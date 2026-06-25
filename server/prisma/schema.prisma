@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Staff {
+  id              Int      @id @default(autoincrement())
+  name            String
+  avatar          String
+  color           String
+  photo           String?
+  phone           String
+  emergencyName   String?
+  emergencyPhone  String?
+  position        String
+  skills          String[]
+  ic              String?
+}
+
+model Booking {
+  id         Int      @id @default(autoincrement())
+  customer   String
+  phone      String
+  service    Int
+  staff      Int
+  date       String
+  time       String
+  status     String
+  note       String?
+  remark     String?
+  payStatus  String
+  payMethod  String?
+  amtPaid    Int      @default(0)
+  txnId      String?
+  seat       String?
+  history    Json     @default("[]")
+}
+
+model LeaveRecord {
+  id        Int      @id @default(autoincrement())
+  staffId   Int
+  dates     String[]
+  leaveType String
+  reason    String?
+}
+
+model Schedule {
+  staffId Int  @id
+  data    Json
+}
+
+model CustomerExtra {
+  phone    String  @id
+  ic       String?
+  email    String?
+  gender   String?
+  birthday String?
+}
+
+model CustomerNote {
+  phone String @id
+  note  String
+}
