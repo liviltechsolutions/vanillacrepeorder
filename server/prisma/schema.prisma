@@ -35,6 +35,7 @@ model Booking {
   payStatus  String
   payMethod  String?
   amtPaid    Int      @default(0)
+  tip        Int      @default(0)
   txnId      String?
   seat       String?
   history    Json     @default("[]")
@@ -64,4 +65,30 @@ model CustomerExtra {
 model CustomerNote {
   phone String @id
   note  String
+}
+
+model ClosedDate {
+  date   String  @id
+  reason String?
+}
+
+model ClosedWeekday {
+  weekday Int     @id
+  reason  String?
+}
+
+model Service {
+  id       Int    @id @default(autoincrement())
+  name     String
+  duration Int
+  price    Int
+}
+
+model Settings {
+  id              Int     @id @default(1)
+  companyName     String
+  location        String
+  passwordHash    String
+  passwordSalt    String
+  notifyOnPending Boolean @default(true)
 }

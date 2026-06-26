@@ -4,7 +4,26 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Beaubook – Merchant Dashboard</title>
-    <style>* { box-sizing: border-box; margin: 0; padding: 0; }</style>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      :root {
+        --bg: #f8f7ff;
+        --surface: #fff;
+        --border: #ede9fe;
+        --text: #1a1a2e;
+        --text-muted: #9090b0;
+        --input-bg: #fff;
+      }
+      [data-theme="dark"] {
+        --bg: #15141f;
+        --surface: #1f1e2c;
+        --border: #34334a;
+        --text: #f0eefa;
+        --text-muted: #a8a6c0;
+        --input-bg: #29283a;
+      }
+      body { background: var(--bg); transition: background 0.15s; }
+    </style>
   </head>
   <body>
     <div id="root"></div>

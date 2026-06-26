@@ -1,10 +1,20 @@
 const { PrismaClient } = require("@prisma/client");
+const { hashPassword } = require("../src/auth");
 const prisma = new PrismaClient();
 
 const INIT_STAFF = [
   { id: 1, name: "Amirah", avatar: "A", color: "#a855f7", photo: null, phone: "012-9988776", emergencyName: "Fatimah (Mother)", emergencyPhone: "017-1122334", position: "Senior Beautician", skills: ["Haircut", "Colouring", "Treatment"], ic: "900101-14-1234" },
   { id: 2, name: "Siti", avatar: "S", color: "#ec4899", photo: null, phone: "013-7765432", emergencyName: "Ahmad (Husband)", emergencyPhone: "011-3344556", position: "Nail Technician", skills: ["Manicure", "Pedicure", "Facial"], ic: "930615-10-5678" },
   { id: 3, name: "Mei Ling", avatar: "M", color: "#06b6d4", photo: null, phone: "016-5543210", emergencyName: "Chong Wai (Father)", emergencyPhone: "012-8899001", position: "Lead Stylist", skills: ["Haircut", "Colouring", "Threading", "Facial"], ic: "950320-07-9012" },
+];
+
+const INIT_SERVICES = [
+  { id: 1, name: "Haircut & Blowdry", duration: 60, price: 80 },
+  { id: 2, name: "Full Colour", duration: 120, price: 180 },
+  { id: 3, name: "Deep Treatment", duration: 90, price: 120 },
+  { id: 4, name: "Manicure", duration: 45, price: 50 },
+  { id: 5, name: "Facial (Basic)", duration: 60, price: 100 },
+  { id: 6, name: "Eyebrow Threading", duration: 30, price: 30 },
 ];
 
 const INIT_CUSTOMERS_DATA = {
@@ -35,9 +45,13 @@ async function main() {
   await prisma.customerNote.deleteMany();
   await prisma.leaveRecord.deleteMany();
   await prisma.schedule.deleteMany();
+  await prisma.service.deleteMany();
 
   for (const s of INIT_STAFF) {
     await prisma.staff.create({ data: s });
+  }
+  for (const sv of INIT_SERVICES) {
+    await prisma.service.create({ data: sv });
   }
   for (const b of INIT_BK) {
     await prisma.booking.create({ data: b });
@@ -53,6 +67,17 @@ async function main() {
   await prisma.$executeRawUnsafe(
     `SELECT setval(pg_get_serial_sequence('"Booking"', 'id'), (SELECT MAX(id) FROM "Booking"))`
   );
+  await prisma.$executeRawUnsafe(
+    `SELECT setval(pg_get_serial_sequence('"Service"', 'id'), (SELECT MAX(id) FROM "Service"))`
+  );
+
+  // Settings is a singleton — only create on first run, never overwrite an existing password on reseed
+  const { hash, salt } = hashPassword("beaubook123");
+  await prisma.settings.upsert({
+    where: { id: 1 },
+    update: {},
+    create: { id: 1, companyName: "Glam Lab", location: "Kuala Lumpur", passwordHash: hash, passwordSalt: salt, notifyOnPending: true },
+  });
 
   console.log("Seed complete.");
 }
