@@ -1,0 +1,14 @@
+ALTER TABLE "Settings" ADD COLUMN "notifyBefore"     INTEGER NOT NULL DEFAULT 30;
+ALTER TABLE "Settings" ADD COLUMN "contactPhone"     TEXT;
+ALTER TABLE "Settings" ADD COLUMN "address"          TEXT;
+ALTER TABLE "Settings" ADD COLUMN "personInCharge"   TEXT;
+ALTER TABLE "Settings" ADD COLUMN "facebook"         TEXT;
+ALTER TABLE "Settings" ADD COLUMN "instagram"        TEXT;
+ALTER TABLE "Settings" ADD COLUMN "tiktok"           TEXT;
+ALTER TABLE "Settings" ADD COLUMN "xhs"              TEXT;
+ALTER TABLE "Settings" ADD COLUMN "youtube"          TEXT;
+ALTER TABLE "Settings" ADD COLUMN "twitter"          TEXT;
+ALTER TABLE "Settings" ADD COLUMN "whatsapp"         TEXT;
+ALTER TABLE "Settings" ADD COLUMN "email"            TEXT;
+ALTER TABLE "Settings" ADD COLUMN "emailVerified"    BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "Settings" ADD COLUMN "emailVerifyToken" TEXT;

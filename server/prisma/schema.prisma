@@ -85,10 +85,24 @@ model Service {
 }
 
 model Settings {
-  id              Int     @id @default(1)
-  companyName     String
-  location        String
-  passwordHash    String
-  passwordSalt    String
-  notifyOnPending Boolean @default(true)
+  id               Int     @id @default(1)
+  companyName      String
+  location         String
+  passwordHash     String
+  passwordSalt     String
+  notifyOnPending  Boolean @default(true)
+  notifyBefore     Int     @default(30)
+  contactPhone     String?
+  address          String?
+  personInCharge   String?
+  facebook         String?
+  instagram        String?
+  tiktok           String?
+  xhs              String?
+  youtube          String?
+  twitter          String?
+  whatsapp         String?
+  email            String?
+  emailVerified    Boolean @default(false)
+  emailVerifyToken String?
 }

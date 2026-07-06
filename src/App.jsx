@@ -42,6 +42,7 @@ const TRANSLATIONS={
     "settings.notifications":"Notifications","settings.notifyOnPending":"Notify me about pending bookings",
     "settings.updatePassword":"Update Password","settings.currentPassword":"Current Password","settings.newPassword":"New Password","settings.confirmPassword":"Confirm New Password","settings.changePassword":"Change Password",
     "settings.exportReport":"Export Report","settings.exportWeekly":"Export Weekly","settings.exportMonthly":"Export Monthly","settings.exportYearly":"Export Yearly",
+    "settings.notifyTiming":"Notify me how early before appointment","settings.contactPhone":"Contact Phone","settings.address":"Address","settings.personInCharge":"Person In Charge","settings.socialMedia":"Social Media","settings.account":"Account & Email","settings.registerEmail":"Register Email","settings.emailPlaceholder":"your@email.com","settings.verifyPending":"Verification email sent — click the link to verify","settings.verified":"Email verified","settings.reschedule":"Reschedule",
   },
   zh:{
     "nav.calendar":"日历","nav.bookings":"预约","nav.customers":"客户","nav.staff":"员工","nav.services":"服务项目","nav.analytics":"数据分析","nav.settings":"设置",
@@ -51,6 +52,7 @@ const TRANSLATIONS={
     "settings.notifications":"通知","settings.notifyOnPending":"有待确认预约时通知我",
     "settings.updatePassword":"修改密码","settings.currentPassword":"当前密码","settings.newPassword":"新密码","settings.confirmPassword":"确认新密码","settings.changePassword":"修改密码",
     "settings.exportReport":"导出报表","settings.exportWeekly":"导出本周","settings.exportMonthly":"导出本月","settings.exportYearly":"导出本年",
+    "settings.notifyTiming":"提前多久通知我","settings.contactPhone":"联系电话","settings.address":"地址","settings.personInCharge":"负责人","settings.socialMedia":"社交媒体","settings.account":"账号与电邮","settings.registerEmail":"注册电邮","settings.emailPlaceholder":"your@email.com","settings.verifyPending":"验证邮件已发送，请点击链接验证","settings.verified":"电邮已验证","settings.reschedule":"重新安排",
   },
   ms:{
     "nav.calendar":"Kalendar","nav.bookings":"Tempahan","nav.customers":"Pelanggan","nav.staff":"Kakitangan","nav.services":"Perkhidmatan","nav.analytics":"Analitik","nav.settings":"Tetapan",
@@ -60,6 +62,7 @@ const TRANSLATIONS={
     "settings.notifications":"Pemberitahuan","settings.notifyOnPending":"Maklumkan saya tentang tempahan tertangguh",
     "settings.updatePassword":"Kemas Kini Kata Laluan","settings.currentPassword":"Kata Laluan Semasa","settings.newPassword":"Kata Laluan Baharu","settings.confirmPassword":"Sahkan Kata Laluan Baharu","settings.changePassword":"Tukar Kata Laluan",
     "settings.exportReport":"Eksport Laporan","settings.exportWeekly":"Eksport Mingguan","settings.exportMonthly":"Eksport Bulanan","settings.exportYearly":"Eksport Tahunan",
+    "settings.notifyTiming":"Beritahu saya berapa awal","settings.contactPhone":"No. Telefon","settings.address":"Alamat","settings.personInCharge":"Orang Bertanggungjawab","settings.socialMedia":"Media Sosial","settings.account":"Akaun & E-mel","settings.registerEmail":"Daftar E-mel","settings.emailPlaceholder":"your@email.com","settings.verifyPending":"E-mel pengesahan dihantar","settings.verified":"E-mel disahkan","settings.reschedule":"Jadual Semula",
   },
 };
 
@@ -207,9 +210,11 @@ function AddModal({show,onClose,onAdd,initialDate,initialTime,leaveRecords,staff
 }
 
 // ─── DETAIL / EDIT MODAL ─────────────────────────────────────────────────────
-function DetailModal({booking,onClose,onAccept,onCancel,onSave,leaveRecords,staffList,services,autoEdit}){
+function DetailModal({booking,onClose,onAccept,onCancel,onSave,onReschedule,leaveRecords,staffList,services,autoEdit}){
   const [edit,setEdit]=useState(false);
   const [draft,setDraft]=useState(null);
+  const [reschedMode,setReschedMode]=useState(false);
+  const [reschedDraft,setReschedDraft]=useState({date:"",time:""});
   if(!booking) return null;
   const b=booking;
   const sc=BC[b.status]||BC.confirmed;
@@ -235,7 +240,8 @@ function DetailModal({booking,onClose,onAccept,onCancel,onSave,leaveRecords,staf
         <div style={{padding:"16px 20px 12px",borderBottom:"1px solid #f0ebff",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,background:"var(--surface)",zIndex:1,borderRadius:"16px 16px 0 0"}}>
           <div><div style={{fontWeight:700,fontSize:18,color:"var(--text)"}}>Booking Details</div><div style={{fontSize:11,color:"var(--text-muted)"}}>#{String(b.id).padStart(5,"0")}</div></div>
           <div style={{display:"flex",gap:8,alignItems:"center"}}>
-            {!edit&&b.status!=="cancelled"&&<button onClick={openEdit} style={gBtn({fontSize:12,padding:"6px 11px",display:"flex",alignItems:"center",gap:5})}><Icon path={ICONS.edit} size={13}/>Edit</button>}
+            {!edit&&b.status!=="cancelled"&&!reschedMode&&<button onClick={()=>{setReschedDraft({date:b.date,time:b.time});setReschedMode(true);}} style={gBtn({fontSize:12,padding:"6px 11px",display:"flex",alignItems:"center",gap:5})}>📅 Reschedule</button>}
+            {!edit&&b.status!=="cancelled"&&!reschedMode&&<button onClick={openEdit} style={gBtn({fontSize:12,padding:"6px 11px",display:"flex",alignItems:"center",gap:5})}><Icon path={ICONS.edit} size={13}/>Edit</button>}
             <button onClick={()=>{onClose();setEdit(false);}} style={{background:"none",border:"none",fontSize:24,cursor:"pointer",color:"var(--text-muted)",padding:"0 4px"}}>×</button>
           </div>
         </div>
@@ -259,6 +265,20 @@ function DetailModal({booking,onClose,onAccept,onCancel,onSave,leaveRecords,staf
             </div>
             {b.tip>0&&<div style={{marginTop:7,background:"rgba(255,255,255,0.7)",borderRadius:8,padding:"7px 10px"}}><div style={{fontSize:10,color:pc.tx,opacity:.7}}>Additional Payment (tips)</div><div style={{fontSize:16,fontWeight:700,color:"#7e22ce"}}>RM {b.tip}</div></div>}
           </div>
+
+          {/* Reschedule inline form */}
+          {reschedMode&&<div style={{marginBottom:14,padding:"14px 16px",background:"#f3e8ff",borderRadius:12,border:"1px solid #c4b5fd"}}>
+            <div style={{fontWeight:700,fontSize:13,color:"#6d28d9",marginBottom:10}}>📅 Reschedule Appointment</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:10}}>
+              <div><label style={lbl}>New Date</label><input type="date" value={reschedDraft.date} onChange={e=>setReschedDraft(p=>({...p,date:e.target.value}))} style={inp}/></div>
+              <div><label style={lbl}>New Time</label><select value={reschedDraft.time} onChange={e=>setReschedDraft(p=>({...p,time:e.target.value}))} style={inp}>{HOURS.map(h=><option key={h} value={h}>{h}</option>)}</select></div>
+            </div>
+            <div style={{fontSize:11,color:"#7e22ce",marginBottom:8}}>Currently: {fmtD(b.date)}, {b.time}</div>
+            <div style={{display:"flex",gap:8}}>
+              <button onClick={()=>{onReschedule(b,reschedDraft);setReschedMode(false);}} style={pBtn({flex:1,fontSize:12,padding:"9px 0"})}>Confirm Reschedule</button>
+              <button onClick={()=>setReschedMode(false)} style={gBtn({flex:1,fontSize:12,padding:"9px 0"})}>Cancel</button>
+            </div>
+          </div>}
 
           {!edit&&<>
             {[[sv?.name,"Service","✂️"],[`${sv?.duration} min`,"Duration","⏱️"],[`${fmtD(b.date)}, ${b.time}`,"Date & Time","📅"],[st?.name||"—","Staff","👩"],[b.seat||"—","Seat / Room","🪑"],[b.payMethod?`${PAY_ICONS[b.payMethod]} ${b.payMethod.toUpperCase()}`:"-","Payment Method","💳"],[b.txnId||"—","Transaction No.","🔖"]].map(([v,l,ic])=>(
@@ -327,7 +347,9 @@ function DetailModal({booking,onClose,onAccept,onCancel,onSave,leaveRecords,staf
             <div style={{display:"flex",gap:6}}><button onClick={saveEdit} style={pBtn({flex:1,padding:"9px 0",fontSize:11})}>Save Changes</button><button onClick={()=>setEdit(false)} style={gBtn({flex:1,padding:"9px 0",fontSize:11})}>Cancel</button></div>
           </div>}
 
-          {!edit&&b.history?.length>0&&<div style={{marginTop:12,paddingTop:10,borderTop:"1px solid #f0ebff"}}><div style={{fontSize:11,fontWeight:700,color:"#7e22ce",marginBottom:6}}>🕓 Change History</div>{b.history.map((h,i)=><div key={i} style={{fontSize:11,color:"#64648a",padding:"3px 0",borderBottom:"1px solid #f8f6ff"}}><strong>{h.field}</strong>: <span style={{color:"#ef4444"}}>{h.from}</span> → <span style={{color:"#16a34a"}}>{h.to}</span> <span style={{color:"#b0b0c8"}}>@ {h.at}</span></div>)}</div>}
+          {!edit&&b.history?.length>0&&<div style={{marginTop:12,paddingTop:10,borderTop:"1px solid #f0ebff"}}><div style={{fontSize:11,fontWeight:700,color:"#7e22ce",marginBottom:6}}>🕓 Change History</div>{b.history.map((h,i)=>{const isRs=h.field==="Rescheduled";return(<div key={i} style={{fontSize:11,color:"#64648a",padding:"4px 6px",borderBottom:"1px solid #f8f6ff",borderRadius:4,background:isRs?"#f3e8ff":"transparent"}}>
+            {isRs&&<span style={{fontSize:10,fontWeight:700,color:"#7e22ce",marginRight:5}}>📅 RESCHEDULED</span>}<strong>{h.field}</strong>: <span style={{color:"#ef4444"}}>{h.from}</span> → <span style={{color:"#16a34a"}}>{h.to}</span> <span style={{color:"#b0b0c8"}}>@ {h.at}</span>
+          </div>);})}</div>}
         </div>
       </div>
     </div>
@@ -658,17 +680,28 @@ function NotifPanel({show,onClose,bookings,services,onSelectBooking}){
 
 // ─── LOGIN SCREEN ─────────────────────────────────────────────────────────────
 function LoginScreen({onSuccess}){
+  const [hasEmail,setHasEmail]=useState(null); // null=loading
+  const [email,setEmail]=useState("");
   const [password,setPassword]=useState("");
   const [error,setError]=useState("");
   const [loading,setLoading]=useState(false);
+
+  useEffect(()=>{
+    fetch("/api/settings/login-mode").then(r=>r.json()).then(d=>setHasEmail(d.hasEmail)).catch(()=>setHasEmail(false));
+  },[]);
+
   const submit=()=>{
     setLoading(true);setError("");
-    fetch("/api/settings/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password})})
-      .then(r=>{if(!r.ok)throw new Error();return r.json();})
+    const body=hasEmail?{email,password}:{password};
+    fetch("/api/settings/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+      .then(r=>{if(!r.ok)return r.json().then(d=>{throw new Error(d.error||"fail");});return r.json();})
       .then(()=>{sessionStorage.setItem("beaubook_authed","1");onSuccess();})
-      .catch(()=>setError("Incorrect password. Please try again."))
+      .catch(e=>setError(e.message==="fail"?"Incorrect credentials. Please try again.":e.message||"Incorrect password."))
       .finally(()=>setLoading(false));
   };
+
+  if(hasEmail===null) return <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"var(--bg)"}}><div style={{color:"var(--text-muted)",fontSize:13}}>Loading…</div></div>;
+
   return(
     <div style={{minHeight:"100vh",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
       <div style={{background:"var(--surface)",borderRadius:16,padding:28,width:380,maxWidth:"100%",boxShadow:"0 24px 64px rgba(0,0,0,0.25)",border:"1px solid var(--border)"}}>
@@ -677,10 +710,11 @@ function LoginScreen({onSuccess}){
           <div style={{fontWeight:700,fontSize:18,color:"var(--text)"}}>Beaubook</div>
           <div style={{fontSize:12,color:"var(--text-muted)"}}>Merchant Dashboard</div>
         </div>
+        {hasEmail&&<div style={{marginBottom:10}}><label style={lbl}>Email</label><input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()} placeholder="your@email.com" style={inp} autoFocus/></div>}
         <label style={lbl}>Password</label>
-        <input type="password" value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()} placeholder="Enter password" style={inp} autoFocus/>
+        <input type="password" value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()} placeholder="Enter password" style={inp} autoFocus={!hasEmail}/>
         {error&&<div style={{marginTop:8,fontSize:12,color:"#991b1b"}}>{error}</div>}
-        <button onClick={submit} disabled={loading} style={pBtn({width:"100%",marginTop:14,padding:"11px 0",opacity:loading?0.7:1})}>{loading?"Logging in...":"Log In"}</button>
+        <button onClick={submit} disabled={loading} style={pBtn({width:"100%",marginTop:14,padding:"11px 0",opacity:loading?0.7:1})}>{loading?"Logging in…":"Log In"}</button>
       </div>
     </div>
   );
@@ -727,8 +761,12 @@ export default function BeaubookDashboard(){
   const [authed,setAuthed]=useState(()=>sessionStorage.getItem("beaubook_authed")==="1");
   const [theme,setTheme]=useState(()=>localStorage.getItem("beaubook_theme")||"light");
   const [language,setLanguage]=useState(()=>localStorage.getItem("beaubook_language")||"en");
-  const [settings,setSettings]=useState({companyName:"Glam Lab",location:"Kuala Lumpur",notifyOnPending:true});
-  const [profileForm,setProfileForm]=useState({companyName:"",location:""});
+  const [settings,setSettings]=useState({companyName:"Glam Lab",location:"Kuala Lumpur",notifyOnPending:true,notifyBefore:30,email:null,emailVerified:false});
+  const [profileForm,setProfileForm]=useState({companyName:"",location:"",contactPhone:"",address:"",personInCharge:"",facebook:"",instagram:"",tiktok:"",xhs:"",youtube:"",twitter:"",whatsapp:""});
+  const [nowTime,setNowTime]=useState(new Date());
+  const [apptToasts,setApptToasts]=useState([]);
+  const shownNotifsRef=useRef(new Set());
+  const [emailForm,setEmailForm]=useState({email:"",token:"",verifyUrl:"",sent:false});
   const [pwForm,setPwForm]=useState({current:"",next:"",confirm:""});
   const [pwMsg,setPwMsg]=useState(null);
   const [bookingSearch,setBookingSearch]=useState("");
@@ -756,11 +794,47 @@ export default function BeaubookDashboard(){
     fetch("/api/closed-dates").then(r=>r.json()).then(setClosedDates);
     fetch("/api/closed-weekdays").then(r=>r.json()).then(setClosedWeekdays);
     fetch("/api/services").then(r=>r.json()).then(setServices);
-    fetch("/api/settings").then(r=>r.json()).then(s=>{setSettings(s);setProfileForm({companyName:s.companyName,location:s.location});});
+    fetch("/api/settings").then(r=>r.json()).then(s=>{
+      setSettings(s);
+      setProfileForm({companyName:s.companyName||"",location:s.location||"",contactPhone:s.contactPhone||"",address:s.address||"",personInCharge:s.personInCharge||"",facebook:s.facebook||"",instagram:s.instagram||"",tiktok:s.tiktok||"",xhs:s.xhs||"",youtube:s.youtube||"",twitter:s.twitter||"",whatsapp:s.whatsapp||""});
+    });
   },[]);
 
+  // Live clock — ticks every second
+  useEffect(()=>{const t=setInterval(()=>setNowTime(new Date()),1000);return()=>clearInterval(t);},[]);
+
+  // Upcoming appointment notifications — checks every 60s
+  useEffect(()=>{
+    if(!settings.notifyOnPending)return;
+    const check=()=>{
+      const now=new Date();
+      const todayDate=now.toISOString().split("T")[0];
+      const nowMin=now.getHours()*60+now.getMinutes();
+      const nb=settings.notifyBefore||30;
+      bookings.filter(b=>b.status!=="cancelled"&&b.date===todayDate).forEach(b=>{
+        const bMin=timeToMin(b.time);
+        const diff=bMin-nowMin;
+        if(diff>=0&&diff<=nb&&!shownNotifsRef.current.has(b.id)){
+          shownNotifsRef.current.add(b.id);
+          const tid=Date.now()+b.id;
+          setApptToasts(p=>[...p,{id:tid,booking:b}]);
+          setTimeout(()=>setApptToasts(p=>p.filter(t=>t.id!==tid)),9000);
+        }
+      });
+    };
+    check();
+    const t=setInterval(check,60000);
+    return()=>clearInterval(t);
+  },[bookings,settings.notifyOnPending,settings.notifyBefore]);
+
   function handleSaveSettings(updates){
-    fetch("/api/settings",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({...settings,...updates})}).then(r=>r.json()).then(saved=>{setSettings(saved);showToast("Settings saved!");});
+    const payload={companyName:profileForm.companyName,location:profileForm.location,contactPhone:profileForm.contactPhone,address:profileForm.address,personInCharge:profileForm.personInCharge,facebook:profileForm.facebook,instagram:profileForm.instagram,tiktok:profileForm.tiktok,xhs:profileForm.xhs,youtube:profileForm.youtube,twitter:profileForm.twitter,whatsapp:profileForm.whatsapp,notifyOnPending:settings.notifyOnPending,notifyBefore:settings.notifyBefore,...updates};
+    fetch("/api/settings",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r=>r.json()).then(saved=>{setSettings(s=>({...s,...saved}));showToast("Settings saved!");});
+  }
+  function handleReschedule(b,{date,time}){
+    const now=nowStr();
+    const history=[...(b.history||[]),{field:"Rescheduled",from:`${b.date} ${b.time}`,to:`${date} ${time}`,at:now}];
+    patchBooking(b.id,{date,time,history}).then(updated=>{setBookings(p=>p.map(bk=>bk.id===b.id?updated:bk));setSelBooking(updated);showToast("Appointment rescheduled!");});
   }
   function handleChangePassword(currentPassword,newPassword){
     return fetch("/api/settings/password",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({currentPassword,newPassword})}).then(r=>r.json().then(data=>({ok:r.ok,...data})));
@@ -958,6 +1032,8 @@ export default function BeaubookDashboard(){
           <div><div style={{fontWeight:700,fontSize:16,color:"var(--text)",letterSpacing:-0.3}}>{settings.companyName}</div><div style={{fontSize:10,color:"#7e22ce",fontWeight:700,letterSpacing:0.5}}>{settings.location?.toUpperCase()}</div></div>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
+          {/* Live clock */}
+          <div style={{fontSize:12,fontWeight:700,color:"#7e22ce",fontFamily:"monospace",background:"#f3e8ff",padding:"5px 11px",borderRadius:8,letterSpacing:0.5,border:"1px solid #ddd6fe"}}>{nowTime.toLocaleTimeString("en-MY",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false})}</div>
           {/* Notification bell */}
           <button onClick={()=>setShowNotif(p=>!p)} style={{position:"relative",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:10,width:38,height:38,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
             <Icon path={ICONS.bell} size={18} color={notifCount>0?"var(--text)":"var(--text-muted)"} strokeWidth={1.8}/>
@@ -983,10 +1059,23 @@ export default function BeaubookDashboard(){
         </aside>}
 
         <main style={{flex:1,padding:16,overflowY:"auto"}}>
-          {/* Toast */}
-          {toast&&<div style={{position:"fixed",top:58,right:16,zIndex:999,padding:"8px 14px",borderRadius:9,background:toast.type==="success"?"#f0fdf4":"#fef2f2",border:`1px solid ${toast.type==="success"?"#86efac":"#fca5a5"}`,color:toast.type==="success"?"#15803d":"#991b1b",fontWeight:600,fontSize:11,boxShadow:"0 4px 20px rgba(0,0,0,0.1)",display:"flex",alignItems:"center",gap:6,zIndex:9999}}>
+          {/* Status toast */}
+          {toast&&<div style={{position:"fixed",top:68,right:16,zIndex:9999,padding:"8px 14px",borderRadius:9,background:toast.type==="success"?"#f0fdf4":"#fef2f2",border:`1px solid ${toast.type==="success"?"#86efac":"#fca5a5"}`,color:toast.type==="success"?"#15803d":"#991b1b",fontWeight:600,fontSize:11,boxShadow:"0 4px 20px rgba(0,0,0,0.1)",display:"flex",alignItems:"center",gap:6}}>
             {toast.type==="success"?"✓":"✕"} {toast.msg}
           </div>}
+          {/* Appointment reminder toasts */}
+          {apptToasts.map(({id,booking:b},idx)=>{const s=svc(b.service);return(
+            <div key={id} onClick={()=>{setSelBooking(b);setApptToasts(p=>p.filter(t=>t.id!==id));}} style={{position:"fixed",bottom:20+(idx*96),right:16,zIndex:9998,padding:"14px 16px",borderRadius:14,background:"linear-gradient(135deg,#6d28d9,#9333ea)",color:"#fff",boxShadow:"0 8px 32px rgba(109,40,217,0.45)",display:"flex",alignItems:"center",gap:12,width:300,cursor:"pointer",animation:"slideIn 0.3s ease"}}>
+              <div style={{fontSize:24,flexShrink:0}}>🔔</div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontWeight:700,fontSize:13,marginBottom:2}}>Upcoming: {b.customer}</div>
+                <div style={{fontSize:11,opacity:.88}}>{s?.name} · {b.time}</div>
+                <div style={{fontSize:10,opacity:.7,marginTop:2}}>{settings.notifyBefore} min reminder</div>
+              </div>
+              <button onClick={e=>{e.stopPropagation();setApptToasts(p=>p.filter(t=>t.id!==id));}} style={{background:"rgba(255,255,255,0.2)",border:"none",color:"#fff",borderRadius:6,width:22,height:22,cursor:"pointer",fontSize:16,lineHeight:1,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>×</button>
+            </div>
+          );})}
+          <style>{`@keyframes slideIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}`}</style>
 
           {/* ═══ CALENDAR ═══ */}
           {tab==="calendar"&&<div>
@@ -1424,16 +1513,34 @@ export default function BeaubookDashboard(){
           {/* ═══ SETTINGS ═══ */}
           {tab==="settings"&&<div>
             <h1 style={{margin:"0 0 16px",fontSize:24,fontWeight:700,color:"var(--text)"}}>{t("nav.settings")}</h1>
-            <div style={{display:"flex",flexDirection:"column",gap:14,maxWidth:480}}>
+            <div style={{display:"flex",flexDirection:"column",gap:14,maxWidth:520}}>
+
+              {/* Company Profile */}
               <div style={card({padding:18})}>
                 <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>{t("settings.companyProfile")}</div>
                 <div style={{display:"flex",flexDirection:"column",gap:10}}>
-                  <div><label style={lbl}>{t("settings.companyName")}</label><input value={profileForm.companyName} onChange={e=>setProfileForm(p=>({...p,companyName:e.target.value}))} style={inp}/></div>
-                  <div><label style={lbl}>{t("settings.location")}</label><input value={profileForm.location} onChange={e=>setProfileForm(p=>({...p,location:e.target.value}))} style={inp}/></div>
-                  <button onClick={()=>handleSaveSettings({companyName:profileForm.companyName,location:profileForm.location})} style={pBtn({padding:"9px 0",fontSize:13,alignSelf:"flex-start",paddingLeft:18,paddingRight:18})}>{t("settings.save")}</button>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                    <div><label style={lbl}>{t("settings.companyName")}</label><input value={profileForm.companyName} onChange={e=>setProfileForm(p=>({...p,companyName:e.target.value}))} style={inp}/></div>
+                    <div><label style={lbl}>{t("settings.location")}</label><input value={profileForm.location} onChange={e=>setProfileForm(p=>({...p,location:e.target.value}))} style={inp}/></div>
+                  </div>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                    <div><label style={lbl}>{t("settings.contactPhone")}</label><input value={profileForm.contactPhone} onChange={e=>setProfileForm(p=>({...p,contactPhone:e.target.value}))} placeholder="+60-12-345 6789" style={inp}/></div>
+                    <div><label style={lbl}>{t("settings.personInCharge")}</label><input value={profileForm.personInCharge} onChange={e=>setProfileForm(p=>({...p,personInCharge:e.target.value}))} placeholder="Manager name" style={inp}/></div>
+                  </div>
+                  <div><label style={lbl}>{t("settings.address")}</label><input value={profileForm.address} onChange={e=>setProfileForm(p=>({...p,address:e.target.value}))} placeholder="Full business address" style={inp}/></div>
+                  {/* Social media */}
+                  <div style={{marginTop:4}}><div style={{fontSize:11,fontWeight:700,color:"#7e22ce",marginBottom:8,letterSpacing:0.4,textTransform:"uppercase"}}>{t("settings.socialMedia")}</div>
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                      {[["facebook","📘 Facebook"],["instagram","📸 Instagram"],["tiktok","🎵 TikTok"],["xhs","🌸 XHS / 小红书"],["youtube","▶️ YouTube"],["twitter","🐦 Twitter / X"],["whatsapp","💬 WhatsApp Business"]].map(([k,pl])=>(
+                        <div key={k} style={k==="whatsapp"?{gridColumn:"1/-1"}:{}}><label style={lbl}>{pl}</label><input value={profileForm[k]} onChange={e=>setProfileForm(p=>({...p,[k]:e.target.value}))} placeholder={`${pl} URL or handle`} style={inp}/></div>
+                      ))}
+                    </div>
+                  </div>
+                  <button onClick={()=>handleSaveSettings(profileForm)} style={pBtn({padding:"9px 0",fontSize:13,alignSelf:"flex-start",paddingLeft:18,paddingRight:18})}>{t("settings.save")}</button>
                 </div>
               </div>
 
+              {/* Appearance */}
               <div style={card({padding:18})}>
                 <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>{t("settings.appearance")}</div>
                 <div style={{display:"flex",gap:2,background:"var(--bg)",borderRadius:9,padding:3,width:"fit-content"}}>
@@ -1443,6 +1550,7 @@ export default function BeaubookDashboard(){
                 </div>
               </div>
 
+              {/* Language */}
               <div style={card({padding:18})}>
                 <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>{t("settings.language")}</div>
                 <div style={{display:"flex",gap:2,background:"var(--bg)",borderRadius:9,padding:3,width:"fit-content"}}>
@@ -1452,14 +1560,55 @@ export default function BeaubookDashboard(){
                 </div>
               </div>
 
+              {/* Notifications */}
               <div style={card({padding:18})}>
                 <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>{t("settings.notifications")}</div>
-                <label style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer",fontSize:13,color:"var(--text)"}}>
+                <label style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer",fontSize:13,color:"var(--text)",marginBottom:12}}>
                   <input type="checkbox" checked={settings.notifyOnPending} onChange={e=>handleSaveSettings({notifyOnPending:e.target.checked})} style={{width:16,height:16,cursor:"pointer"}}/>
                   {t("settings.notifyOnPending")}
                 </label>
+                <div><label style={lbl}>{t("settings.notifyTiming")}</label>
+                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                    {[[10,"10 min"],[30,"30 min"],[60,"1 hour"],[120,"2 hours"],[1440,"1 day"]].map(([v,l])=>(
+                      <button key={v} onClick={()=>handleSaveSettings({notifyBefore:v})} style={{padding:"6px 14px",borderRadius:8,border:settings.notifyBefore===v?"2px solid #7e22ce":"1px solid var(--border)",background:settings.notifyBefore===v?"#f3e8ff":"var(--surface)",color:settings.notifyBefore===v?"#7e22ce":"var(--text-muted)",fontWeight:settings.notifyBefore===v?700:400,fontSize:12,cursor:"pointer"}}>{l}</button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
+              {/* Account & Email */}
+              <div style={card({padding:18})}>
+                <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>{t("settings.account")}</div>
+                {settings.email?(
+                  <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                    <div style={{display:"flex",alignItems:"center",gap:9,padding:"10px 12px",background:settings.emailVerified?"#f0fdf4":"#fffbeb",borderRadius:10,border:`1px solid ${settings.emailVerified?"#86efac":"#fcd34d"}`}}>
+                      <span style={{fontSize:18}}>{settings.emailVerified?"✅":"⏳"}</span>
+                      <div><div style={{fontWeight:600,fontSize:13,color:"var(--text)"}}>{settings.email}</div><div style={{fontSize:11,color:settings.emailVerified?"#15803d":"#92400e"}}>{settings.emailVerified?t("settings.verified"):t("settings.verifyPending")}</div></div>
+                    </div>
+                    {!settings.emailVerified&&emailForm.verifyUrl&&<div style={{padding:"8px 12px",background:"#f3e8ff",borderRadius:8,fontSize:11,color:"#7e22ce"}}>Dev mode — <a href={emailForm.verifyUrl} target="_blank" rel="noreferrer" style={{color:"#7e22ce",fontWeight:700}}>click here to verify</a></div>}
+                    <button onClick={()=>setSettings(s=>({...s,email:null,emailVerified:false}))&&fetch("/api/settings/register-email",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:""})}).catch(()=>{})} style={gBtn({fontSize:12,padding:"7px 14px",alignSelf:"flex-start",color:"#991b1b",borderColor:"#fca5a5"})}>Change Email</button>
+                  </div>
+                ):(
+                  <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                    <p style={{margin:0,fontSize:13,color:"var(--text-muted)"}}>Register an email to enable email-based login and account recovery.</p>
+                    <div><label style={lbl}>{t("settings.registerEmail")}</label><input type="email" value={emailForm.email} onChange={e=>setEmailForm(p=>({...p,email:e.target.value}))} placeholder={t("settings.emailPlaceholder")} style={inp}/></div>
+                    <button onClick={()=>{
+                      if(!emailForm.email||!emailForm.email.includes("@")){return;}
+                      fetch("/api/settings/register-email",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:emailForm.email})})
+                        .then(r=>r.json()).then(d=>{
+                          if(d.ok){
+                            setSettings(s=>({...s,email:emailForm.email,emailVerified:false}));
+                            setEmailForm(p=>({...p,token:d.token,verifyUrl:d.verifyUrl,sent:true}));
+                            showToast("Verification email sent!");
+                          }
+                        });
+                    }} style={pBtn({padding:"9px 0",fontSize:13,alignSelf:"flex-start",paddingLeft:18,paddingRight:18})}>Register Email</button>
+                    {emailForm.sent&&emailForm.verifyUrl&&<div style={{padding:"8px 12px",background:"#f3e8ff",borderRadius:8,fontSize:11,color:"#7e22ce"}}>Dev mode — <a href={`http://localhost:4000${emailForm.verifyUrl}`} target="_blank" rel="noreferrer" style={{color:"#7e22ce",fontWeight:700}}>click here to verify your email</a></div>}
+                  </div>
+                )}
+              </div>
+
+              {/* Update Password */}
               <div style={card({padding:18})}>
                 <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>{t("settings.updatePassword")}</div>
                 <div style={{display:"flex",flexDirection:"column",gap:10}}>
@@ -1477,6 +1626,7 @@ export default function BeaubookDashboard(){
                 </div>
               </div>
 
+              {/* Export Report */}
               <div style={card({padding:18})}>
                 <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>{t("settings.exportReport")}</div>
                 <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
@@ -1485,6 +1635,7 @@ export default function BeaubookDashboard(){
                   <button onClick={()=>exportReport("yearly")} style={gBtn({fontSize:12,padding:"8px 14px"})}>{t("settings.exportYearly")}</button>
                 </div>
               </div>
+
             </div>
           </div>}
         </main>
@@ -1492,7 +1643,7 @@ export default function BeaubookDashboard(){
 
       {/* ─── MODALS ─── */}
       <AddModal show={showAdd} onClose={()=>setShowAdd(false)} onAdd={handleAddBooking} initialDate={addDate} initialTime={addTime} leaveRecords={leaveRecords} staffList={staffList} services={services}/>
-      <DetailModal booking={selBooking} onClose={()=>{setSelBooking(null);setNotifTriggered(false);}} onAccept={handleAccept} onCancel={handleCancel} onSave={handleSaveEdit} leaveRecords={leaveRecords} staffList={staffList} services={services} autoEdit={notifTriggered}/>
+      <DetailModal booking={selBooking} onClose={()=>{setSelBooking(null);setNotifTriggered(false);}} onAccept={handleAccept} onCancel={handleCancel} onSave={handleSaveEdit} onReschedule={handleReschedule} leaveRecords={leaveRecords} staffList={staffList} services={services} autoEdit={notifTriggered}/>
       <LeaveModal staffMember={leaveStaff} bookings={bookings} staffList={staffList} services={services} onClose={()=>setLeaveStaff(null)} onConfirm={handleLeave}/>
       <ScheduleModal staffMember={schedStaff} schedule={schedStaff?schedules[schedStaff.id]:null} onClose={()=>setSchedStaff(null)} onSave={handleSaveSched}/>
       {editStaff&&<StaffModal staffMember={editStaff} onClose={()=>setEditStaff(null)} onSave={handleSaveStaff} isNew={false}/>}
