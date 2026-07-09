@@ -12,7 +12,7 @@ const BC={confirmed:{bg:"#f0fdf4",br:"#86efac",tx:"#15803d"},pending:{bg:"#fffbe
 const POSITIONS=["Junior Beautician","Senior Beautician","Lead Stylist","Nail Technician","Therapist","Manager","Freelancer"];
 const SKILL_OPTIONS=["Haircut","Colouring","Treatment","Manicure","Pedicure","Facial","Threading","Massage","Makeup","Lash Extension"];
 const SEATS=["Seat A1","Seat A2","Seat B1","Seat B2","Room 1","Room 2","Room 3","VIP Room"];
-// Malaysia national public holidays — 2026 only (gazetted federal holidays)
+// Malaysia national public holidays — gazetted federal holidays
 const MY_HOLIDAYS_2026={
   "2026-01-01":"New Year's Day",
   "2026-02-17":"Chinese New Year",
@@ -30,7 +30,10 @@ const MY_HOLIDAYS_2026={
   "2026-11-08":"Deepavali",
   "2026-12-25":"Christmas Day",
 };
-const getHoliday=date=>MY_HOLIDAYS_2026[date];
+const MY_HOLIDAYS_2025={"2025-01-01":"New Year's Day","2025-01-29":"Chinese New Year","2025-01-30":"Chinese New Year Holiday","2025-03-31":"Hari Raya Aidilfitri","2025-04-01":"Hari Raya Aidilfitri Holiday","2025-05-01":"Labour Day","2025-05-12":"Wesak Day","2025-06-02":"Agong's Birthday","2025-06-06":"Hari Raya Haji","2025-06-27":"Awal Muharram","2025-08-31":"National Day","2025-09-05":"Maulidur Rasul","2025-09-16":"Malaysia Day","2025-10-20":"Deepavali","2025-12-25":"Christmas Day"};
+const MY_HOLIDAYS_2027={"2027-01-01":"New Year's Day","2027-02-06":"Chinese New Year","2027-02-07":"Chinese New Year Holiday","2027-03-11":"Hari Raya Aidilfitri","2027-03-12":"Hari Raya Aidilfitri Holiday","2027-05-01":"Labour Day","2027-05-17":"Hari Raya Haji","2027-05-20":"Wesak Day","2027-06-07":"Agong's Birthday","2027-06-17":"Awal Muharram","2027-08-31":"National Day","2027-09-16":"Malaysia Day","2027-09-25":"Maulidur Rasul","2027-11-08":"Deepavali","2027-12-25":"Christmas Day"};
+const MY_HOLIDAYS={...MY_HOLIDAYS_2025,...MY_HOLIDAYS_2026,...MY_HOLIDAYS_2027};
+const getHoliday=date=>MY_HOLIDAYS[date];
 
 // ─── TRANSLATIONS ────────────────────────────────────────────────────────────
 const TRANSLATIONS={
@@ -73,7 +76,7 @@ const timeToMin=t=>{const[h,m]=t.split(":").map(Number);return h*60+m;};
 const nowStr=()=>new Date().toLocaleString("en-MY",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
 const getDIM=(y,m)=>new Date(y,m+1,0).getDate();
 const getFD=(y,m)=>new Date(y,m,1).getDay();
-const TODAY="2026-06-22";
+const TODAY=new Date().toISOString().split("T")[0];
 function getWkDates(base){const d=new Date(base);const dy=d.getDay();const out=[];for(let i=0;i<7;i++){const n=new Date(d);n.setDate(d.getDate()-dy+i);out.push(n.toISOString().split("T")[0]);}return out;}
 function dateRange(from,to){const out=[];const cur=new Date(from+"T00:00:00");const end=new Date(to+"T00:00:00");while(cur<=end){out.push(cur.toISOString().split("T")[0]);cur.setDate(cur.getDate()+1);}return out;}
 
@@ -731,7 +734,7 @@ export default function BeaubookDashboard(){
   const [custNotes,setCustNotes]=useState({});
   const [selectedDate,setSelectedDate]=useState(TODAY);
   const [calView,setCalView]=useState("week");
-  const [monthYear,setMonthYear]=useState({y:2026,m:5});
+  const [monthYear,setMonthYear]=useState({y:new Date().getFullYear(),m:new Date().getMonth()});
   const [weekBase,setWeekBase]=useState(TODAY);
   const [filterStaff,setFilterStaff]=useState(0);
   const [selBooking,setSelBooking]=useState(null);
@@ -752,7 +755,7 @@ export default function BeaubookDashboard(){
   const [editStaff,setEditStaff]=useState(null);
   const [addStaff,setAddStaff]=useState(false);
   const [notifTriggered,setNotifTriggered]=useState(false);
-  const [staffMonth,setStaffMonth]=useState({m:5,y:2026});
+  const [staffMonth,setStaffMonth]=useState({m:new Date().getMonth(),y:new Date().getFullYear()});
   const [closedDates,setClosedDates]=useState([]);
   const [showCloseDay,setShowCloseDay]=useState(false);
   const [closedWeekdays,setClosedWeekdays]=useState([]);
