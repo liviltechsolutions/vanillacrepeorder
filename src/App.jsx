@@ -1643,6 +1643,16 @@ export default function BeaubookDashboard(){
                 </div>
               </div>
 
+              {/* Sign Out */}
+              <div style={card({padding:18})}>
+                <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:4}}>Sign Out</div>
+                <div style={{fontSize:12,color:"var(--text-muted)",marginBottom:12}}>You will be returned to the login screen.</div>
+                <button onClick={()=>{sessionStorage.removeItem("beaubook_authed");setAuthed(false);}} style={{display:"flex",alignItems:"center",gap:8,padding:"10px 18px",borderRadius:10,border:"1px solid #fca5a5",background:"#fef2f2",color:"#991b1b",fontWeight:700,fontSize:13,cursor:"pointer"}}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  Sign Out
+                </button>
+              </div>
+
             </div>
           </div>}
         </main>
