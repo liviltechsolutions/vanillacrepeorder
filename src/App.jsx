@@ -76,18 +76,18 @@ const timeToMin=t=>{const[h,m]=t.split(":").map(Number);return h*60+m;};
 const nowStr=()=>new Date().toLocaleString("en-MY",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
 const getDIM=(y,m)=>new Date(y,m+1,0).getDate();
 const getFD=(y,m)=>new Date(y,m,1).getDay();
-const TODAY=new Date().toISOString().split("T")[0];
-function getWkDates(base){const d=new Date(base);const dy=d.getDay();const out=[];for(let i=0;i<7;i++){const n=new Date(d);n.setDate(d.getDate()-dy+i);out.push(n.toISOString().split("T")[0]);}return out;}
+const _td=new Date();const TODAY=`${_td.getFullYear()}-${String(_td.getMonth()+1).padStart(2,"0")}-${String(_td.getDate()).padStart(2,"0")}`;
+function getWkDates(base){const d=new Date(base);const dy=d.getDay();const out=[];for(let i=0;i<7;i++){const n=new Date(d);n.setDate(d.getDate()-dy+i);const nd=new Date(n);out.push(`${nd.getFullYear()}-${String(nd.getMonth()+1).padStart(2,"0")}-${String(nd.getDate()).padStart(2,"0")}`);}return out;}
 function dateRange(from,to){const out=[];const cur=new Date(from+"T00:00:00");const end=new Date(to+"T00:00:00");while(cur<=end){out.push(cur.toISOString().split("T")[0]);cur.setDate(cur.getDate()+1);}return out;}
 
 // ─── STYLES ──────────────────────────────────────────────────────────────────
-const card=(e={})=>({background:"var(--surface)",borderRadius:16,border:"1px solid var(--border)",boxShadow:"0 1px 4px rgba(124,58,237,0.05)",...e});
-const pBtn=(e={})=>({background:"linear-gradient(135deg,#0d9488,#10b981)",color:"#fff",border:"none",borderRadius:10,padding:"10px 18px",cursor:"pointer",fontSize:14,fontWeight:600,...e});
-const gBtn=(e={})=>({border:"1px solid var(--border)",background:"var(--surface)",borderRadius:10,padding:"8px 15px",cursor:"pointer",fontSize:13,color:"#5b21b6",fontWeight:600,...e});
-const inp={width:"100%",padding:"11px 13px",border:"1px solid var(--border)",borderRadius:10,fontSize:15,outline:"none",boxSizing:"border-box",fontFamily:"inherit",background:"var(--input-bg)",color:"var(--text)"};
-const lbl={fontSize:13,fontWeight:600,color:"var(--text-muted)",display:"block",marginBottom:6};
-const sectionLbl={fontSize:11,fontWeight:700,color:"var(--text-muted)",letterSpacing:0.6,textTransform:"uppercase"};
-const statCard=(accent,e={})=>({background:"var(--surface)",borderRadius:14,border:"1px solid var(--border)",borderLeft:`4px solid ${accent}`,boxShadow:"0 1px 4px rgba(124,58,237,0.05)",padding:"14px 16px",...e});
+const card=(e={})=>({background:"var(--surface)",borderRadius:"var(--radius-lg,16px)",border:"1px solid var(--border)",boxShadow:"var(--shadow-sm)",...e});
+const pBtn=(e={})=>({background:"linear-gradient(135deg,#0d9488,#10b981)",color:"#fff",border:"none",borderRadius:"var(--radius,12px)",padding:"10px 20px",cursor:"pointer",fontSize:14,fontWeight:600,letterSpacing:"-0.01em",...e});
+const gBtn=(e={})=>({border:"1px solid var(--border)",background:"var(--surface)",borderRadius:"var(--radius,12px)",padding:"8px 16px",cursor:"pointer",fontSize:13,color:"#7c3aed",fontWeight:600,...e});
+const inp={width:"100%",padding:"10px 13px",border:"1px solid var(--border)",borderRadius:"var(--radius,12px)",fontSize:14,outline:"none",boxSizing:"border-box",fontFamily:"inherit",background:"var(--input-bg)",color:"var(--text)"};
+const lbl={fontSize:12,fontWeight:600,color:"var(--text-muted)",display:"block",marginBottom:5,letterSpacing:"0.02em",textTransform:"uppercase"};
+const sectionLbl={fontSize:11,fontWeight:700,color:"var(--text-muted)",letterSpacing:"0.08em",textTransform:"uppercase"};
+const statCard=(accent,e={})=>({background:"var(--surface)",borderRadius:"var(--radius-lg,16px)",border:"1px solid var(--border)",borderLeft:`4px solid ${accent}`,boxShadow:"var(--shadow-sm)",padding:"18px 20px",...e});
 const Icon=({path,size=18,color="currentColor",strokeWidth=2})=><svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">{path}</svg>;
 const ICONS={
   calendar:<><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></>,
@@ -700,28 +700,30 @@ function LoginScreen({onSuccess}){
   };
 
   return(
-    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#f5f3ff,#ede9fe)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
-      <div style={{background:"#fff",borderRadius:20,padding:32,width:390,maxWidth:"100%",boxShadow:"0 24px 64px rgba(109,40,217,0.15)",border:"1px solid #ede9fe"}}>
-        <div style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:24}}>
-          <div style={{width:56,height:56,borderRadius:16,background:"linear-gradient(135deg,#6d28d9,#9333ea)",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:12,boxShadow:"0 8px 20px rgba(109,40,217,0.35)"}}><span style={{color:"#fff",fontWeight:700,fontSize:26}}>B</span></div>
-          <div style={{fontWeight:700,fontSize:20,color:"#1e1b4b",letterSpacing:-0.3}}>Beaubook</div>
-          <div style={{fontSize:12,color:"#7c6fb0",marginTop:2}}>Merchant Dashboard</div>
+    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#f5f3ff 0%,#ede9fe 50%,#ddd6fe 100%)",display:"flex",alignItems:"center",justifyContent:"center",padding:16,fontFamily:"'Inter',system-ui,sans-serif"}}>
+      <div style={{background:"#fff",borderRadius:24,padding:36,width:400,maxWidth:"100%",boxShadow:"0 32px 80px rgba(109,40,217,0.18)",border:"1px solid #ede9fe"}}>
+        <div style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:28}}>
+          <div style={{width:62,height:62,borderRadius:18,background:"linear-gradient(135deg,#6d28d9,#9333ea)",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:14,boxShadow:"0 10px 28px rgba(109,40,217,0.40)"}}><span style={{color:"#fff",fontWeight:800,fontSize:28}}>B</span></div>
+          <div style={{fontWeight:800,fontSize:22,color:"#1e1b4b",letterSpacing:"-0.5px"}}>Beaubook</div>
+          <div style={{fontSize:13,color:"#8b7fb0",marginTop:3,fontWeight:500}}>Merchant Dashboard</div>
         </div>
-        <div style={{marginBottom:14}}>
-          <label style={{...lbl,color:"#4c1d95"}}>Email</label>
-          <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()} placeholder="your@email.com" style={{...inp,borderColor:"#ddd6fe"}} autoFocus/>
-        </div>
-        <div style={{marginBottom:4}}>
-          <label style={{...lbl,color:"#4c1d95"}}>Password</label>
-          <div style={{position:"relative"}}>
-            <input type={showPw?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()} placeholder="Enter password" style={{...inp,borderColor:"#ddd6fe",paddingRight:44}}/>
-            <button onClick={()=>setShowPw(p=>!p)} tabIndex={-1} style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"#7c6fb0",fontSize:18,lineHeight:1,padding:0}}>
-              {showPw?"🙈":"👁️"}
-            </button>
+        <div style={{display:"flex",flexDirection:"column",gap:14}}>
+          <div>
+            <label style={{fontSize:11,fontWeight:700,color:"#7c3aed",display:"block",marginBottom:6,letterSpacing:"0.08em",textTransform:"uppercase"}}>Email</label>
+            <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()} placeholder="your@email.com" style={{...inp,padding:"12px 14px",fontSize:15}} autoFocus/>
           </div>
+          <div>
+            <label style={{fontSize:11,fontWeight:700,color:"#7c3aed",display:"block",marginBottom:6,letterSpacing:"0.08em",textTransform:"uppercase"}}>Password</label>
+            <div style={{position:"relative"}}>
+              <input type={showPw?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()} placeholder="Enter password" style={{...inp,padding:"12px 14px",paddingRight:46,fontSize:15}}/>
+              <button onClick={()=>setShowPw(p=>!p)} tabIndex={-1} style={{position:"absolute",right:13,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"#9090b0",fontSize:19,lineHeight:1,padding:0}}>
+                {showPw?"🙈":"👁️"}
+              </button>
+            </div>
+          </div>
+          {error&&<div style={{fontSize:13,color:"#991b1b",background:"#fef2f2",padding:"10px 14px",borderRadius:10,border:"1px solid #fca5a5",fontWeight:500}}>{error}</div>}
+          <button onClick={submit} disabled={loading} style={pBtn({width:"100%",marginTop:4,padding:"14px 0",fontSize:15,fontWeight:700,background:"linear-gradient(135deg,#6d28d9,#9333ea)",boxShadow:"0 6px 18px rgba(109,40,217,0.35)",opacity:loading?0.7:1})}>{loading?"Logging in…":"Log In"}</button>
         </div>
-        {error&&<div style={{marginTop:8,fontSize:12,color:"#991b1b",background:"#fef2f2",padding:"6px 10px",borderRadius:7,border:"1px solid #fca5a5"}}>{error}</div>}
-        <button onClick={submit} disabled={loading} style={pBtn({width:"100%",marginTop:16,padding:"12px 0",fontSize:15,opacity:loading?0.7:1,background:"linear-gradient(135deg,#6d28d9,#9333ea)",boxShadow:"0 4px 14px rgba(109,40,217,0.35)"})}>{loading?"Logging in…":"Log In"}</button>
       </div>
     </div>
   );
@@ -993,32 +995,36 @@ export default function BeaubookDashboard(){
     const sc=BC[b.status]||BC.confirmed;const pc=PC[b.payStatus]||PC.unpaid;const s=svc(b.service);const st=stf(b.staff);
     const price=s?.price||0;const balance=Math.max(0,price-(b.amtPaid||0));
     return(
-      <div key={b.id} style={card({padding:"14px 18px",cursor:"pointer",display:"flex",alignItems:"center",gap:14,borderLeft:b.status==="pending"?"4px solid #f59e0b":b.status==="unassigned"?"4px solid #c084fc":"1px solid var(--border)"})}>
+      <div key={b.id} style={card({padding:"16px 18px",cursor:"pointer",display:"flex",alignItems:"center",gap:14,borderLeft:b.status==="pending"?"4px solid #f59e0b":b.status==="unassigned"?"4px solid #c084fc":"1px solid var(--border)"})}>
         <div onClick={()=>setSelBooking(b)} style={{flex:1,display:"flex",alignItems:"center",gap:14}}>
-          <div style={{textAlign:"center",minWidth:52,cursor:"pointer"}}>
-            <div style={{fontSize:10,color:"var(--text-muted)",fontWeight:600}}>{fmtD(b.date)}</div>
-            <div style={{fontSize:15,fontWeight:700,color:"#6d28d9"}}>{b.time}</div>
+          <div style={{textAlign:"center",minWidth:56,flexShrink:0}}>
+            <div style={{fontSize:10,color:"var(--text-muted)",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.04em",marginBottom:2}}>{fmtD(b.date)}</div>
+            <div style={{fontSize:16,fontWeight:800,color:"#7c3aed",letterSpacing:"-0.5px"}}>{b.time}</div>
           </div>
-          <div style={{width:1,height:34,background:"var(--border)",flexShrink:0}}/>
+          <div style={{width:1,height:40,background:"var(--border)",flexShrink:0}}/>
           <div style={{flex:1,minWidth:0}}>
-            <div style={{fontWeight:700,fontSize:15,color:"var(--text)"}}>{b.customer}</div>
-            <div style={{fontSize:12,color:"var(--text-muted)",marginTop:1}}>{s?.name}{st?` · ${st.name}`:""}{b.seat&&` · ${b.seat}`}</div>
-            {b.remark&&<div style={{display:"inline-block",marginTop:4,padding:"2px 9px",borderRadius:20,background:"#f3e8ff",fontSize:11,color:"#7e22ce",fontWeight:500}}>&ldquo;{b.remark}&rdquo;</div>}
+            <div style={{fontWeight:700,fontSize:15,color:"var(--text)",marginBottom:3}}>{b.customer}</div>
+            <div style={{fontSize:12,color:"var(--text-muted)",display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+              {s?.name&&<span>{s.name}</span>}
+              {st&&<><span style={{color:"var(--border-2,#e5e1f8)"}}>·</span><span>{st.name}</span></>}
+              {b.seat&&<><span style={{color:"var(--border-2,#e5e1f8)"}}>·</span><span style={{background:"#f3e8ff",color:"#7c3aed",padding:"1px 7px",borderRadius:6,fontSize:11,fontWeight:600}}>{b.seat}</span></>}
+            </div>
+            {b.remark&&<div style={{display:"inline-block",marginTop:5,padding:"3px 10px",borderRadius:20,background:"#f3e8ff",fontSize:11,color:"#7c3aed",fontWeight:500,border:"1px solid #e9d5ff"}}>&ldquo;{b.remark}&rdquo;</div>}
           </div>
-          <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:4,flexShrink:0}}>
-            <span style={{padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:600,background:sc.bg,color:sc.tx,border:`1px solid ${sc.br}`}}>{b.status}</span>
-            <span style={{padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:600,background:pc.bg,color:pc.tx,border:`1px solid ${pc.br}`}}>{b.payStatus}</span>
-            {balance>0&&<span style={{fontSize:11,color:"#991b1b",fontWeight:600}}>Balance RM{balance}</span>}
+          <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:5,flexShrink:0}}>
+            <span style={{padding:"3px 11px",borderRadius:99,fontSize:11,fontWeight:700,background:sc.bg,color:sc.tx,border:`1px solid ${sc.br}`,letterSpacing:"0.01em"}}>{b.status}</span>
+            <span style={{padding:"3px 11px",borderRadius:99,fontSize:11,fontWeight:700,background:pc.bg,color:pc.tx,border:`1px solid ${pc.br}`}}>{b.payStatus}</span>
+            {balance>0&&<span style={{fontSize:11,color:"#dc2626",fontWeight:700}}>Balance RM{balance}</span>}
           </div>
         </div>
         {/* Call / WA buttons */}
         <div style={{display:"flex",gap:6,flexShrink:0}}>
-          <a href={`tel:${b.phone}`} onClick={e=>e.stopPropagation()} style={{display:"flex",alignItems:"center",justifyContent:"center",width:36,height:36,borderRadius:10,background:"var(--surface)",border:"1px solid var(--border)",color:"#6d28d9",textDecoration:"none"}}><Icon path={ICONS.phone} size={16}/></a>
-          <a href={`https://wa.me/6${b.phone.replace(/-/g,"")}`} target="_blank" rel="noreferrer" onClick={e=>e.stopPropagation()} style={{display:"flex",alignItems:"center",justifyContent:"center",width:36,height:36,borderRadius:10,background:"var(--surface)",border:"1px solid var(--border)",color:"#6d28d9",textDecoration:"none"}}><Icon path={ICONS.message} size={16}/></a>
+          <a href={`tel:${b.phone}`} onClick={e=>e.stopPropagation()} style={{display:"flex",alignItems:"center",justifyContent:"center",width:36,height:36,borderRadius:10,background:"var(--bg)",border:"1px solid var(--border)",color:"#7c3aed",textDecoration:"none"}}><Icon path={ICONS.phone} size={15}/></a>
+          <a href={`https://wa.me/6${b.phone.replace(/-/g,"")}`} target="_blank" rel="noreferrer" onClick={e=>e.stopPropagation()} style={{display:"flex",alignItems:"center",justifyContent:"center",width:36,height:36,borderRadius:10,background:"var(--bg)",border:"1px solid var(--border)",color:"#7c3aed",textDecoration:"none"}}><Icon path={ICONS.message} size={15}/></a>
         </div>
         {b.status==="pending"&&<div style={{display:"flex",gap:6,flexShrink:0}}>
           <button onClick={e=>{e.stopPropagation();handleAccept(b.id);}} style={{background:"#16a34a",border:"none",color:"#fff",borderRadius:10,width:36,height:36,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><Icon path={ICONS.check} size={16}/></button>
-          <button onClick={e=>{e.stopPropagation();handleCancel(b.id);}} style={{background:"var(--surface)",border:"1px solid #fca5a5",color:"#991b1b",borderRadius:10,width:36,height:36,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><Icon path={ICONS.x} size={16}/></button>
+          <button onClick={e=>{e.stopPropagation();handleCancel(b.id);}} style={{background:"var(--bg)",border:"1px solid #fca5a5",color:"#991b1b",borderRadius:10,width:36,height:36,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><Icon path={ICONS.x} size={16}/></button>
         </div>}
       </div>
     );
@@ -1030,42 +1036,48 @@ export default function BeaubookDashboard(){
     <div style={{fontFamily:"'Inter',system-ui,sans-serif",minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column"}}>
 
       {/* NAV */}
-      <nav style={{background:"var(--surface)",borderBottom:"1px solid var(--border)",padding:"0 20px",height:60,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:200}}>
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <button onClick={()=>setSidebarOpen(!sidebarOpen)} style={{background:"none",border:"none",cursor:"pointer",padding:5,color:"#7e22ce",display:"flex"}}>
-            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <nav style={{background:"var(--surface)",borderBottom:"1px solid var(--border)",padding:"0 24px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:200,boxShadow:"var(--shadow-sm)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <button onClick={()=>setSidebarOpen(!sidebarOpen)} style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:10,padding:8,cursor:"pointer",color:"#7c3aed",display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
-          <div style={{width:32,height:32,borderRadius:"50%",background:"linear-gradient(135deg,#9333ea,#c084fc)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:12}}>{settings.companyName.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase()}</div>
-          <div><div style={{fontWeight:700,fontSize:16,color:"var(--text)",letterSpacing:-0.3}}>{settings.companyName}</div><div style={{fontSize:10,color:"#7e22ce",fontWeight:700,letterSpacing:0.5}}>{settings.location?.toUpperCase()}</div></div>
+          <div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#7c3aed,#9333ea)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:800,fontSize:13,flexShrink:0}}>{settings.companyName.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase()}</div>
+          <div>
+            <div style={{fontWeight:700,fontSize:15,color:"var(--text)",letterSpacing:"-0.3px",lineHeight:1.2}}>{settings.companyName}</div>
+            <div style={{fontSize:11,color:"var(--text-muted)",fontWeight:500,marginTop:1}}>{settings.location}</div>
+          </div>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           {/* Live clock */}
-          <div style={{fontSize:12,fontWeight:700,color:"#7e22ce",fontFamily:"monospace",background:"#f3e8ff",padding:"5px 11px",borderRadius:8,letterSpacing:0.5,border:"1px solid #ddd6fe"}}>{nowTime.toLocaleTimeString("en-MY",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false})}</div>
+          <div style={{display:"flex",alignItems:"center",gap:7,fontSize:13,fontWeight:700,color:"#7c3aed",background:"var(--primary-bg,#f3e8ff)",padding:"7px 14px",borderRadius:10,border:"1px solid var(--border)",letterSpacing:"0.01em"}}>
+            <span style={{width:7,height:7,borderRadius:"50%",background:"#10b981",display:"inline-block",flexShrink:0}}/>
+            {nowTime.toLocaleTimeString("en-MY",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false})}
+          </div>
           {/* Notification bell */}
-          <button onClick={()=>setShowNotif(p=>!p)} style={{position:"relative",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:10,width:38,height:38,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
-            <Icon path={ICONS.bell} size={18} color={notifCount>0?"var(--text)":"var(--text-muted)"} strokeWidth={1.8}/>
-            {notifCount>0&&<span style={{position:"absolute",top:-4,right:-4,background:"#ef4444",color:"#fff",borderRadius:10,fontSize:10,fontWeight:700,minWidth:18,height:18,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4px",border:"2px solid var(--surface)"}}>{notifCount}</span>}
+          <button onClick={()=>setShowNotif(p=>!p)} style={{position:"relative",background:"var(--bg)",border:"1px solid var(--border)",borderRadius:10,width:40,height:40,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <Icon path={ICONS.bell} size={18} color={notifCount>0?"#7c3aed":"var(--text-muted)"} strokeWidth={1.8}/>
+            {notifCount>0&&<span style={{position:"absolute",top:-5,right:-5,background:"#ef4444",color:"#fff",borderRadius:99,fontSize:10,fontWeight:700,minWidth:18,height:18,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 5px",border:"2px solid var(--surface)"}}>{notifCount}</span>}
           </button>
-          <div style={{display:"flex",alignItems:"center",gap:7}}>
-            <div style={{width:24,height:24,borderRadius:7,background:"#6d28d9",display:"flex",alignItems:"center",justifyContent:"center"}}><span style={{color:"#fff",fontWeight:700,fontSize:11}}>B</span></div>
-            <span style={{fontSize:12,color:"var(--text-muted)",fontWeight:600}}>Beaubook</span>
+          <div style={{display:"flex",alignItems:"center",gap:8,padding:"6px 12px",background:"var(--bg)",borderRadius:10,border:"1px solid var(--border)"}}>
+            <div style={{width:26,height:26,borderRadius:8,background:"linear-gradient(135deg,#6d28d9,#7c3aed)",display:"flex",alignItems:"center",justifyContent:"center"}}><span style={{color:"#fff",fontWeight:800,fontSize:11}}>B</span></div>
+            <span style={{fontSize:13,color:"var(--text)",fontWeight:600}}>Beaubook</span>
           </div>
         </div>
       </nav>
 
       <div style={{display:"flex",flex:1}}>
         {/* SIDEBAR */}
-        {sidebarOpen&&<aside style={{width:200,background:"var(--surface)",borderRight:"1px solid var(--border)",padding:"16px 12px",display:"flex",flexDirection:"column",gap:3,flexShrink:0}}>
-          <div style={{...sectionLbl,padding:"0 9px",marginBottom:6}}>Menu</div>
+        {sidebarOpen&&<aside style={{width:224,background:"var(--surface)",borderRight:"1px solid var(--border)",padding:"20px 14px",display:"flex",flexDirection:"column",gap:2,flexShrink:0}}>
+          <div style={{...sectionLbl,padding:"0 10px",marginBottom:12}}>Menu</div>
           {[{id:"calendar",icon:ICONS.calendar,label:t("nav.calendar")},{id:"bookings",icon:ICONS.list,label:t("nav.bookings"),badge:pendingAll.length+unassignedAll.length},{id:"customers",icon:ICONS.user,label:t("nav.customers")},{id:"staff",icon:ICONS.users,label:t("nav.staff")},{id:"services",icon:ICONS.scissors,label:t("nav.services")},{id:"analytics",icon:ICONS.chart,label:t("nav.analytics")},{id:"settings",icon:ICONS.settings,label:t("nav.settings")}].map(item=>(
-            <button key={item.id} onClick={()=>setTab(item.id)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 11px",borderRadius:10,border:"none",cursor:"pointer",textAlign:"left",width:"100%",background:tab===item.id?"#f3e8ff":"transparent",color:tab===item.id?"#6d28d9":"#64648a",fontWeight:tab===item.id?700:500,fontSize:14}}>
-              <Icon path={item.icon} size={18} strokeWidth={tab===item.id?2.2:1.8}/><span style={{flex:1}}>{item.label}</span>
-              {item.badge>0&&<span style={{background:"#ef4444",color:"#fff",borderRadius:10,fontSize:10,fontWeight:700,padding:"2px 6px"}}>{item.badge}</span>}
+            <button key={item.id} onClick={()=>setTab(item.id)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:10,border:"none",cursor:"pointer",textAlign:"left",width:"100%",background:tab===item.id?"var(--primary-bg,#f3e8ff)":"transparent",color:tab===item.id?"#7c3aed":"var(--text-muted)",fontWeight:tab===item.id?700:500,fontSize:13.5}}>
+              <Icon path={item.icon} size={17} color={tab===item.id?"#7c3aed":"var(--text-muted)"} strokeWidth={tab===item.id?2.2:1.8}/><span style={{flex:1}}>{item.label}</span>
+              {item.badge>0&&<span style={{background:"#ef4444",color:"#fff",borderRadius:99,fontSize:10,fontWeight:700,padding:"2px 7px",lineHeight:1.5}}>{item.badge}</span>}
             </button>
           ))}
         </aside>}
 
-        <main style={{flex:1,padding:16,overflowY:"auto"}}>
+        <main style={{flex:1,padding:20,overflowY:"auto"}}>
           {/* Status toast */}
           {toast&&<div style={{position:"fixed",top:68,right:16,zIndex:9999,padding:"8px 14px",borderRadius:9,background:toast.type==="success"?"#f0fdf4":"#fef2f2",border:`1px solid ${toast.type==="success"?"#86efac":"#fca5a5"}`,color:toast.type==="success"?"#15803d":"#991b1b",fontWeight:600,fontSize:11,boxShadow:"0 4px 20px rgba(0,0,0,0.1)",display:"flex",alignItems:"center",gap:6}}>
             {toast.type==="success"?"✓":"✕"} {toast.msg}
@@ -1088,7 +1100,7 @@ export default function BeaubookDashboard(){
           {tab==="calendar"&&<div>
             <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:16,flexWrap:"wrap",gap:10}}>
               <div>
-                <h1 style={{margin:0,fontSize:24,fontWeight:700,color:"var(--text)"}}>{t("nav.calendar")}</h1>
+                <h1 style={{margin:0,fontSize:26,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px"}}>{t("nav.calendar")}</h1>
                 <p style={{margin:"3px 0 0",fontSize:13,color:"var(--text-muted)"}}>{new Date(selectedDate+"T00:00:00").toLocaleDateString("en-MY",{weekday:"long",day:"numeric",month:"long",year:"numeric"})} · {staffList.length} stylists on shift{selHoliday&&<span style={{color:"#dc2626",fontWeight:600}}> · Public Holiday: {selHoliday}</span>}{selClosed&&<span style={{color:"#dc2626",fontWeight:600}}> · Closed{selClosed.reason?`: ${selClosed.reason}`:""}</span>}</p>
               </div>
               <div style={{display:"flex",gap:8}}>
@@ -1097,8 +1109,14 @@ export default function BeaubookDashboard(){
               </div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:16}}>
-              {[{l:"Today",v:todayStats.total,ic:ICONS.calendar,c:"#7e22ce"},{l:"Confirmed",v:todayStats.confirmed,ic:ICONS.check,c:"#16a34a"},{l:"Pending",v:todayStats.pending,ic:ICONS.clock,c:"#d97706"}].map(s=>(
-                <div key={s.l} style={statCard(s.c)}><div style={{fontSize:11,fontWeight:600,color:"var(--text-muted)",marginBottom:6}}>{s.l}</div><div style={{fontSize:28,fontWeight:700,color:"var(--text)"}}>{s.v}</div></div>
+              {[{l:"Today",v:todayStats.total,ic:ICONS.calendar,c:"#7c3aed"},{l:"Confirmed",v:todayStats.confirmed,ic:ICONS.check,c:"#16a34a"},{l:"Pending",v:todayStats.pending,ic:ICONS.clock,c:"#d97706"}].map(s=>(
+                <div key={s.l} style={statCard(s.c)}>
+                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+                    <div style={{width:30,height:30,borderRadius:8,background:`${s.c}18`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon path={s.ic} size={15} color={s.c}/></div>
+                    <div style={{fontSize:12,fontWeight:600,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:"0.04em"}}>{s.l}</div>
+                  </div>
+                  <div style={{fontSize:34,fontWeight:800,color:"var(--text)",lineHeight:1,letterSpacing:"-1px"}}>{s.v}</div>
+                </div>
               ))}
             </div>
             {unassignedAll.length>0&&<div style={{background:"#fdf4ff",border:"1px solid #e9d5ff",borderRadius:12,padding:"10px 14px",marginBottom:12,display:"flex",alignItems:"center",gap:9}}>
@@ -1222,7 +1240,7 @@ export default function BeaubookDashboard(){
           {/* ═══ BOOKINGS ═══ */}
           {tab==="bookings"&&<div>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,flexWrap:"wrap",gap:10}}>
-              <div><h1 style={{margin:0,fontSize:24,fontWeight:700,color:"var(--text)"}}>{t("nav.bookings")}</h1><p style={{margin:"3px 0 0",fontSize:13,color:"var(--text-muted)"}}>{bookings.filter(b=>b.status!=="cancelled").length} active bookings</p></div>
+              <div><h1 style={{margin:0,fontSize:26,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px"}}>{t("nav.bookings")}</h1><p style={{margin:"3px 0 0",fontSize:13,color:"var(--text-muted)"}}>{bookings.filter(b=>b.status!=="cancelled").length} active bookings</p></div>
               <button onClick={()=>{setAddDate(selectedDate);setShowAdd(true);}} style={pBtn({display:"flex",alignItems:"center",gap:6})}><Icon path={ICONS.plus} size={16}/>New booking</button>
             </div>
             {pendingAll.length>0&&<div style={{background:"#fffbeb",border:"1px solid #fcd34d",borderRadius:12,padding:"11px 16px",marginBottom:10,display:"flex",gap:10,alignItems:"center"}}>
@@ -1360,10 +1378,10 @@ export default function BeaubookDashboard(){
               </div>
             );}
             return<div>
-              <h1 style={{margin:"0 0 14px",fontSize:24,fontWeight:700,color:"var(--text)"}}>{t("nav.customers")}</h1>
+              <h1 style={{margin:"0 0 16px",fontSize:26,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px"}}>{t("nav.customers")}</h1>
               <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:14}}>
-                {[{l:"Total",v:allCustomers.length,c:"#7e22ce"},{l:"Returning",v:allCustomers.filter(c=>c.count>1).length,c:"#0891b2"},{l:"New",v:allCustomers.filter(c=>c.isNew).length,c:"#16a34a"},{l:"Revenue",v:`RM${allCustomers.reduce((s,c)=>s+c.spend,0)}`,c:"#d97706"}].map(s=>(
-                  <div key={s.l} style={statCard(s.c)}><div style={{fontSize:11,fontWeight:600,color:"var(--text-muted)",marginBottom:6}}>{s.l}</div><div style={{fontSize:24,fontWeight:700,color:"var(--text)"}}>{s.v}</div></div>
+                {[{l:"Total",v:allCustomers.length,c:"#7c3aed"},{l:"Returning",v:allCustomers.filter(c=>c.count>1).length,c:"#0891b2"},{l:"New",v:allCustomers.filter(c=>c.isNew).length,c:"#16a34a"},{l:"Revenue",v:`RM${allCustomers.reduce((s,c)=>s+c.spend,0)}`,c:"#d97706"}].map(s=>(
+                  <div key={s.l} style={statCard(s.c)}><div style={{fontSize:11,fontWeight:600,color:"var(--text-muted)",marginBottom:8,textTransform:"uppercase",letterSpacing:"0.04em"}}>{s.l}</div><div style={{fontSize:26,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px"}}>{s.v}</div></div>
                 ))}
               </div>
               <div style={{position:"relative",marginBottom:10}}>
@@ -1381,21 +1399,24 @@ export default function BeaubookDashboard(){
                   {[["recent","Recent"],["name","Name"],["visits","Most Visits"],["spend","Highest Spend"]].map(([k,v])=><option key={k} value={k}>{v}</option>)}
                 </select>
               </div>
-              <div style={{display:"flex",flexDirection:"column",gap:7}}>
+              <div style={{display:"flex",flexDirection:"column",gap:8}}>
                 {filtered.map(c=>(
-                  <div key={c.phone} onClick={()=>{setSelCustomer(c);setCustNoteEdit(custNotes[c.phone]||"");}} style={card({padding:"13px 16px",cursor:"pointer",display:"flex",alignItems:"center",gap:12})}>
-                    <div style={{width:40,height:40,borderRadius:"50%",background:`linear-gradient(135deg,${c.isVip?"#f59e0b,#fbbf24":"#9333ea,#c084fc"})`,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:15,flexShrink:0}}>{c.name[0]}</div>
+                  <div key={c.phone} onClick={()=>{setSelCustomer(c);setCustNoteEdit(custNotes[c.phone]||"");}} style={card({padding:"14px 18px",cursor:"pointer",display:"flex",alignItems:"center",gap:14})}>
+                    <div style={{width:44,height:44,borderRadius:13,background:`linear-gradient(135deg,${c.isVip?"#f59e0b,#fbbf24":"#7c3aed,#c084fc"})`,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:800,fontSize:17,flexShrink:0}}>{c.name[0]}</div>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
+                      <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}>
                         <span style={{fontWeight:700,fontSize:14,color:"var(--text)"}}>{c.name}</span>
-                        {c.isVip&&<span style={{padding:"1px 6px",borderRadius:20,fontSize:9,fontWeight:700,background:"#fef9c3",color:"#854d0e",border:"1px solid #fde68a"}}>VIP</span>}
-                        {c.isNew&&<span style={{padding:"1px 6px",borderRadius:20,fontSize:9,fontWeight:700,background:"#f0fdf4",color:"#15803d",border:"1px solid #86efac"}}>New</span>}
-                        {c.hasUnpaid&&<span style={{padding:"1px 6px",borderRadius:20,fontSize:9,fontWeight:700,background:"#fef2f2",color:"#991b1b",border:"1px solid #fca5a5"}}>Unpaid</span>}
+                        {c.isVip&&<span style={{padding:"2px 8px",borderRadius:99,fontSize:10,fontWeight:700,background:"#fef9c3",color:"#854d0e",border:"1px solid #fde68a"}}>⭐ VIP</span>}
+                        {c.isNew&&<span style={{padding:"2px 8px",borderRadius:99,fontSize:10,fontWeight:700,background:"#f0fdf4",color:"#15803d",border:"1px solid #86efac"}}>New</span>}
+                        {c.hasUnpaid&&<span style={{padding:"2px 8px",borderRadius:99,fontSize:10,fontWeight:700,background:"#fef2f2",color:"#991b1b",border:"1px solid #fca5a5"}}>Unpaid</span>}
                       </div>
-                      <div style={{fontSize:12,color:"var(--text-muted)"}}>{c.phone} · Last: <span style={{color:"#7e22ce",fontWeight:500}}>{fmtD(c.lastVisit)}</span></div>
+                      <div style={{fontSize:12,color:"var(--text-muted)"}}>{c.phone} · Last: <span style={{color:"#7c3aed",fontWeight:600}}>{fmtD(c.lastVisit)}</span></div>
                     </div>
-                    <div style={{textAlign:"right",flexShrink:0}}><div style={{fontWeight:700,fontSize:14,color:"#7e22ce"}}>RM{c.spend}</div><div style={{fontSize:11,color:"var(--text-muted)"}}>{c.count} visits</div></div>
-                    <Icon path={ICONS.chevRight} size={15} color="#d8b4fe"/>
+                    <div style={{textAlign:"right",flexShrink:0}}>
+                      <div style={{fontWeight:700,fontSize:15,color:"#7c3aed"}}>RM {c.spend}</div>
+                      <div style={{fontSize:11,color:"var(--text-muted)",marginTop:2}}>{c.count} visits</div>
+                    </div>
+                    <Icon path={ICONS.chevRight} size={15} color="var(--text-muted)"/>
                   </div>
                 ))}
               </div>
@@ -1406,7 +1427,7 @@ export default function BeaubookDashboard(){
           {tab==="staff"&&<div>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,flexWrap:"wrap",gap:10}}>
               <div>
-                <h1 style={{margin:0,fontSize:24,fontWeight:700,color:"var(--text)"}}>{t("nav.staff")}</h1>
+                <h1 style={{margin:0,fontSize:26,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px"}}>{t("nav.staff")}</h1>
                 <div style={{display:"flex",alignItems:"center",gap:6,marginTop:4}}>
                   <span style={{fontSize:13,color:"var(--text-muted)"}}>Stats for</span>
                   <button onClick={()=>setStaffMonth(p=>{const m=p.m-1<0?11:p.m-1;return{y:p.m-1<0?p.y-1:p.y,m};})} style={{background:"none",border:"none",cursor:"pointer",color:"var(--text-muted)",padding:0,display:"flex"}}><Icon path={<polyline points="15 18 9 12 15 6"/>} size={15}/></button>
@@ -1425,29 +1446,29 @@ export default function BeaubookDashboard(){
                 const todayLeave=leaveRecords.find(r=>r.staffId===s.id&&r.dates.includes(selectedDate));
                 const myLeaves=leaveRecords.filter(r=>r.staffId===s.id);
                 return(
-                  <div key={s.id} style={card({padding:18})}>
-                    <div style={{display:"flex",alignItems:"flex-start",gap:11,marginBottom:14}}>
-                      <div style={{width:48,height:48,borderRadius:12,background:s.photo?"transparent":(todayLeave?"#d1d5db":s.color),overflow:"hidden",flexShrink:0}}>
-                        {s.photo?<img src={s.photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:19}}>{s.avatar}</div>}
+                  <div key={s.id} style={card({padding:20})}>
+                    <div style={{display:"flex",alignItems:"flex-start",gap:12,marginBottom:14}}>
+                      <div style={{width:52,height:52,borderRadius:14,background:s.photo?"transparent":(todayLeave?"#d1d5db":s.color),overflow:"hidden",flexShrink:0}}>
+                        {s.photo?<img src={s.photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:800,fontSize:20}}>{s.avatar}</div>}
                       </div>
                       <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontWeight:700,fontSize:15,color:"var(--text)"}}>{s.name}</div>
+                        <div style={{fontWeight:700,fontSize:15,color:"var(--text)",marginBottom:2}}>{s.name}</div>
                         <div style={{fontSize:12,color:"var(--text-muted)"}}>{s.position}</div>
                         <div style={{fontSize:12,color:"var(--text-muted)"}}>{s.phone}</div>
                       </div>
-                      <button onClick={()=>setEditStaff(s)} style={{background:"var(--surface)",border:"1px solid var(--border)",borderRadius:9,width:30,height:30,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#6d28d9",flexShrink:0}}><Icon path={ICONS.edit} size={14}/></button>
+                      <button onClick={()=>setEditStaff(s)} style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:9,width:32,height:32,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#7c3aed",flexShrink:0}}><Icon path={ICONS.edit} size={14}/></button>
                     </div>
-                    <span style={{padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:600,marginBottom:12,display:"inline-flex",alignItems:"center",gap:5,...(todayLeave?{background:"#fef2f2",color:"#991b1b",border:"1px solid #fca5a5"}:{background:"#f0fdf4",color:"#15803d",border:"1px solid #86efac"})}}><span style={{width:6,height:6,borderRadius:"50%",background:todayLeave?"#ef4444":"#22c55e",display:"inline-block"}}/>{todayLeave?"On Leave":"Active"}</span>
+                    <span style={{padding:"4px 12px",borderRadius:99,fontSize:11,fontWeight:700,marginBottom:14,display:"inline-flex",alignItems:"center",gap:6,...(todayLeave?{background:"#fef2f2",color:"#991b1b",border:"1px solid #fca5a5"}:{background:"#f0fdf4",color:"#15803d",border:"1px solid #86efac"})}}><span style={{width:6,height:6,borderRadius:"50%",background:todayLeave?"#ef4444":"#22c55e",display:"inline-block"}}/>{todayLeave?"On Leave":"Active"}</span>
                     {/* Monthly stats */}
-                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12,marginTop:10}}>
-                      <div style={{background:"var(--bg)",borderRadius:10,padding:"9px 11px"}}><div style={{fontSize:11,color:"var(--text-muted)"}}>{MONTHS_EN[staffMonth.m]} bookings</div><div style={{fontSize:17,fontWeight:700,color:"var(--text)"}}>{monthBks.length}</div></div>
-                      <div style={{background:"var(--bg)",borderRadius:10,padding:"9px 11px"}}><div style={{fontSize:11,color:"var(--text-muted)"}}>{MONTHS_EN[staffMonth.m]} revenue</div><div style={{fontSize:17,fontWeight:700,color:"#6d28d9"}}>RM{monthRev}</div></div>
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:14,marginTop:4}}>
+                      <div style={{background:"var(--bg)",borderRadius:10,padding:"11px 13px",border:"1px solid var(--border)"}}><div style={{fontSize:10,color:"var(--text-muted)",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.04em",marginBottom:4}}>Bookings</div><div style={{fontSize:20,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px"}}>{monthBks.length}</div></div>
+                      <div style={{background:"var(--bg)",borderRadius:10,padding:"11px 13px",border:"1px solid var(--border)"}}><div style={{fontSize:10,color:"var(--text-muted)",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.04em",marginBottom:4}}>Revenue</div><div style={{fontSize:20,fontWeight:800,color:"#7c3aed",letterSpacing:"-0.5px"}}>RM {monthRev}</div></div>
                     </div>
                     {/* Skills */}
                     {s.skills?.length>0&&<div style={{marginBottom:12}}>
-                      <div style={{...sectionLbl,marginBottom:5}}>Skills</div>
+                      <div style={{...sectionLbl,marginBottom:6}}>Skills</div>
                       <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
-                        {s.skills.map(sk=><span key={sk} style={{padding:"3px 9px",borderRadius:20,background:"#f3e8ff",color:"#7e22ce",fontSize:11,fontWeight:600}}>{sk}</span>)}
+                        {s.skills.map(sk=><span key={sk} style={{padding:"3px 10px",borderRadius:99,background:"var(--primary-bg,#f3e8ff)",color:"#7c3aed",fontSize:11,fontWeight:600}}>{sk}</span>)}
                       </div>
                     </div>}
                     {/* Emergency contact */}
@@ -1473,16 +1494,22 @@ export default function BeaubookDashboard(){
           {/* ═══ SERVICES ═══ */}
           {tab==="services"&&<div>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
-              <h1 style={{margin:0,fontSize:24,fontWeight:700,color:"var(--text)"}}>{t("nav.services")}</h1>
+              <h1 style={{margin:0,fontSize:26,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px"}}>{t("nav.services")}</h1>
               <button onClick={()=>setAddService(true)} style={pBtn({display:"flex",alignItems:"center",gap:6})}><Icon path={ICONS.plus} size={16}/>Add service</button>
             </div>
-            <div style={{display:"flex",flexDirection:"column",gap:9}}>
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
               {services.map(s=>(
-                <div key={s.id} style={card({padding:"14px 16px",display:"flex",alignItems:"center",gap:13})}>
-                  <div style={{width:40,height:40,borderRadius:10,background:"#f3e8ff",display:"flex",alignItems:"center",justifyContent:"center",color:"#7e22ce",flexShrink:0}}><Icon path={ICONS.scissors} size={18}/></div>
-                  <div style={{flex:1}}><div style={{fontWeight:700,fontSize:15,color:"var(--text)"}}>{s.name}</div><div style={{fontSize:12,color:"var(--text-muted)"}}>{s.duration} min</div></div>
-                  <div style={{textAlign:"right"}}><div style={{fontWeight:700,fontSize:16,color:"#7e22ce"}}>RM {s.price}</div><div style={{fontSize:11,color:"var(--text-muted)"}}>per session</div></div>
-                  <button style={gBtn({fontSize:12,padding:"6px 13px"})}>Edit</button>
+                <div key={s.id} style={card({padding:"16px 20px",display:"flex",alignItems:"center",gap:14})}>
+                  <div style={{width:44,height:44,borderRadius:12,background:"var(--primary-bg,#f3e8ff)",display:"flex",alignItems:"center",justifyContent:"center",color:"#7c3aed",flexShrink:0}}><Icon path={ICONS.scissors} size={20}/></div>
+                  <div style={{flex:1}}>
+                    <div style={{fontWeight:700,fontSize:15,color:"var(--text)",marginBottom:3}}>{s.name}</div>
+                    <div style={{fontSize:12,color:"var(--text-muted)",display:"flex",alignItems:"center",gap:4}}><Icon path={ICONS.clock} size={12} color="var(--text-muted)"/>{s.duration} min</div>
+                  </div>
+                  <div style={{textAlign:"right",marginRight:8}}>
+                    <div style={{fontWeight:800,fontSize:18,color:"#7c3aed",letterSpacing:"-0.5px"}}>RM {s.price}</div>
+                    <div style={{fontSize:11,color:"var(--text-muted)",marginTop:1}}>per session</div>
+                  </div>
+                  <button style={gBtn({fontSize:12,padding:"7px 14px"})}>Edit</button>
                 </div>
               ))}
             </div>
@@ -1490,10 +1517,14 @@ export default function BeaubookDashboard(){
 
           {/* ═══ ANALYTICS ═══ */}
           {tab==="analytics"&&<div>
-            <h1 style={{margin:"0 0 16px",fontSize:24,fontWeight:700,color:"var(--text)"}}>{t("nav.analytics")}</h1>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:14}}>
-              {[{l:"This Month Revenue",v:"RM 1,840",c:"+18%"},{l:"Total Bookings",v:"38",c:"+12%"},{l:"Avg per Booking",v:"RM 120",c:"+5%"}].map(s=>(
-                <div key={s.l} style={card({padding:"16px 18px"})}><div style={{fontSize:12,color:"var(--text-muted)",marginBottom:5}}>{s.l}</div><div style={{fontSize:24,fontWeight:700,color:"var(--text)"}}>{s.v}</div><div style={{fontSize:12,color:"#16a34a",fontWeight:600,marginTop:3}}>{s.c} vs last month</div></div>
+            <h1 style={{margin:"0 0 18px",fontSize:26,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px"}}>{t("nav.analytics")}</h1>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14,marginBottom:16}}>
+              {[{l:"This Month Revenue",v:"RM 1,840",c:"+18%",acc:"#7c3aed"},{l:"Total Bookings",v:"38",c:"+12%",acc:"#0891b2"},{l:"Avg per Booking",v:"RM 120",c:"+5%",acc:"#16a34a"}].map(s=>(
+                <div key={s.l} style={statCard(s.acc,{padding:"20px 22px"})}>
+                  <div style={{fontSize:11,color:"var(--text-muted)",marginBottom:10,textTransform:"uppercase",letterSpacing:"0.05em",fontWeight:600}}>{s.l}</div>
+                  <div style={{fontSize:28,fontWeight:800,color:"var(--text)",letterSpacing:"-1px",lineHeight:1,marginBottom:6}}>{s.v}</div>
+                  <div style={{fontSize:12,color:"#16a34a",fontWeight:700,display:"flex",alignItems:"center",gap:4}}><span>↑</span> {s.c} vs last month</div>
+                </div>
               ))}
             </div>
             <div style={card({padding:18,marginBottom:14})}>
@@ -1519,12 +1550,12 @@ export default function BeaubookDashboard(){
 
           {/* ═══ SETTINGS ═══ */}
           {tab==="settings"&&<div>
-            <h1 style={{margin:"0 0 16px",fontSize:24,fontWeight:700,color:"var(--text)"}}>{t("nav.settings")}</h1>
-            <div style={{display:"flex",flexDirection:"column",gap:14,maxWidth:520}}>
+            <h1 style={{margin:"0 0 20px",fontSize:26,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px"}}>{t("nav.settings")}</h1>
+            <div style={{display:"flex",flexDirection:"column",gap:16,maxWidth:560}}>
 
               {/* Company Profile */}
-              <div style={card({padding:18})}>
-                <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>{t("settings.companyProfile")}</div>
+              <div style={card({padding:22})}>
+                <div style={{fontWeight:700,fontSize:15,color:"var(--text)",marginBottom:16,paddingBottom:12,borderBottom:"1px solid var(--border)"}}>{t("settings.companyProfile")}</div>
                 <div style={{display:"flex",flexDirection:"column",gap:10}}>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
                     <div><label style={lbl}>{t("settings.companyName")}</label><input value={profileForm.companyName} onChange={e=>setProfileForm(p=>({...p,companyName:e.target.value}))} style={inp}/></div>
@@ -1548,8 +1579,8 @@ export default function BeaubookDashboard(){
               </div>
 
               {/* Appearance */}
-              <div style={card({padding:18})}>
-                <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>{t("settings.appearance")}</div>
+              <div style={card({padding:22})}>
+                <div style={{fontWeight:700,fontSize:15,color:"var(--text)",marginBottom:14,paddingBottom:12,borderBottom:"1px solid var(--border)"}}>{t("settings.appearance")}</div>
                 <div style={{display:"flex",gap:2,background:"var(--bg)",borderRadius:9,padding:3,width:"fit-content"}}>
                   {[["light",t("settings.light")],["dark",t("settings.dark")]].map(([k,l])=>(
                     <button key={k} onClick={()=>setTheme(k)} style={{padding:"7px 16px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:theme===k?"#6d28d9":"transparent",color:theme===k?"#fff":"#7e22ce"}}>{l}</button>
@@ -1558,8 +1589,8 @@ export default function BeaubookDashboard(){
               </div>
 
               {/* Language */}
-              <div style={card({padding:18})}>
-                <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>{t("settings.language")}</div>
+              <div style={card({padding:22})}>
+                <div style={{fontWeight:700,fontSize:15,color:"var(--text)",marginBottom:14,paddingBottom:12,borderBottom:"1px solid var(--border)"}}>{t("settings.language")}</div>
                 <div style={{display:"flex",gap:2,background:"var(--bg)",borderRadius:9,padding:3,width:"fit-content"}}>
                   {[["en","English"],["zh","中文"],["ms","Bahasa Melayu"]].map(([k,l])=>(
                     <button key={k} onClick={()=>setLanguage(k)} style={{padding:"7px 14px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:language===k?"#6d28d9":"transparent",color:language===k?"#fff":"#7e22ce"}}>{l}</button>
@@ -1568,8 +1599,8 @@ export default function BeaubookDashboard(){
               </div>
 
               {/* Notifications */}
-              <div style={card({padding:18})}>
-                <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>{t("settings.notifications")}</div>
+              <div style={card({padding:22})}>
+                <div style={{fontWeight:700,fontSize:15,color:"var(--text)",marginBottom:14,paddingBottom:12,borderBottom:"1px solid var(--border)"}}>{t("settings.notifications")}</div>
                 <label style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer",fontSize:13,color:"var(--text)",marginBottom:12}}>
                   <input type="checkbox" checked={settings.notifyOnPending} onChange={e=>handleSaveSettings({notifyOnPending:e.target.checked})} style={{width:16,height:16,cursor:"pointer"}}/>
                   {t("settings.notifyOnPending")}
@@ -1584,8 +1615,8 @@ export default function BeaubookDashboard(){
               </div>
 
               {/* Account & Email */}
-              <div style={card({padding:18})}>
-                <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>{t("settings.account")}</div>
+              <div style={card({padding:22})}>
+                <div style={{fontWeight:700,fontSize:15,color:"var(--text)",marginBottom:14,paddingBottom:12,borderBottom:"1px solid var(--border)"}}>{t("settings.account")}</div>
                 {settings.email?(
                   <div style={{display:"flex",flexDirection:"column",gap:8}}>
                     <div style={{display:"flex",alignItems:"center",gap:9,padding:"10px 12px",background:settings.emailVerified?"#f0fdf4":"#fffbeb",borderRadius:10,border:`1px solid ${settings.emailVerified?"#86efac":"#fcd34d"}`}}>
@@ -1616,8 +1647,8 @@ export default function BeaubookDashboard(){
               </div>
 
               {/* Update Password */}
-              <div style={card({padding:18})}>
-                <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>{t("settings.updatePassword")}</div>
+              <div style={card({padding:22})}>
+                <div style={{fontWeight:700,fontSize:15,color:"var(--text)",marginBottom:14,paddingBottom:12,borderBottom:"1px solid var(--border)"}}>{t("settings.updatePassword")}</div>
                 <div style={{display:"flex",flexDirection:"column",gap:10}}>
                   <div><label style={lbl}>{t("settings.currentPassword")}</label><input type="password" value={pwForm.current} onChange={e=>setPwForm(p=>({...p,current:e.target.value}))} style={inp}/></div>
                   <div><label style={lbl}>{t("settings.newPassword")}</label><input type="password" value={pwForm.next} onChange={e=>setPwForm(p=>({...p,next:e.target.value}))} style={inp}/></div>
@@ -1634,8 +1665,8 @@ export default function BeaubookDashboard(){
               </div>
 
               {/* Export Report */}
-              <div style={card({padding:18})}>
-                <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>{t("settings.exportReport")}</div>
+              <div style={card({padding:22})}>
+                <div style={{fontWeight:700,fontSize:15,color:"var(--text)",marginBottom:14,paddingBottom:12,borderBottom:"1px solid var(--border)"}}>{t("settings.exportReport")}</div>
                 <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
                   <button onClick={()=>exportReport("weekly")} style={gBtn({fontSize:12,padding:"8px 14px"})}>{t("settings.exportWeekly")}</button>
                   <button onClick={()=>exportReport("monthly")} style={gBtn({fontSize:12,padding:"8px 14px"})}>{t("settings.exportMonthly")}</button>
@@ -1644,8 +1675,8 @@ export default function BeaubookDashboard(){
               </div>
 
               {/* Sign Out */}
-              <div style={card({padding:18})}>
-                <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:4}}>Sign Out</div>
+              <div style={card({padding:22})}>
+                <div style={{fontWeight:700,fontSize:15,color:"var(--text)",marginBottom:4,paddingBottom:12,borderBottom:"1px solid var(--border)"}}>Sign Out</div>
                 <div style={{fontSize:12,color:"var(--text-muted)",marginBottom:12}}>You will be returned to the login screen.</div>
                 <button onClick={()=>{sessionStorage.removeItem("beaubook_authed");setAuthed(false);}} style={{display:"flex",alignItems:"center",gap:8,padding:"10px 18px",borderRadius:10,border:"1px solid #fca5a5",background:"#fef2f2",color:"#991b1b",fontWeight:700,fontSize:13,cursor:"pointer"}}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
