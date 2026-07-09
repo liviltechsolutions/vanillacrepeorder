@@ -94,14 +94,14 @@ module.exports = (prisma) => {
   router.post("/login", async (req, res) => {
     const { password, email } = req.body;
     const s = await prisma.settings.findUnique({ where: { id: 1 } });
-    // If email login attempted, verify email matches
-    if (email && s.email && s.emailVerified) {
+    // If a verified email is registered, the submitted email must match
+    if (s.email && s.emailVerified && email) {
       if (email.toLowerCase() !== s.email.toLowerCase()) {
-        return res.status(401).json({ ok: false, error: "Email not recognised" });
+        return res.status(401).json({ ok: false, error: "fail" });
       }
     }
     const ok = verifyPassword(password || "", s.passwordHash, s.passwordSalt);
-    if (!ok) return res.status(401).json({ ok: false });
+    if (!ok) return res.status(401).json({ ok: false, error: "fail" });
     res.json({ ok: true });
   });
 

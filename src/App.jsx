@@ -683,41 +683,45 @@ function NotifPanel({show,onClose,bookings,services,onSelectBooking}){
 
 // ─── LOGIN SCREEN ─────────────────────────────────────────────────────────────
 function LoginScreen({onSuccess}){
-  const [hasEmail,setHasEmail]=useState(null); // null=loading
   const [email,setEmail]=useState("");
   const [password,setPassword]=useState("");
+  const [showPw,setShowPw]=useState(false);
   const [error,setError]=useState("");
   const [loading,setLoading]=useState(false);
 
-  useEffect(()=>{
-    fetch("/api/settings/login-mode").then(r=>r.json()).then(d=>setHasEmail(d.hasEmail)).catch(()=>setHasEmail(false));
-  },[]);
-
   const submit=()=>{
+    if(!email.trim()){setError("Please enter your email.");return;}
     setLoading(true);setError("");
-    const body=hasEmail?{email,password}:{password};
-    fetch("/api/settings/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+    fetch("/api/settings/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password})})
       .then(r=>{if(!r.ok)return r.json().then(d=>{throw new Error(d.error||"fail");});return r.json();})
       .then(()=>{sessionStorage.setItem("beaubook_authed","1");onSuccess();})
-      .catch(e=>setError(e.message==="fail"?"Incorrect credentials. Please try again.":e.message||"Incorrect password."))
+      .catch(e=>setError(e.message==="fail"?"Incorrect email or password.":e.message||"Login failed."))
       .finally(()=>setLoading(false));
   };
 
-  if(hasEmail===null) return <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"var(--bg)"}}><div style={{color:"var(--text-muted)",fontSize:13}}>Loading…</div></div>;
-
   return(
-    <div style={{minHeight:"100vh",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
-      <div style={{background:"var(--surface)",borderRadius:16,padding:28,width:380,maxWidth:"100%",boxShadow:"0 24px 64px rgba(0,0,0,0.25)",border:"1px solid var(--border)"}}>
-        <div style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:18}}>
-          <div style={{width:48,height:48,borderRadius:13,background:"#6d28d9",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:10}}><span style={{color:"#fff",fontWeight:700,fontSize:22}}>B</span></div>
-          <div style={{fontWeight:700,fontSize:18,color:"var(--text)"}}>Beaubook</div>
-          <div style={{fontSize:12,color:"var(--text-muted)"}}>Merchant Dashboard</div>
+    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#f5f3ff,#ede9fe)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+      <div style={{background:"#fff",borderRadius:20,padding:32,width:390,maxWidth:"100%",boxShadow:"0 24px 64px rgba(109,40,217,0.15)",border:"1px solid #ede9fe"}}>
+        <div style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:24}}>
+          <div style={{width:56,height:56,borderRadius:16,background:"linear-gradient(135deg,#6d28d9,#9333ea)",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:12,boxShadow:"0 8px 20px rgba(109,40,217,0.35)"}}><span style={{color:"#fff",fontWeight:700,fontSize:26}}>B</span></div>
+          <div style={{fontWeight:700,fontSize:20,color:"#1e1b4b",letterSpacing:-0.3}}>Beaubook</div>
+          <div style={{fontSize:12,color:"#7c6fb0",marginTop:2}}>Merchant Dashboard</div>
         </div>
-        {hasEmail&&<div style={{marginBottom:10}}><label style={lbl}>Email</label><input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()} placeholder="your@email.com" style={inp} autoFocus/></div>}
-        <label style={lbl}>Password</label>
-        <input type="password" value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()} placeholder="Enter password" style={inp} autoFocus={!hasEmail}/>
-        {error&&<div style={{marginTop:8,fontSize:12,color:"#991b1b"}}>{error}</div>}
-        <button onClick={submit} disabled={loading} style={pBtn({width:"100%",marginTop:14,padding:"11px 0",opacity:loading?0.7:1})}>{loading?"Logging in…":"Log In"}</button>
+        <div style={{marginBottom:14}}>
+          <label style={{...lbl,color:"#4c1d95"}}>Email</label>
+          <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()} placeholder="your@email.com" style={{...inp,borderColor:"#ddd6fe"}} autoFocus/>
+        </div>
+        <div style={{marginBottom:4}}>
+          <label style={{...lbl,color:"#4c1d95"}}>Password</label>
+          <div style={{position:"relative"}}>
+            <input type={showPw?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()} placeholder="Enter password" style={{...inp,borderColor:"#ddd6fe",paddingRight:44}}/>
+            <button onClick={()=>setShowPw(p=>!p)} tabIndex={-1} style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"#7c6fb0",fontSize:18,lineHeight:1,padding:0}}>
+              {showPw?"🙈":"👁️"}
+            </button>
+          </div>
+        </div>
+        {error&&<div style={{marginTop:8,fontSize:12,color:"#991b1b",background:"#fef2f2",padding:"6px 10px",borderRadius:7,border:"1px solid #fca5a5"}}>{error}</div>}
+        <button onClick={submit} disabled={loading} style={pBtn({width:"100%",marginTop:16,padding:"12px 0",fontSize:15,opacity:loading?0.7:1,background:"linear-gradient(135deg,#6d28d9,#9333ea)",boxShadow:"0 4px 14px rgba(109,40,217,0.35)"})}>{loading?"Logging in…":"Log In"}</button>
       </div>
     </div>
   );
