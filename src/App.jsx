@@ -1201,10 +1201,10 @@ export default function BeaubookDashboard(){
                                 return(
                                   <div key={b.id} onClick={e=>{e.stopPropagation();setSelBooking(b);}} style={{background:sc.bg,border:`1px solid ${sc.br}`,borderBottom:isLast?`1px solid ${sc.br}`:"none",borderRadius:isLast?7:"7px 7px 0 0",padding:"4px 7px",marginBottom:isLast?2:-3,cursor:"pointer",position:"relative",zIndex:1}}>
                                     <div style={{fontSize:13,fontWeight:700,color:sc.tx,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{b.customer}</div>
-                                    <div style={{display:"flex",gap:4,alignItems:"center",flexWrap:"wrap"}}>
-                                      <span style={{fontSize:11,color:"var(--text-muted)",overflow:"hidden",textOverflow:"ellipsis",maxWidth:80}}>{svc(b.service)?.name}</span>
-                                      {b.seat&&<span style={{fontSize:10,background:"#f3e8ff",color:"#7e22ce",padding:"0 4px",borderRadius:4,flexShrink:0}}>{b.seat.replace("Seat ","").replace("Room ","R")}</span>}
-                                      <span style={{fontSize:10,padding:"0 4px",borderRadius:4,background:pc2.bg,color:pc2.tx,border:`1px solid ${pc2.br}`,fontWeight:600,flexShrink:0}}>{b.payStatus}</span>
+                                    <div style={{fontSize:11,color:sc.tx,opacity:.75,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{svc(b.service)?.name}</div>
+                                    <div style={{display:"flex",gap:3,alignItems:"center",flexWrap:"wrap",marginTop:2}}>
+                                      {b.seat&&<span style={{fontSize:9,background:"#6d28d9",color:"#fff",padding:"1px 5px",borderRadius:4,flexShrink:0,fontWeight:700}}>{b.seat.replace("Seat ","").replace("Room ","R")}</span>}
+                                      <span style={{fontSize:9,padding:"1px 5px",borderRadius:4,background:pc2.tx,color:"#fff",fontWeight:700,flexShrink:0,textTransform:"uppercase"}}>{b.payStatus}</span>
                                     </div>
                                   </div>
                                 );
