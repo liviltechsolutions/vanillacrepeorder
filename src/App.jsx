@@ -324,12 +324,13 @@ function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leave
 }
 
 // ─── DETAIL / EDIT MODAL ─────────────────────────────────────────────────────
-function DetailModal({booking,onClose,onAccept,onCancel,onSave,onReschedule,leaveRecords,staffList,services,autoEdit,seats,products}){
+function DetailModal({booking,onClose,onAccept,onCancel,onSave,onReschedule,onQuickPay,leaveRecords,staffList,services,autoEdit,seats,products}){
   const [edit,setEdit]=useState(false);
   const [draft,setDraft]=useState(null);
   const [reschedMode,setReschedMode]=useState(false);
   const [reschedDraft,setReschedDraft]=useState({date:"",time:""});
   const [draftProdSearch,setDraftProdSearch]=useState("");
+  const [partialAmt,setPartialAmt]=useState("");
   if(!booking) return null;
   const b=booking;
   const sc=BC[b.status]||BC.confirmed;
@@ -410,6 +411,32 @@ function DetailModal({booking,onClose,onAccept,onCancel,onSave,onReschedule,leav
             {b.remark&&<div style={{marginTop:10,padding:"9px 11px",background:"#f3e8ff",borderRadius:9,fontSize:13,color:"#7e22ce"}}>💬 <strong>Remark:</strong> {b.remark}</div>}
             {b.note&&<div style={{marginTop:6,padding:"8px 11px",background:"#fffbeb",borderRadius:9,fontSize:13,color:"#92400e"}}>📝 {b.note}</div>}
             {b.status==="unassigned"&&<div style={{marginTop:9,padding:"9px 12px",background:"#fdf4ff",border:"1px solid #e9d5ff",borderRadius:9,fontSize:13,color:"#7e22ce",fontWeight:600}}>⚠️ Staff on leave — please reassign</div>}
+            {/* Quick payment */}
+            {b.status!=="cancelled"&&<div style={{marginTop:12,padding:"12px 14px",background:"var(--bg)",borderRadius:12,border:"1px solid var(--border)"}}>
+              <div style={{fontSize:11,fontWeight:700,color:"var(--text-muted)",marginBottom:8,textTransform:"uppercase",letterSpacing:"0.04em"}}>Payment Status</div>
+              <div style={{display:"flex",gap:6,marginBottom:8}}>
+                {[["paid","✅ PAID","#15803d","#f0fdf4","#86efac"],["partial","⚠️ PARTIAL","#92400e","#fffbeb","#fcd34d"],["unpaid","❌ UNPAID","#991b1b","#fef2f2","#fca5a5"]].map(([ps,label,tx,bg,br])=>{
+                  const sel=b.payStatus===ps;
+                  return<button key={ps} onClick={()=>{
+                    if(sel)return;
+                    if(ps==="paid"){onQuickPay(b.id,"paid",price+bProdTotal);}
+                    else if(ps==="unpaid"){onQuickPay(b.id,"unpaid",0);}
+                    else{setPartialAmt(String(b.amtPaid||""));}
+                  }} style={{flex:1,padding:"9px 4px",borderRadius:8,border:sel?`2px solid ${br}`:`1px solid ${br}`,background:sel?bg:"var(--surface)",color:sel?tx:"var(--text-muted)",fontWeight:sel?700:500,fontSize:11,cursor:sel?"default":"pointer"}}>{label}</button>;
+                })}
+              </div>
+              {/* Partial amount input — show when selecting partial OR already partial */}
+              {(b.payStatus==="partial"||partialAmt!=="")&&<div style={{display:"flex",flexDirection:"column",gap:6}}>
+                {balance>0&&<div style={{padding:"6px 10px",background:"#fffbeb",border:"1px solid #fcd34d",borderRadius:7,fontSize:12,color:"#92400e",fontWeight:600}}>Outstanding: RM {balance}</div>}
+                <div style={{display:"flex",gap:7,alignItems:"center"}}>
+                  <div style={{position:"relative",flex:1}}>
+                    <span style={{position:"absolute",left:11,top:"50%",transform:"translateY(-50%)",fontSize:13,color:"var(--text-muted)",fontWeight:600,pointerEvents:"none"}}>RM</span>
+                    <input type="number" min={0} value={partialAmt} onChange={e=>setPartialAmt(e.target.value)} onWheel={e=>e.target.blur()} placeholder={String(b.amtPaid||0)} style={{...inp,paddingLeft:36,fontSize:13}}/>
+                  </div>
+                  <button onClick={()=>{if(partialAmt==="")return;onQuickPay(b.id,"partial",Number(partialAmt));setPartialAmt("");}} style={pBtn({padding:"9px 14px",fontSize:12})}>Save</button>
+                </div>
+              </div>}
+            </div>}
             {/* Call / WhatsApp */}
             <div style={{display:"flex",gap:8,marginTop:12}}>
               <a href={`tel:${b.phone}`} style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:6,padding:"9px 0",borderRadius:9,background:"#f0fdf4",border:"1px solid #86efac",color:"#15803d",textDecoration:"none",fontSize:13,fontWeight:600}}>📞 Call</a>
@@ -2075,7 +2102,7 @@ export default function BeaubookDashboard(){
       {/* ─── MODALS ─── */}
       <AddModal show={showAdd} onClose={()=>setShowAdd(false)} onAdd={handleAddBooking} initialDate={addDate} initialTime={addTime} initialStaff={addInitStaff} leaveRecords={leaveRecords} staffList={staffList} services={services} products={products} seats={seats}/>
       <QuickSaleModal show={showQuickSale} onClose={()=>setShowQuickSale(false)} onSave={handleQuickSale} products={products}/>
-      <DetailModal booking={selBooking} onClose={()=>{setSelBooking(null);setNotifTriggered(false);}} onAccept={handleAccept} onCancel={handleCancel} onSave={handleSaveEdit} onReschedule={handleReschedule} leaveRecords={leaveRecords} staffList={staffList} services={services} autoEdit={notifTriggered} seats={seats} products={products}/>
+      <DetailModal booking={selBooking} onClose={()=>{setSelBooking(null);setNotifTriggered(false);}} onAccept={handleAccept} onCancel={handleCancel} onSave={handleSaveEdit} onReschedule={handleReschedule} onQuickPay={(id,ps,amt)=>patchBooking(id,{payStatus:ps,amtPaid:amt}).then(updated=>{setBookings(p=>p.map(b=>b.id===id?updated:b));setSelBooking(updated);showToast("Payment updated!");})} leaveRecords={leaveRecords} staffList={staffList} services={services} autoEdit={notifTriggered} seats={seats} products={products}/>
       {(addService||editService)&&<ServiceModal service={editService} onClose={()=>{setAddService(false);setEditService(null);}} onSave={editService?handleEditServiceSave:handleAddService}/>}
       <LeaveModal staffMember={leaveStaff} bookings={bookings} staffList={staffList} services={services} onClose={()=>setLeaveStaff(null)} onConfirm={handleLeave}/>
       <ScheduleModal staffMember={schedStaff} schedule={schedStaff?schedules[schedStaff.id]:null} onClose={()=>setSchedStaff(null)} onSave={handleSaveSched}/>
