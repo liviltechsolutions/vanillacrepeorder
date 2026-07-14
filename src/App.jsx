@@ -1077,7 +1077,7 @@ export default function BeaubookDashboard(){
           ))}
         </aside>}
 
-        <main style={{flex:1,padding:20,overflowY:"auto"}}>
+        <main style={{flex:1,padding:"12px 16px",overflowY:"auto"}}>
           {/* Status toast */}
           {toast&&<div style={{position:"fixed",top:68,right:16,zIndex:9999,padding:"8px 14px",borderRadius:9,background:toast.type==="success"?"#f0fdf4":"#fef2f2",border:`1px solid ${toast.type==="success"?"#86efac":"#fca5a5"}`,color:toast.type==="success"?"#15803d":"#991b1b",fontWeight:600,fontSize:11,boxShadow:"0 4px 20px rgba(0,0,0,0.1)",display:"flex",alignItems:"center",gap:6}}>
             {toast.type==="success"?"✓":"✕"} {toast.msg}
@@ -1098,26 +1098,22 @@ export default function BeaubookDashboard(){
 
           {/* ═══ CALENDAR ═══ */}
           {tab==="calendar"&&<div>
-            <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:10,flexWrap:"wrap",gap:8}}>
-              <div>
-                <h1 style={{margin:0,fontSize:22,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px"}}>{t("nav.calendar")}</h1>
-                <p style={{margin:"3px 0 0",fontSize:13,color:"var(--text-muted)"}}>{new Date(selectedDate+"T00:00:00").toLocaleDateString("en-MY",{weekday:"long",day:"numeric",month:"long",year:"numeric"})} · {staffList.length} stylists on shift{selHoliday&&<span style={{color:"#dc2626",fontWeight:600}}> · Public Holiday: {selHoliday}</span>}{selClosed&&<span style={{color:"#dc2626",fontWeight:600}}> · Closed{selClosed.reason?`: ${selClosed.reason}`:""}</span>}</p>
-              </div>
-              <div style={{display:"flex",gap:8}}>
-                <button onClick={()=>setShowCloseDay(true)} style={gBtn({display:"flex",alignItems:"center",gap:6})}><Icon path={ICONS.lock} size={15}/>Mark Closed</button>
-                <button onClick={()=>{setAddDate(selectedDate);setAddTime("09:00");setShowAdd(true);}} style={pBtn({display:"flex",alignItems:"center",gap:6})}><Icon path={ICONS.plus} size={16}/>Add booking</button>
-              </div>
-            </div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:10}}>
-              {[{l:"Today",v:todayStats.total,ic:ICONS.calendar,c:"#7c3aed"},{l:"Confirmed",v:todayStats.confirmed,ic:ICONS.check,c:"#16a34a"},{l:"Pending",v:todayStats.pending,ic:ICONS.clock,c:"#d97706"}].map(s=>(
-                <div key={s.l} style={statCard(s.c,{padding:"12px 16px"})}>
-                  <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:6}}>
-                    <div style={{width:24,height:24,borderRadius:7,background:`${s.c}18`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon path={s.ic} size={13} color={s.c}/></div>
-                    <div style={{fontSize:11,fontWeight:600,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:"0.04em"}}>{s.l}</div>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8,flexWrap:"wrap",gap:8}}>
+              <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+                <h1 style={{margin:0,fontSize:18,fontWeight:800,color:"var(--text)",letterSpacing:"-0.3px"}}>{t("nav.calendar")}</h1>
+                <span style={{fontSize:12,color:"var(--text-muted)"}}>{new Date(selectedDate+"T00:00:00").toLocaleDateString("en-MY",{weekday:"short",day:"numeric",month:"short",year:"numeric"})}{selHoliday&&<span style={{color:"#dc2626",fontWeight:600}}> · {selHoliday}</span>}{selClosed&&<span style={{color:"#dc2626",fontWeight:600}}> · Closed</span>}</span>
+                {/* Compact stat chips */}
+                {[{l:"Today",v:todayStats.total,c:"#7c3aed"},{l:"Confirmed",v:todayStats.confirmed,c:"#16a34a"},{l:"Pending",v:todayStats.pending,c:"#d97706"}].map(s=>(
+                  <div key={s.l} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 12px",background:"var(--surface)",border:"1px solid var(--border)",borderLeft:`3px solid ${s.c}`,borderRadius:8,boxShadow:"var(--shadow-sm)"}}>
+                    <span style={{fontSize:10,fontWeight:700,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:"0.05em"}}>{s.l}</span>
+                    <span style={{fontSize:18,fontWeight:800,color:s.c,letterSpacing:"-0.5px",lineHeight:1}}>{s.v}</span>
                   </div>
-                  <div style={{fontSize:28,fontWeight:800,color:"var(--text)",lineHeight:1,letterSpacing:"-1px"}}>{s.v}</div>
-                </div>
-              ))}
+                ))}
+              </div>
+              <div style={{display:"flex",gap:7}}>
+                <button onClick={()=>setShowCloseDay(true)} style={gBtn({display:"flex",alignItems:"center",gap:5,padding:"7px 12px",fontSize:12})}><Icon path={ICONS.lock} size={13}/>Mark Closed</button>
+                <button onClick={()=>{setAddDate(selectedDate);setAddTime("09:00");setShowAdd(true);}} style={pBtn({display:"flex",alignItems:"center",gap:5,padding:"7px 14px",fontSize:12})}><Icon path={ICONS.plus} size={14}/>Add booking</button>
+              </div>
             </div>
             {unassignedAll.length>0&&<div style={{background:"#fdf4ff",border:"1px solid #e9d5ff",borderRadius:12,padding:"10px 14px",marginBottom:12,display:"flex",alignItems:"center",gap:9}}>
               <Icon path={ICONS.alert} size={16} color="#9333ea"/><div style={{flex:1,fontWeight:600,color:"#7e22ce",fontSize:13}}>{unassignedAll.length} unassigned — staff on leave</div>
@@ -1216,7 +1212,7 @@ export default function BeaubookDashboard(){
                     const holiday=getHoliday(date);const closed=getClosed(date);
                     const isToday=date===TODAY;const isSel=date===selectedDate;
                     return(
-                      <div key={date} onClick={()=>{setSelectedDate(date);setCalView("week");const d=new Date(date);const dy=d.getDay();const base=new Date(d);base.setDate(d.getDate()-dy);setWeekBase(base.toISOString().split("T")[0]);}} style={{minHeight:72,borderRadius:8,border:closed?"2px solid #fca5a5":isSel?"2px solid #9333ea":isToday?"2px solid #c084fc":"1px solid var(--border)",background:closed?"#fef2f2":isSel?"#f3e8ff":isToday?"#fdf4ff":"var(--surface)",cursor:"pointer",padding:"5px 6px"}}>
+                      <div key={date} onClick={()=>{setSelectedDate(date);setCalView("week");const d=new Date(date);const dy=d.getDay();const base=new Date(d);base.setDate(d.getDate()-dy);setWeekBase(base.toISOString().split("T")[0]);}} style={{minHeight:58,borderRadius:8,border:closed?"2px solid #fca5a5":isSel?"2px solid #9333ea":isToday?"2px solid #c084fc":"1px solid var(--border)",background:closed?"#fef2f2":isSel?"#f3e8ff":isToday?"#fdf4ff":"var(--surface)",cursor:"pointer",padding:"4px 5px"}}>
                         <div style={{fontSize:14,fontWeight:isSel||isToday?700:500,color:isSel?"#7e22ce":isToday?"#9333ea":"var(--text)"}}>{parseInt(date.split("-")[2])}</div>
                         {holiday&&<div style={{fontSize:10,color:"#dc2626",fontWeight:600,marginTop:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{holiday}</div>}
                         {closed&&<div style={{marginTop:2,padding:"1px 6px",borderRadius:20,display:"inline-block",fontSize:10,fontWeight:700,background:"#ef4444",color:"#fff"}}>Closed</div>}
