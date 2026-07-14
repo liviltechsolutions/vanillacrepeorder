@@ -1098,9 +1098,9 @@ export default function BeaubookDashboard(){
 
           {/* ═══ CALENDAR ═══ */}
           {tab==="calendar"&&<div>
-            <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:16,flexWrap:"wrap",gap:10}}>
+            <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:10,flexWrap:"wrap",gap:8}}>
               <div>
-                <h1 style={{margin:0,fontSize:26,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px"}}>{t("nav.calendar")}</h1>
+                <h1 style={{margin:0,fontSize:22,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px"}}>{t("nav.calendar")}</h1>
                 <p style={{margin:"3px 0 0",fontSize:13,color:"var(--text-muted)"}}>{new Date(selectedDate+"T00:00:00").toLocaleDateString("en-MY",{weekday:"long",day:"numeric",month:"long",year:"numeric"})} · {staffList.length} stylists on shift{selHoliday&&<span style={{color:"#dc2626",fontWeight:600}}> · Public Holiday: {selHoliday}</span>}{selClosed&&<span style={{color:"#dc2626",fontWeight:600}}> · Closed{selClosed.reason?`: ${selClosed.reason}`:""}</span>}</p>
               </div>
               <div style={{display:"flex",gap:8}}>
@@ -1108,14 +1108,14 @@ export default function BeaubookDashboard(){
                 <button onClick={()=>{setAddDate(selectedDate);setAddTime("09:00");setShowAdd(true);}} style={pBtn({display:"flex",alignItems:"center",gap:6})}><Icon path={ICONS.plus} size={16}/>Add booking</button>
               </div>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:16}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:10}}>
               {[{l:"Today",v:todayStats.total,ic:ICONS.calendar,c:"#7c3aed"},{l:"Confirmed",v:todayStats.confirmed,ic:ICONS.check,c:"#16a34a"},{l:"Pending",v:todayStats.pending,ic:ICONS.clock,c:"#d97706"}].map(s=>(
-                <div key={s.l} style={statCard(s.c)}>
-                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-                    <div style={{width:30,height:30,borderRadius:8,background:`${s.c}18`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon path={s.ic} size={15} color={s.c}/></div>
-                    <div style={{fontSize:12,fontWeight:600,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:"0.04em"}}>{s.l}</div>
+                <div key={s.l} style={statCard(s.c,{padding:"12px 16px"})}>
+                  <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:6}}>
+                    <div style={{width:24,height:24,borderRadius:7,background:`${s.c}18`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon path={s.ic} size={13} color={s.c}/></div>
+                    <div style={{fontSize:11,fontWeight:600,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:"0.04em"}}>{s.l}</div>
                   </div>
-                  <div style={{fontSize:34,fontWeight:800,color:"var(--text)",lineHeight:1,letterSpacing:"-1px"}}>{s.v}</div>
+                  <div style={{fontSize:28,fontWeight:800,color:"var(--text)",lineHeight:1,letterSpacing:"-1px"}}>{s.v}</div>
                 </div>
               ))}
             </div>
@@ -1125,7 +1125,7 @@ export default function BeaubookDashboard(){
             </div>}
 
             <div style={card({marginBottom:12,overflow:"hidden"})}>
-              <div style={{display:"flex",alignItems:"center",padding:"10px 14px",borderBottom:"1px solid var(--border)",gap:8,flexWrap:"wrap"}}>
+              <div style={{display:"flex",alignItems:"center",padding:"8px 12px",borderBottom:"1px solid var(--border)",gap:8,flexWrap:"wrap"}}>
                 <div style={{display:"flex",gap:2,background:"#f3e8ff",borderRadius:9,padding:3}}>
                   {["week","month"].map(v=><button key={v} onClick={()=>setCalView(v)} style={{padding:"5px 13px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:calView===v?"#6d28d9":"transparent",color:calView===v?"#fff":"#7e22ce"}}>{v==="week"?"Week":"Month"}</button>)}
                 </div>
@@ -1150,7 +1150,7 @@ export default function BeaubookDashboard(){
               </div>
 
               {calView==="week"&&<>
-                <div style={{padding:"9px 14px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+                <div style={{padding:"6px 12px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
                   <span style={{...sectionLbl,marginRight:2}}>Staff</span>
                   {[{id:0,name:"All"},...staffList].map(s=>(
                     <button key={s.id} onClick={()=>setFilterStaff(s.id)} style={{padding:"4px 11px",borderRadius:20,border:filterStaff===s.id?"2px solid #9333ea":"1px solid var(--border)",background:filterStaff===s.id?"#f3e8ff":"#fff",cursor:"pointer",fontSize:12,fontWeight:filterStaff===s.id?700:500,color:filterStaff===s.id?"#7e22ce":"#64648a",display:"flex",alignItems:"center",gap:4}}>
@@ -1160,23 +1160,24 @@ export default function BeaubookDashboard(){
                 </div>
                 <div style={{overflowX:"auto"}}>
                   <div style={{minWidth:560}}>
-                    <div style={{display:"grid",gridTemplateColumns:`60px repeat(${filterStaff===0?staffList.length:1},1fr)`,borderBottom:"1px solid var(--border)"}}>
-                      <div style={{padding:"8px 8px",fontSize:12,color:"var(--text-muted)",fontWeight:600}}>TIME</div>
+                    <div style={{display:"grid",gridTemplateColumns:`60px repeat(${filterStaff===0?staffList.length:1},1fr)`,borderBottom:"1px solid var(--border)",position:"sticky",top:0,background:"var(--surface)",zIndex:10}}>
+                      <div style={{padding:"6px 8px",fontSize:11,color:"var(--text-muted)",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.05em"}}>Time</div>
                       {staffList.filter(s=>filterStaff===0||s.id===filterStaff).map(s=>(
-                        <div key={s.id} style={{padding:"8px 10px",fontSize:13,fontWeight:600,color:"var(--text-muted)",borderLeft:"1px solid var(--border)",display:"flex",alignItems:"center",gap:6}}>
-                          {s.photo?<img src={s.photo} alt="" style={{width:20,height:20,borderRadius:"50%",objectFit:"cover",flexShrink:0}}/>:<div style={{width:20,height:20,borderRadius:"50%",background:isOL(s.id,selectedDate)?"#d1d5db":s.color,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:9,fontWeight:700,flexShrink:0}}>{s.avatar}</div>}
+                        <div key={s.id} style={{padding:"6px 10px",fontSize:12,fontWeight:600,color:"var(--text-muted)",borderLeft:"1px solid var(--border)",display:"flex",alignItems:"center",gap:6}}>
+                          {s.photo?<img src={s.photo} alt="" style={{width:18,height:18,borderRadius:"50%",objectFit:"cover",flexShrink:0}}/>:<div style={{width:18,height:18,borderRadius:"50%",background:isOL(s.id,selectedDate)?"#d1d5db":s.color,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:8,fontWeight:700,flexShrink:0}}>{s.avatar}</div>}
                           {s.name}{isOL(s.id,selectedDate)&&<span style={{fontSize:9,color:"#991b1b",background:"#fef2f2",padding:"0 4px",borderRadius:4}}>Off</span>}
                         </div>
                       ))}
                     </div>
+                    <div style={{maxHeight:"calc(100vh - 400px)",overflowY:"auto"}}>
                     {HOURS.map(hour=>(
-                      <div key={hour} style={{display:"grid",gridTemplateColumns:`60px repeat(${filterStaff===0?staffList.length:1},1fr)`,borderBottom:`1px solid ${hour.endsWith(":00")?"var(--border)":"#f8f6ff"}`,minHeight:44}}>
-                        <div style={{padding:"4px 8px",fontSize:12,color:hour.endsWith(":00")?"#7e22ce":"#d0c8f0",fontWeight:hour.endsWith(":00")?600:400,paddingTop:6,borderRight:"1px solid #f0ebff"}}>{hour}</div>
+                      <div key={hour} style={{display:"grid",gridTemplateColumns:`60px repeat(${filterStaff===0?staffList.length:1},1fr)`,borderBottom:`1px solid ${hour.endsWith(":00")?"var(--border)":"var(--bg)"}`,minHeight:28}}>
+                        <div style={{padding:"3px 8px",fontSize:11,color:hour.endsWith(":00")?"#7c3aed":"#d0c8f0",fontWeight:hour.endsWith(":00")?700:400,borderRight:"1px solid var(--border)",lineHeight:"22px"}}>{hour}</div>
                         {staffList.filter(s=>filterStaff===0||s.id===filterStaff).map(s=>{
                           const covering=getSlotBks(selectedDate,hour,s.id);
                           const onLeave=isOL(s.id,selectedDate);
                           return(
-                            <div key={s.id} onClick={()=>{if(!onLeave){setAddDate(selectedDate);setAddTime(hour);setShowAdd(true);}}} style={{borderLeft:"1px solid #f5f3ff",padding:"4px 5px",minHeight:44,cursor:onLeave?"not-allowed":"pointer",background:onLeave?"repeating-linear-gradient(45deg,#fef2f2,#fef2f2 3px,#fff 3px,#fff 6px)":"transparent"}}>
+                            <div key={s.id} onClick={()=>{if(!onLeave){setAddDate(selectedDate);setAddTime(hour);setShowAdd(true);}}} style={{borderLeft:"1px solid var(--bg)",padding:"3px 5px",minHeight:28,cursor:onLeave?"not-allowed":"pointer",background:onLeave?"repeating-linear-gradient(45deg,#fef2f2,#fef2f2 3px,#fff 3px,#fff 6px)":"transparent"}}>
                               {covering.map(b=>{
                                 const sc=BC[b.status]||BC.confirmed;const pc2=PC[b.payStatus]||PC.unpaid;
                                 const isStart=b.time===hour;
@@ -1197,15 +1198,16 @@ export default function BeaubookDashboard(){
                         })}
                       </div>
                     ))}
+                    </div>
                   </div>
                 </div>
               </>}
 
-              {calView==="month"&&<div style={{padding:14}}>
-                <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:3,marginBottom:5}}>
+              {calView==="month"&&<div style={{padding:"10px 12px"}}>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:2,marginBottom:4}}>
                   {DAY_NAMES.map(d=><div key={d} style={{textAlign:"center",fontSize:12,fontWeight:600,color:"var(--text-muted)",padding:"4px 0"}}>{d}</div>)}
                 </div>
-                <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:4}}>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:3}}>
                   {monthDays.map((date,i)=>{
                     if(!date)return<div key={`e${i}`}/>;
                     const cnt=bookings.filter(b=>b.date===date&&b.status!=="cancelled").length;
@@ -1214,16 +1216,16 @@ export default function BeaubookDashboard(){
                     const holiday=getHoliday(date);const closed=getClosed(date);
                     const isToday=date===TODAY;const isSel=date===selectedDate;
                     return(
-                      <div key={date} onClick={()=>{setSelectedDate(date);setCalView("week");const d=new Date(date);const dy=d.getDay();const base=new Date(d);base.setDate(d.getDate()-dy);setWeekBase(base.toISOString().split("T")[0]);}} style={{minHeight:100,borderRadius:10,border:closed?"2px solid #fca5a5":isSel?"2px solid #9333ea":isToday?"2px solid #c084fc":"1px solid var(--border)",background:closed?"#fef2f2":isSel?"#f3e8ff":isToday?"#fdf4ff":"#fff",cursor:"pointer",padding:"6px 7px"}}>
-                        <div style={{fontSize:17,fontWeight:isSel||isToday?700:500,color:isSel?"#7e22ce":isToday?"#9333ea":"#1a1a2e"}}>{parseInt(date.split("-")[2])}</div>
+                      <div key={date} onClick={()=>{setSelectedDate(date);setCalView("week");const d=new Date(date);const dy=d.getDay();const base=new Date(d);base.setDate(d.getDate()-dy);setWeekBase(base.toISOString().split("T")[0]);}} style={{minHeight:72,borderRadius:8,border:closed?"2px solid #fca5a5":isSel?"2px solid #9333ea":isToday?"2px solid #c084fc":"1px solid var(--border)",background:closed?"#fef2f2":isSel?"#f3e8ff":isToday?"#fdf4ff":"var(--surface)",cursor:"pointer",padding:"5px 6px"}}>
+                        <div style={{fontSize:14,fontWeight:isSel||isToday?700:500,color:isSel?"#7e22ce":isToday?"#9333ea":"var(--text)"}}>{parseInt(date.split("-")[2])}</div>
                         {holiday&&<div style={{fontSize:10,color:"#dc2626",fontWeight:600,marginTop:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{holiday}</div>}
                         {closed&&<div style={{marginTop:2,padding:"1px 6px",borderRadius:20,display:"inline-block",fontSize:10,fontWeight:700,background:"#ef4444",color:"#fff"}}>Closed</div>}
-                        {cnt>0&&<div style={{marginTop:3}}>
-                          <div style={{fontSize:12,color:"#7e22ce",fontWeight:700}}>{cnt} appointment{cnt>1?"s":""}</div>
-                          {pendCnt>0&&<div style={{fontSize:11,color:"#d97706",fontWeight:600}}>{pendCnt} pending</div>}
-                          {unaCnt>0&&<div style={{fontSize:11,color:"#9333ea",fontWeight:600}}>{unaCnt} unassigned</div>}
+                        {cnt>0&&<div style={{marginTop:2}}>
+                          <div style={{fontSize:11,color:"#7c3aed",fontWeight:700}}>{cnt} appt{cnt>1?"s":""}</div>
+                          {pendCnt>0&&<div style={{fontSize:10,color:"#d97706",fontWeight:600}}>{pendCnt} pending</div>}
+                          {unaCnt>0&&<div style={{fontSize:10,color:"#9333ea",fontWeight:600}}>{unaCnt} unassigned</div>}
                         </div>}
-                        {cnt===0&&!holiday&&!closed&&<div style={{fontSize:11,color:"#d8b4fe",marginTop:3}}>Free</div>}
+                        {cnt===0&&!holiday&&!closed&&<div style={{fontSize:10,color:"#d8b4fe",marginTop:2}}>Free</div>}
                       </div>
                     );
                   })}
