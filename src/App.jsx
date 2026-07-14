@@ -8,7 +8,7 @@ const MONTHS_EN=["January","February","March","April","May","June","July","Augus
 const PAY_METHODS=["fpx","tng","grabpay","duitnow","card","cash","boost"];
 const PAY_ICONS={fpx:"🏦",tng:"💚",grabpay:"🟢",duitnow:"🔵",card:"💳",cash:"💵",boost:"⚡"};
 const PC={paid:{bg:"#f0fdf4",br:"#86efac",tx:"#15803d"},unpaid:{bg:"#fef2f2",br:"#fca5a5",tx:"#991b1b"},partial:{bg:"#fffbeb",br:"#fcd34d",tx:"#92400e"}};
-const BC={confirmed:{bg:"#f0fdf4",br:"#86efac",tx:"#15803d"},pending:{bg:"#fffbeb",br:"#fcd34d",tx:"#92400e"},cancelled:{bg:"#fef2f2",br:"#fca5a5",tx:"#991b1b"},unassigned:{bg:"#fdf4ff",br:"#e9d5ff",tx:"#7e22ce"}};
+const BC={confirmed:{bg:"#f0fdf4",br:"#86efac",tx:"#15803d"},pending:{bg:"#fffbeb",br:"#fcd34d",tx:"#92400e"},cancelled:{bg:"#fef2f2",br:"#fca5a5",tx:"#991b1b"},unassigned:{bg:"#fdf4ff",br:"#e9d5ff",tx:"#7e22ce"},sale:{bg:"#fff7ed",br:"#fbbf24",tx:"#92400e"}};
 const POSITIONS=["Junior Beautician","Senior Beautician","Lead Stylist","Nail Technician","Therapist","Manager","Freelancer"];
 const SKILL_OPTIONS=["Haircut","Colouring","Treatment","Manicure","Pedicure","Facial","Threading","Massage","Makeup","Lash Extension"];
 const SEATS=["Seat A1","Seat A2","Seat B1","Seat B2","Room 1","Room 2","Room 3","VIP Room"];
@@ -116,6 +116,108 @@ const ICONS={
   image:<><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></>,
 };
 
+// ─── SHARED PRODUCT PICKER ───────────────────────────────────────────────────
+function ProductPicker({products,selected,search,onSearch,onAdd,onQty}){
+  if(!products||products.length===0) return null;
+  const inp2={width:"100%",padding:"7px 11px",borderRadius:8,border:"1px solid var(--border)",background:"var(--input-bg)",color:"var(--text)",fontSize:12,outline:"none",boxSizing:"border-box"};
+  return(
+    <div style={{background:"var(--bg)",borderRadius:9,padding:"11px 13px"}}>
+      <div style={{fontSize:12,fontWeight:700,color:"#7e22ce",marginBottom:8}}>🛍️ Add Products (optional)</div>
+      <input value={search} onChange={e=>onSearch(e.target.value)} placeholder="Search product..." style={{...inp2,marginBottom:7}} onWheel={e=>e.target.blur()}/>
+      <div style={{maxHeight:130,overflowY:"auto",display:"flex",flexDirection:"column",gap:4,marginBottom:selected.length>0?8:0}}>
+        {products.filter(p=>p.name.toLowerCase().includes((search||"").toLowerCase())).map(p=>{
+          const inCart=selected.find(x=>x.productId===p.id);
+          const sellPrice=p.offerPrice||p.price;
+          return<div key={p.id} style={{display:"flex",alignItems:"center",gap:8,padding:"5px 8px",background:"var(--surface)",borderRadius:7,border:"1px solid var(--border)",fontSize:12}}>
+            {p.image&&<img src={p.image} alt="" style={{width:28,height:28,borderRadius:4,objectFit:"cover",flexShrink:0}}/>}
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.name}</div>
+              <div style={{fontSize:10,color:"var(--text-muted)"}}>RM{sellPrice}{p.inventory>0?` · Stock: ${p.inventory}`:" · Out of stock"}</div>
+            </div>
+            {inCart
+              ?<div style={{display:"flex",alignItems:"center",gap:4}}>
+                  <button onClick={()=>onQty(p.id,inCart.qty-1)} style={{width:22,height:22,borderRadius:5,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",color:"#7c3aed",fontWeight:700}}>−</button>
+                  <span style={{fontWeight:700,minWidth:16,textAlign:"center"}}>{inCart.qty}</span>
+                  <button onClick={()=>onQty(p.id,inCart.qty+1)} style={{width:22,height:22,borderRadius:5,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",color:"#7c3aed",fontWeight:700}}>+</button>
+                </div>
+              :<button disabled={p.inventory===0} onClick={()=>onAdd(p)} style={{padding:"3px 10px",borderRadius:6,border:"none",background:p.inventory===0?"#e5e7eb":"#7c3aed",color:"#fff",fontSize:11,fontWeight:600,cursor:p.inventory===0?"not-allowed":"pointer"}}>Add</button>
+            }
+          </div>;
+        })}
+      </div>
+      {selected.length>0&&<div style={{borderTop:"1px solid var(--border)",paddingTop:7}}>
+        <div style={{fontSize:11,fontWeight:700,color:"var(--text-muted)",marginBottom:4}}>SELECTED PRODUCTS</div>
+        {selected.map(p=><div key={p.productId} style={{display:"flex",justifyContent:"space-between",fontSize:12,padding:"2px 0"}}><span>{p.name} × {p.qty}</span><span style={{fontWeight:600,color:"#7c3aed"}}>RM{p.unitPrice*p.qty}</span></div>)}
+        <div style={{display:"flex",justifyContent:"space-between",fontSize:12,fontWeight:700,color:"#7c3aed",borderTop:"1px solid var(--border)",marginTop:5,paddingTop:5}}><span>Products Total</span><span>RM{selected.reduce((s,p)=>s+p.unitPrice*p.qty,0)}</span></div>
+      </div>}
+    </div>
+  );
+}
+
+// ─── QUICK SALE MODAL (walk-in product purchase) ─────────────────────────────
+function QuickSaleModal({show,onClose,onSave,products}){
+  const [f,setF]=useState({customer:"",phone:"",products:[],payStatus:"paid",payMethod:"cash",amtPaid:0,tip:0,txnId:""});
+  const [submitting,setSubmitting]=useState(false);
+  const [prodSearch,setProdSearch]=useState("");
+  useMemo(()=>{if(show){setF({customer:"",phone:"",products:[],payStatus:"paid",payMethod:"cash",amtPaid:0,tip:0,txnId:""});setSubmitting(false);setProdSearch("");};},[show]);
+  if(!show) return null;
+  const prodTotal=f.products.reduce((s,p)=>s+p.unitPrice*p.qty,0);
+  const inp={width:"100%",padding:"9px 13px",borderRadius:8,border:"1px solid var(--border)",background:"var(--input-bg)",color:"var(--text)",fontSize:13,outline:"none",boxSizing:"border-box"};
+  const lbl={fontSize:11,fontWeight:700,color:"var(--text-muted)",marginBottom:4,display:"block",textTransform:"uppercase",letterSpacing:"0.04em"};
+  const up=(k,v)=>setF(p=>({...p,[k]:v}));
+  const PC2={paid:{label:"PAID",bg:"#15803d",tx:"#fff"},unpaid:{label:"UNPAID",bg:"#991b1b",tx:"#fff"},partial:{label:"PARTIAL",bg:"#92400e",tx:"#fff"}};
+  const METHODS=["cash","card","online","ewallet","voucher","other"];
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.45)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+      <div style={{background:"var(--surface)",borderRadius:16,padding:"22px 20px",width:"100%",maxWidth:420,maxHeight:"92vh",overflowY:"auto",boxShadow:"0 20px 60px rgba(0,0,0,0.25)"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+          <div style={{fontWeight:800,fontSize:16,color:"var(--text)"}}>💰 Walk-in Sale</div>
+          <button onClick={onClose} style={{background:"none",border:"none",cursor:"pointer",fontSize:20,color:"var(--text-muted)",lineHeight:1}}>×</button>
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}>
+            <div><label style={lbl}>Customer Name <span style={{fontWeight:400,color:"var(--text-muted)"}}>(optional)</span></label><input value={f.customer} onChange={e=>up("customer",e.target.value)} placeholder="Walk-in" style={inp}/></div>
+            <div><label style={lbl}>Phone <span style={{fontWeight:400,color:"var(--text-muted)"}}>(optional)</span></label><input value={f.phone} onChange={e=>up("phone",e.target.value)} placeholder="012-..." style={inp}/></div>
+          </div>
+          <ProductPicker products={products} selected={f.products} search={prodSearch} onSearch={setProdSearch}
+            onAdd={p=>{const sp=p.offerPrice||p.price;setF(prev=>({...prev,products:[...prev.products,{productId:p.id,name:p.name,unitPrice:sp,qty:1}]}));}}
+            onQty={(pid,qty)=>setF(prev=>({...prev,products:qty>0?prev.products.map(x=>x.productId===pid?{...x,qty}:x):prev.products.filter(x=>x.productId!==pid)}))}
+          />
+          {f.products.length>0&&<>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}>
+              <div><label style={lbl}>Payment Status</label>
+                <select value={f.payStatus} onChange={e=>up("payStatus",e.target.value)} onWheel={e=>e.target.blur()} style={inp}>
+                  {Object.entries(PC2).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}
+                </select>
+              </div>
+              <div><label style={lbl}>Payment Method</label>
+                <select value={f.payMethod} onChange={e=>up("payMethod",e.target.value)} onWheel={e=>e.target.blur()} style={inp}>
+                  {METHODS.map(m=><option key={m} value={m}>{m.charAt(0).toUpperCase()+m.slice(1)}</option>)}
+                </select>
+              </div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}>
+              <div><label style={lbl}>Amount Paid (RM)</label>
+                <div style={{position:"relative"}}>
+                  <span style={{position:"absolute",left:13,top:"50%",transform:"translateY(-50%)",fontSize:14,color:"var(--text-muted)",fontWeight:600,pointerEvents:"none"}}>RM</span>
+                  <input type="number" min={0} value={f.amtPaid} onChange={e=>up("amtPaid",e.target.value===""?"":Number(e.target.value))} onWheel={e=>e.target.blur()} style={{...inp,paddingLeft:40}}/>
+                </div>
+              </div>
+              <div><label style={lbl}>Transaction No.</label><input value={f.txnId} onChange={e=>up("txnId",e.target.value)} placeholder="TXN..." style={inp}/></div>
+            </div>
+            {prodTotal>0&&<div style={{display:"flex",justifyContent:"space-between",padding:"7px 10px",background:"var(--surface)",borderRadius:7,border:"1px solid var(--border)",fontSize:12,marginBottom:2}}>
+              <span>Total: <strong>RM {prodTotal}</strong></span>
+              <span style={{color:(Number(f.amtPaid)||0)>=prodTotal?"#15803d":"#991b1b",fontWeight:600}}>Balance: RM {Math.max(0,prodTotal-(Number(f.amtPaid)||0))}</span>
+            </div>}
+            <button onClick={()=>{if(submitting)return;setSubmitting(true);onSave({...f,amtPaid:Number(f.amtPaid)||0,tip:0,customer:f.customer||"Walk-in",phone:f.phone||"-"});}} disabled={submitting} style={{padding:"11px 0",fontSize:13,width:"100%",borderRadius:10,border:"none",background:"linear-gradient(135deg,#7c3aed,#6d28d9)",color:"#fff",fontWeight:700,cursor:submitting?"not-allowed":"pointer",opacity:submitting?0.65:1}}>{submitting?"Saving...":"Record Sale"}</button>
+          </>}
+          {f.products.length===0&&<div style={{textAlign:"center",padding:"18px 0",color:"var(--text-muted)",fontSize:13}}>Add at least one product to record a sale.</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── ADD BOOKING MODAL ───────────────────────────────────────────────────────
 function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leaveRecords,staffList,services,products}){
   const [f,setF]=useState({customer:"",phone:"",service:1,staff:initialStaff||1,date:initialDate||TODAY,time:initialTime||"09:00",remark:"",payStatus:"unpaid",payMethod:"",amtPaid:0,tip:0,txnId:"",seat:"",products:[]});
@@ -156,6 +258,11 @@ function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leave
               {services.map(s=><option key={s.id} value={s.id}>{s.name} — RM{s.price} ({s.duration}min)</option>)}
             </select>
           </div>
+          {/* Products — right after service */}
+          <ProductPicker products={products} selected={f.products} search={prodSearch} onSearch={setProdSearch}
+            onAdd={p=>{const sellPrice=p.offerPrice||p.price;setF(prev=>({...prev,products:[...prev.products,{productId:p.id,name:p.name,unitPrice:sellPrice,qty:1}]}));}}
+            onQty={(pid,qty)=>setF(prev=>({...prev,products:qty>0?prev.products.map(x=>x.productId===pid?{...x,qty}:x):prev.products.filter(x=>x.productId!==pid)}))}
+          />
           {staffWarning&&<div style={{display:"flex",alignItems:"center",gap:7,padding:"8px 11px",background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:9,fontSize:12,color:"#991b1b",fontWeight:600}}><Icon path={ICONS.alert} size={15} color="#991b1b"/>{staffWarning}</div>}
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}>
             <div><label style={lbl}>Staff</label>
@@ -206,43 +313,9 @@ function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leave
                 <input type="number" min={0} value={f.tip} onChange={e=>up("tip",e.target.value===""?"":Number(e.target.value))} onWheel={e=>e.target.blur()} placeholder="0" style={{...inp,paddingLeft:40}}/>
               </div>
             </div>
-            {price>0&&<div style={{display:"flex",justifyContent:"space-between",padding:"6px 9px",background:"var(--surface)",borderRadius:6,border:"1px solid var(--border)",fontSize:11,marginBottom:7}}>
-              <span>Total: <strong>RM {price}</strong>{Number(f.tip)>0&&<span style={{color:"#7e22ce"}}> + RM{Number(f.tip)} tip</span>}</span>
-              <span style={{color:(Number(f.amtPaid)||0)>=price?"#15803d":"#991b1b",fontWeight:600}}>Balance: RM {Math.max(0,price-(Number(f.amtPaid)||0))}</span>
-            </div>}
+            {(price>0||f.products.length>0)&&(()=>{const prodTotal=f.products.reduce((s,p)=>s+p.unitPrice*p.qty,0);const grandTotal=price+prodTotal;return<div style={{display:"flex",justifyContent:"space-between",padding:"6px 9px",background:"var(--surface)",borderRadius:6,border:"1px solid var(--border)",fontSize:11,marginBottom:7}}><span>Total: <strong>RM {grandTotal}</strong>{Number(f.tip)>0&&<span style={{color:"#7e22ce"}}> + RM{Number(f.tip)} tip</span>}{prodTotal>0&&price>0&&<span style={{color:"#7e22ce",fontSize:10}}> (svc RM{price} + prod RM{prodTotal})</span>}</span><span style={{color:(Number(f.amtPaid)||0)>=grandTotal?"#15803d":"#991b1b",fontWeight:600}}>Balance: RM {Math.max(0,grandTotal-(Number(f.amtPaid)||0))}</span></div>;})()}
             <div><label style={lbl}>Transaction No.</label><input value={f.txnId} onChange={e=>up("txnId",e.target.value)} placeholder="TXN..." style={inp}/></div>
           </div>
-          {/* Products add-on */}
-          {products&&products.length>0&&<div style={{background:"var(--bg)",borderRadius:9,padding:"11px 13px"}}>
-            <div style={{fontSize:12,fontWeight:700,color:"#7e22ce",marginBottom:8}}>🛍️ Add Products (optional)</div>
-            <input value={prodSearch} onChange={e=>setProdSearch(e.target.value)} placeholder="Search product..." style={{...inp,marginBottom:7,fontSize:12,padding:"7px 11px"}}/>
-            <div style={{maxHeight:120,overflowY:"auto",display:"flex",flexDirection:"column",gap:4,marginBottom:f.products.length>0?8:0}}>
-              {(products||[]).filter(p=>p.name.toLowerCase().includes(prodSearch.toLowerCase())).map(p=>{
-                const inCart=f.products.find(x=>x.productId===p.id);
-                const sellPrice=p.offerPrice||p.price;
-                return<div key={p.id} style={{display:"flex",alignItems:"center",gap:8,padding:"5px 8px",background:"var(--surface)",borderRadius:7,border:"1px solid var(--border)",fontSize:12}}>
-                  {p.image&&<img src={p.image} alt="" style={{width:28,height:28,borderRadius:4,objectFit:"cover",flexShrink:0}}/>}
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.name}</div>
-                    <div style={{fontSize:10,color:"var(--text-muted)"}}>RM{sellPrice}{p.inventory>0?` · Stock: ${p.inventory}`:" · Out of stock"}</div>
-                  </div>
-                  {inCart
-                    ?<div style={{display:"flex",alignItems:"center",gap:4}}>
-                        <button onClick={()=>{const qty=inCart.qty-1;setF(prev=>({...prev,products:qty>0?prev.products.map(x=>x.productId===p.id?{...x,qty}:x):prev.products.filter(x=>x.productId!==p.id)}));}} style={{width:22,height:22,borderRadius:5,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",color:"#7c3aed",fontWeight:700}}>−</button>
-                        <span style={{fontWeight:700,minWidth:16,textAlign:"center"}}>{inCart.qty}</span>
-                        <button onClick={()=>{setF(prev=>({...prev,products:prev.products.map(x=>x.productId===p.id?{...x,qty:x.qty+1}:x)}));}} style={{width:22,height:22,borderRadius:5,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",color:"#7c3aed",fontWeight:700}}>+</button>
-                      </div>
-                    :<button disabled={p.inventory===0} onClick={()=>{setF(prev=>({...prev,products:[...prev.products,{productId:p.id,name:p.name,unitPrice:sellPrice,qty:1}]}));}} style={{padding:"3px 10px",borderRadius:6,border:"none",background:p.inventory===0?"#e5e7eb":"#7c3aed",color:"#fff",fontSize:11,fontWeight:600,cursor:p.inventory===0?"not-allowed":"pointer"}}>Add</button>
-                  }
-                </div>;
-              })}
-            </div>
-            {f.products.length>0&&<div style={{borderTop:"1px solid var(--border)",paddingTop:7}}>
-              <div style={{fontSize:11,fontWeight:700,color:"var(--text-muted)",marginBottom:4}}>SELECTED PRODUCTS</div>
-              {f.products.map(p=><div key={p.productId} style={{display:"flex",justifyContent:"space-between",fontSize:12,padding:"2px 0"}}><span>{p.name} × {p.qty}</span><span style={{fontWeight:600,color:"#7c3aed"}}>RM{p.unitPrice*p.qty}</span></div>)}
-              <div style={{display:"flex",justifyContent:"space-between",fontSize:12,fontWeight:700,color:"#7c3aed",borderTop:"1px solid var(--border)",marginTop:5,paddingTop:5}}><span>Products Total</span><span>RM{f.products.reduce((s,p)=>s+p.unitPrice*p.qty,0)}</span></div>
-            </div>}
-          </div>}
           <button onClick={()=>{if(!f.customer||!f.phone||submitting)return;setSubmitting(true);onAdd({...f,amtPaid:Number(f.amtPaid)||0,tip:Number(f.tip)||0});}} disabled={submitting} style={pBtn({padding:"11px 0",fontSize:13,width:"100%",marginTop:2,opacity:submitting?0.65:1})}>{submitting?"Adding...":"Add Booking"}</button>
         </div>
       </div>
@@ -848,6 +921,7 @@ export default function BeaubookDashboard(){
   const [filterStaff,setFilterStaff]=useState(0);
   const [selBooking,setSelBooking]=useState(null);
   const [showAdd,setShowAdd]=useState(false);
+  const [showQuickSale,setShowQuickSale]=useState(false);
   const [addDate,setAddDate]=useState(TODAY);
   const [addTime,setAddTime]=useState("09:00");
   const [addInitStaff,setAddInitStaff]=useState(0);
@@ -1024,6 +1098,12 @@ export default function BeaubookDashboard(){
     const dup=bookings.find(b=>b.status!=="cancelled"&&b.staff===Number(form.staff)&&b.date===form.date&&b.time===form.time);
     if(dup){showToast(`⚠️ ${dup.customer} already booked at ${form.time} with the same staff`);return;}
     fetch("/api/bookings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)}).then(r=>r.json()).then(created=>{setBookings(p=>[...p,created]);setShowAdd(false);showToast("Booking added!");});
+  }
+  function handleQuickSale(form){
+    const today=new Date().toISOString().split("T")[0];
+    const now=new Date().toTimeString().slice(0,5);
+    const payload={customer:form.customer,phone:form.phone,service:0,staff:0,date:today,time:now,status:"sale",note:"Walk-in sale",remark:"",payStatus:form.payStatus,payMethod:form.payMethod,amtPaid:form.amtPaid,tip:0,txnId:form.txnId||"",seat:"",products:form.products};
+    fetch("/api/bookings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r=>r.json()).then(created=>{setBookings(p=>[...p,created]);setShowQuickSale(false);showToast("Sale recorded!");});
   }
   function handleSaveProduct(form,isNew){
     const url=isNew?"/api/products":`/api/products/${form.id}`;
@@ -1235,6 +1315,7 @@ export default function BeaubookDashboard(){
               </div>
               <div style={{display:"flex",gap:7}}>
                 <button onClick={()=>setShowCloseDay(true)} style={gBtn({display:"flex",alignItems:"center",gap:5,padding:"7px 12px",fontSize:12})}><Icon path={ICONS.lock} size={13}/>Mark Closed</button>
+                <button onClick={()=>setShowQuickSale(true)} style={{...gBtn({display:"flex",alignItems:"center",gap:5,padding:"7px 13px",fontSize:12}),background:"#fff7ed",border:"1px solid #fbbf24",color:"#92400e"}}><Icon path={ICONS.box} size={13} color="#92400e"/>Sales</button>
                 <button onClick={()=>{setAddDate(selectedDate);setAddTime("09:00");setAddInitStaff(0);setShowAdd(true);}} style={pBtn({display:"flex",alignItems:"center",gap:5,padding:"7px 14px",fontSize:12})}><Icon path={ICONS.plus} size={14}/>Add booking</button>
               </div>
             </div>
@@ -1893,6 +1974,7 @@ export default function BeaubookDashboard(){
 
       {/* ─── MODALS ─── */}
       <AddModal show={showAdd} onClose={()=>setShowAdd(false)} onAdd={handleAddBooking} initialDate={addDate} initialTime={addTime} initialStaff={addInitStaff} leaveRecords={leaveRecords} staffList={staffList} services={services} products={products}/>
+      <QuickSaleModal show={showQuickSale} onClose={()=>setShowQuickSale(false)} onSave={handleQuickSale} products={products}/>
       <DetailModal booking={selBooking} onClose={()=>{setSelBooking(null);setNotifTriggered(false);}} onAccept={handleAccept} onCancel={handleCancel} onSave={handleSaveEdit} onReschedule={handleReschedule} leaveRecords={leaveRecords} staffList={staffList} services={services} autoEdit={notifTriggered}/>
       <LeaveModal staffMember={leaveStaff} bookings={bookings} staffList={staffList} services={services} onClose={()=>setLeaveStaff(null)} onConfirm={handleLeave}/>
       <ScheduleModal staffMember={schedStaff} schedule={schedStaff?schedules[schedStaff.id]:null} onClose={()=>setSchedStaff(null)} onSave={handleSaveSched}/>
