@@ -38,7 +38,7 @@ const getHoliday=date=>MY_HOLIDAYS[date];
 // ─── TRANSLATIONS ────────────────────────────────────────────────────────────
 const TRANSLATIONS={
   en:{
-    "nav.calendar":"Calendar","nav.bookings":"Bookings","nav.customers":"Customers","nav.staff":"Staff","nav.services":"Services","nav.analytics":"Analytics","nav.settings":"Settings",
+    "nav.calendar":"Calendar","nav.bookings":"Bookings","nav.customers":"Customers","nav.staff":"Staff","nav.services":"Services","nav.products":"Products","nav.analytics":"Analytics","nav.settings":"Settings",
     "settings.companyProfile":"Company Profile","settings.companyName":"Company Name","settings.location":"Location","settings.save":"Save",
     "settings.appearance":"Appearance","settings.light":"Light","settings.dark":"Dark",
     "settings.language":"Language",
@@ -48,7 +48,7 @@ const TRANSLATIONS={
     "settings.notifyTiming":"Notify me how early before appointment","settings.contactPhone":"Contact Phone","settings.address":"Address","settings.personInCharge":"Person In Charge","settings.socialMedia":"Social Media","settings.account":"Account & Email","settings.registerEmail":"Register Email","settings.emailPlaceholder":"your@email.com","settings.verifyPending":"Verification email sent — click the link to verify","settings.verified":"Email verified","settings.reschedule":"Reschedule",
   },
   zh:{
-    "nav.calendar":"日历","nav.bookings":"预约","nav.customers":"客户","nav.staff":"员工","nav.services":"服务项目","nav.analytics":"数据分析","nav.settings":"设置",
+    "nav.calendar":"日历","nav.bookings":"预约","nav.customers":"客户","nav.staff":"员工","nav.services":"服务项目","nav.products":"产品","nav.analytics":"数据分析","nav.settings":"设置",
     "settings.companyProfile":"公司资料","settings.companyName":"公司名称","settings.location":"地点","settings.save":"保存",
     "settings.appearance":"外观","settings.light":"浅色","settings.dark":"深色",
     "settings.language":"语言",
@@ -58,7 +58,7 @@ const TRANSLATIONS={
     "settings.notifyTiming":"提前多久通知我","settings.contactPhone":"联系电话","settings.address":"地址","settings.personInCharge":"负责人","settings.socialMedia":"社交媒体","settings.account":"账号与电邮","settings.registerEmail":"注册电邮","settings.emailPlaceholder":"your@email.com","settings.verifyPending":"验证邮件已发送，请点击链接验证","settings.verified":"电邮已验证","settings.reschedule":"重新安排",
   },
   ms:{
-    "nav.calendar":"Kalendar","nav.bookings":"Tempahan","nav.customers":"Pelanggan","nav.staff":"Kakitangan","nav.services":"Perkhidmatan","nav.analytics":"Analitik","nav.settings":"Tetapan",
+    "nav.calendar":"Kalendar","nav.bookings":"Tempahan","nav.customers":"Pelanggan","nav.staff":"Kakitangan","nav.services":"Perkhidmatan","nav.products":"Produk","nav.analytics":"Analitik","nav.settings":"Tetapan",
     "settings.companyProfile":"Profil Syarikat","settings.companyName":"Nama Syarikat","settings.location":"Lokasi","settings.save":"Simpan",
     "settings.appearance":"Penampilan","settings.light":"Terang","settings.dark":"Gelap",
     "settings.language":"Bahasa",
@@ -111,15 +111,19 @@ const ICONS={
   chevRight:<polyline points="9 18 15 12 9 6"/>,
   lock:<><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>,
   settings:<><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></>,
+  box:<><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></>,
+  trash:<><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></>,
+  image:<><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></>,
 };
 
 // ─── ADD BOOKING MODAL ───────────────────────────────────────────────────────
-function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leaveRecords,staffList,services}){
-  const [f,setF]=useState({customer:"",phone:"",service:1,staff:initialStaff||1,date:initialDate||TODAY,time:initialTime||"09:00",remark:"",payStatus:"unpaid",payMethod:"",amtPaid:0,tip:0,txnId:"",seat:""});
+function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leaveRecords,staffList,services,products}){
+  const [f,setF]=useState({customer:"",phone:"",service:1,staff:initialStaff||1,date:initialDate||TODAY,time:initialTime||"09:00",remark:"",payStatus:"unpaid",payMethod:"",amtPaid:0,tip:0,txnId:"",seat:"",products:[]});
   const [staffWarning,setStaffWarning]=useState(null);
   const [submitting,setSubmitting]=useState(false);
+  const [prodSearch,setProdSearch]=useState("");
   useMemo(()=>{
-    if(show){setF({customer:"",phone:"",service:services[0]?.id||1,staff:initialStaff||(staffList[0]?.id)||1,date:initialDate||TODAY,time:initialTime||"09:00",remark:"",payStatus:"unpaid",payMethod:"",amtPaid:0,tip:0,txnId:"",seat:""});setSubmitting(false);}
+    if(show){setF({customer:"",phone:"",service:services[0]?.id||1,staff:initialStaff||(staffList[0]?.id)||1,date:initialDate||TODAY,time:initialTime||"09:00",remark:"",payStatus:"unpaid",payMethod:"",amtPaid:0,tip:0,txnId:"",seat:"",products:[]});setSubmitting(false);setProdSearch("");}
   },[show,initialDate,initialTime,initialStaff]);
   useEffect(()=>{if(show)setStaffWarning(null);},[show]);
   const isOL=(sid)=>leaveRecords.some(r=>r.dates.includes(f.date)&&r.staffId===sid);
@@ -208,6 +212,37 @@ function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leave
             </div>}
             <div><label style={lbl}>Transaction No.</label><input value={f.txnId} onChange={e=>up("txnId",e.target.value)} placeholder="TXN..." style={inp}/></div>
           </div>
+          {/* Products add-on */}
+          {products&&products.length>0&&<div style={{background:"var(--bg)",borderRadius:9,padding:"11px 13px"}}>
+            <div style={{fontSize:12,fontWeight:700,color:"#7e22ce",marginBottom:8}}>🛍️ Add Products (optional)</div>
+            <input value={prodSearch} onChange={e=>setProdSearch(e.target.value)} placeholder="Search product..." style={{...inp,marginBottom:7,fontSize:12,padding:"7px 11px"}}/>
+            <div style={{maxHeight:120,overflowY:"auto",display:"flex",flexDirection:"column",gap:4,marginBottom:f.products.length>0?8:0}}>
+              {(products||[]).filter(p=>p.name.toLowerCase().includes(prodSearch.toLowerCase())).map(p=>{
+                const inCart=f.products.find(x=>x.productId===p.id);
+                const sellPrice=p.offerPrice||p.price;
+                return<div key={p.id} style={{display:"flex",alignItems:"center",gap:8,padding:"5px 8px",background:"var(--surface)",borderRadius:7,border:"1px solid var(--border)",fontSize:12}}>
+                  {p.image&&<img src={p.image} alt="" style={{width:28,height:28,borderRadius:4,objectFit:"cover",flexShrink:0}}/>}
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.name}</div>
+                    <div style={{fontSize:10,color:"var(--text-muted)"}}>RM{sellPrice}{p.inventory>0?` · Stock: ${p.inventory}`:" · Out of stock"}</div>
+                  </div>
+                  {inCart
+                    ?<div style={{display:"flex",alignItems:"center",gap:4}}>
+                        <button onClick={()=>{const qty=inCart.qty-1;setF(prev=>({...prev,products:qty>0?prev.products.map(x=>x.productId===p.id?{...x,qty}:x):prev.products.filter(x=>x.productId!==p.id)}));}} style={{width:22,height:22,borderRadius:5,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",color:"#7c3aed",fontWeight:700}}>−</button>
+                        <span style={{fontWeight:700,minWidth:16,textAlign:"center"}}>{inCart.qty}</span>
+                        <button onClick={()=>{setF(prev=>({...prev,products:prev.products.map(x=>x.productId===p.id?{...x,qty:x.qty+1}:x)}));}} style={{width:22,height:22,borderRadius:5,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",color:"#7c3aed",fontWeight:700}}>+</button>
+                      </div>
+                    :<button disabled={p.inventory===0} onClick={()=>{setF(prev=>({...prev,products:[...prev.products,{productId:p.id,name:p.name,unitPrice:sellPrice,qty:1}]}));}} style={{padding:"3px 10px",borderRadius:6,border:"none",background:p.inventory===0?"#e5e7eb":"#7c3aed",color:"#fff",fontSize:11,fontWeight:600,cursor:p.inventory===0?"not-allowed":"pointer"}}>Add</button>
+                  }
+                </div>;
+              })}
+            </div>
+            {f.products.length>0&&<div style={{borderTop:"1px solid var(--border)",paddingTop:7}}>
+              <div style={{fontSize:11,fontWeight:700,color:"var(--text-muted)",marginBottom:4}}>SELECTED PRODUCTS</div>
+              {f.products.map(p=><div key={p.productId} style={{display:"flex",justifyContent:"space-between",fontSize:12,padding:"2px 0"}}><span>{p.name} × {p.qty}</span><span style={{fontWeight:600,color:"#7c3aed"}}>RM{p.unitPrice*p.qty}</span></div>)}
+              <div style={{display:"flex",justifyContent:"space-between",fontSize:12,fontWeight:700,color:"#7c3aed",borderTop:"1px solid var(--border)",marginTop:5,paddingTop:5}}><span>Products Total</span><span>RM{f.products.reduce((s,p)=>s+p.unitPrice*p.qty,0)}</span></div>
+            </div>}
+          </div>}
           <button onClick={()=>{if(!f.customer||!f.phone||submitting)return;setSubmitting(true);onAdd({...f,amtPaid:Number(f.amtPaid)||0,tip:Number(f.tip)||0});}} disabled={submitting} style={pBtn({padding:"11px 0",fontSize:13,width:"100%",marginTop:2,opacity:submitting?0.65:1})}>{submitting?"Adding...":"Add Booking"}</button>
         </div>
       </div>
@@ -696,6 +731,59 @@ function NotifPanel({show,onClose,bookings,services,onSelectBooking,apptToasts,o
   );
 }
 
+// ─── PRODUCT MODAL ───────────────────────────────────────────────────────────
+const PRODUCT_CATS=["Hair Care","Skin Care","Nail Care","Colour & Dye","Tools & Equipment","Supplements","Other"];
+function ProductModal({product,onClose,onSave}){
+  const isNew=!product;
+  const [f,setF]=useState(product||{name:"",description:"",price:"",offerPrice:"",discount:"",inventory:"",category:"",image:""});
+  const up=(k,v)=>setF(p=>({...p,[k]:v}));
+  const handleImg=e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>up("image",ev.target.result);reader.readAsDataURL(file);};
+  return(
+    <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",padding:12}}>
+      <div onClick={e=>e.stopPropagation()} style={{background:"var(--surface)",borderRadius:16,padding:20,width:480,maxWidth:"100%",maxHeight:"93vh",overflowY:"auto",boxShadow:"0 24px 64px rgba(0,0,0,0.25)"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+          <div style={{fontWeight:700,fontSize:15,color:"var(--text)"}}>{isNew?"➕ Add Product":"✏️ Edit Product"}</div>
+          <button onClick={onClose} style={{background:"none",border:"none",fontSize:22,cursor:"pointer",color:"var(--text-muted)"}}>×</button>
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          {/* Image */}
+          <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+            <div style={{width:90,height:90,borderRadius:10,border:"1px dashed var(--border-2)",overflow:"hidden",flexShrink:0,background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",position:"relative"}} onClick={()=>document.getElementById("prod-img-inp").click()}>
+              {f.image?<img src={f.image} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<Icon path={ICONS.image} size={28} color="#c084fc"/>}
+              <input id="prod-img-inp" type="file" accept="image/*" style={{display:"none"}} onChange={handleImg}/>
+            </div>
+            <div style={{flex:1}}>
+              <div style={{fontSize:11,color:"var(--text-muted)",marginBottom:6}}>Click the box to upload a product image.</div>
+              {f.image&&<button onClick={()=>up("image","")} style={{fontSize:11,color:"#991b1b",background:"none",border:"none",cursor:"pointer",padding:0}}>Remove image</button>}
+            </div>
+          </div>
+          <div><label style={lbl}>Product Name *</label><input value={f.name} onChange={e=>up("name",e.target.value)} placeholder="e.g. Keratin Shampoo" style={inp}/></div>
+          <div><label style={lbl}>Description</label><textarea value={f.description} onChange={e=>up("description",e.target.value)} placeholder="Short description..." rows={2} style={{...inp,resize:"vertical"}}/></div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}>
+            <div><label style={lbl}>Category</label>
+              <select value={f.category} onChange={e=>up("category",e.target.value)} onWheel={e=>e.target.blur()} style={inp}>
+                <option value="">— Select —</option>
+                {PRODUCT_CATS.map(c=><option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div><label style={lbl}>Inventory (stock)</label><input type="number" min={0} value={f.inventory} onChange={e=>up("inventory",e.target.value)} onWheel={e=>e.target.blur()} placeholder="0" style={inp}/></div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:9}}>
+            <div><label style={lbl}>Price (RM) *</label><input type="number" min={0} value={f.price} onChange={e=>up("price",e.target.value)} onWheel={e=>e.target.blur()} placeholder="0" style={inp}/></div>
+            <div><label style={lbl}>Offer Price (RM)</label><input type="number" min={0} value={f.offerPrice} onChange={e=>up("offerPrice",e.target.value)} onWheel={e=>e.target.blur()} placeholder="optional" style={inp}/></div>
+            <div><label style={lbl}>Discount (%)</label><input type="number" min={0} max={100} value={f.discount} onChange={e=>up("discount",e.target.value)} onWheel={e=>e.target.blur()} placeholder="optional" style={inp}/></div>
+          </div>
+          {(f.price||f.offerPrice)&&<div style={{padding:"8px 12px",background:"var(--bg)",borderRadius:8,fontSize:12,color:"var(--text-muted)"}}>
+            Sell price: <strong style={{color:"#7c3aed"}}>RM{f.offerPrice||f.price}</strong>
+            {f.offerPrice&&f.price&&Number(f.offerPrice)<Number(f.price)&&<span style={{color:"#991b1b",marginLeft:8}}>Save RM{Number(f.price)-Number(f.offerPrice)}</span>}
+          </div>}
+          <button onClick={()=>{if(!f.name||!f.price)return;onSave({...f,id:product?.id});}} style={pBtn({padding:"11px 0",fontSize:13,width:"100%",marginTop:4})}>{isNew?"Add Product":"Save Changes"}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── LOGIN SCREEN ─────────────────────────────────────────────────────────────
 function LoginScreen({onSuccess}){
   const [email,setEmail]=useState("");
@@ -783,6 +871,10 @@ export default function BeaubookDashboard(){
   const [closedWeekdays,setClosedWeekdays]=useState([]);
   const [services,setServices]=useState([]);
   const [addService,setAddService]=useState(false);
+  const [products,setProducts]=useState([]);
+  const [editProduct,setEditProduct]=useState(null);
+  const [addProduct,setAddProduct]=useState(false);
+  const [productSearch,setProductSearch]=useState("");
   const [authed,setAuthed]=useState(()=>sessionStorage.getItem("beaubook_authed")==="1");
   const [theme,setTheme]=useState(()=>localStorage.getItem("beaubook_theme")||"light");
   const [language,setLanguage]=useState(()=>localStorage.getItem("beaubook_language")||"en");
@@ -819,6 +911,7 @@ export default function BeaubookDashboard(){
     fetch("/api/closed-dates").then(r=>r.json()).then(setClosedDates);
     fetch("/api/closed-weekdays").then(r=>r.json()).then(setClosedWeekdays);
     fetch("/api/services").then(r=>r.json()).then(setServices);
+    fetch("/api/products").then(r=>r.json()).then(setProducts);
     fetch("/api/settings").then(r=>r.json()).then(s=>{
       setSettings(s);
       setProfileForm({companyName:s.companyName||"",location:s.location||"",contactPhone:s.contactPhone||"",address:s.address||"",personInCharge:s.personInCharge||"",facebook:s.facebook||"",instagram:s.instagram||"",tiktok:s.tiktok||"",xhs:s.xhs||"",youtube:s.youtube||"",twitter:s.twitter||"",whatsapp:s.whatsapp||""});
@@ -931,6 +1024,18 @@ export default function BeaubookDashboard(){
     const dup=bookings.find(b=>b.status!=="cancelled"&&b.staff===Number(form.staff)&&b.date===form.date&&b.time===form.time);
     if(dup){showToast(`⚠️ ${dup.customer} already booked at ${form.time} with the same staff`);return;}
     fetch("/api/bookings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)}).then(r=>r.json()).then(created=>{setBookings(p=>[...p,created]);setShowAdd(false);showToast("Booking added!");});
+  }
+  function handleSaveProduct(form,isNew){
+    const url=isNew?"/api/products":`/api/products/${form.id}`;
+    const method=isNew?"POST":"PUT";
+    fetch(url,{method,headers:{"Content-Type":"application/json"},body:JSON.stringify(form)}).then(r=>r.json()).then(saved=>{
+      if(isNew)setProducts(p=>[...p,saved]);
+      else setProducts(p=>p.map(x=>x.id===saved.id?saved:x));
+      setEditProduct(null);setAddProduct(false);showToast(isNew?"Product added!":"Product updated!");
+    });
+  }
+  function handleDeleteProduct(id){
+    fetch(`/api/products/${id}`,{method:"DELETE"}).then(()=>{setProducts(p=>p.filter(x=>x.id!==id));showToast("Product deleted.","error");});
   }
   function handleLeave(staffId,dates,lt,reason,affected,reassign){
     const now=nowStr();
@@ -1087,7 +1192,7 @@ export default function BeaubookDashboard(){
         {/* SIDEBAR */}
         {sidebarOpen&&<aside style={{width:224,background:"var(--surface)",borderRight:"1px solid var(--border)",padding:"20px 14px",display:"flex",flexDirection:"column",gap:2,flexShrink:0}}>
           <div style={{...sectionLbl,padding:"0 10px",marginBottom:12}}>Menu</div>
-          {[{id:"calendar",icon:ICONS.calendar,label:t("nav.calendar")},{id:"bookings",icon:ICONS.list,label:t("nav.bookings"),badge:pendingAll.length+unassignedAll.length},{id:"customers",icon:ICONS.user,label:t("nav.customers")},{id:"staff",icon:ICONS.users,label:t("nav.staff")},{id:"services",icon:ICONS.scissors,label:t("nav.services")},{id:"analytics",icon:ICONS.chart,label:t("nav.analytics")},{id:"settings",icon:ICONS.settings,label:t("nav.settings")}].map(item=>(
+          {[{id:"calendar",icon:ICONS.calendar,label:t("nav.calendar")},{id:"bookings",icon:ICONS.list,label:t("nav.bookings"),badge:pendingAll.length+unassignedAll.length},{id:"customers",icon:ICONS.user,label:t("nav.customers")},{id:"staff",icon:ICONS.users,label:t("nav.staff")},{id:"services",icon:ICONS.scissors,label:t("nav.services")},{id:"products",icon:ICONS.box,label:t("nav.products")},{id:"analytics",icon:ICONS.chart,label:t("nav.analytics")},{id:"settings",icon:ICONS.settings,label:t("nav.settings")}].map(item=>(
             <button key={item.id} onClick={()=>setTab(item.id)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:10,border:"none",cursor:"pointer",textAlign:"left",width:"100%",background:tab===item.id?"var(--primary-bg,#f3e8ff)":"transparent",color:tab===item.id?"#7c3aed":"var(--text-muted)",fontWeight:tab===item.id?700:500,fontSize:13.5}}>
               <Icon path={item.icon} size={17} color={tab===item.id?"#7c3aed":"var(--text-muted)"} strokeWidth={tab===item.id?2.2:1.8}/><span style={{flex:1}}>{item.label}</span>
               {item.badge>0&&<span style={{background:"#ef4444",color:"#fff",borderRadius:99,fontSize:10,fontWeight:700,padding:"2px 7px",lineHeight:1.5}}>{item.badge}</span>}
@@ -1547,6 +1652,50 @@ export default function BeaubookDashboard(){
           </div>}
 
           {/* ═══ ANALYTICS ═══ */}
+          {/* ═══ PRODUCTS ═══ */}
+          {tab==="products"&&<div>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18,flexWrap:"wrap",gap:10}}>
+              <h1 style={{margin:0,fontSize:22,fontWeight:800,color:"var(--text)",letterSpacing:"-0.3px"}}>🛍️ Products</h1>
+              <button onClick={()=>setAddProduct(true)} style={pBtn({padding:"9px 18px",fontSize:13})}>+ Add Product</button>
+            </div>
+            <div style={{marginBottom:14}}><input value={productSearch} onChange={e=>setProductSearch(e.target.value)} placeholder="Search products..." style={{...inp,maxWidth:320}}/></div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:14}}>
+              {products.filter(p=>p.name.toLowerCase().includes(productSearch.toLowerCase())||(p.category||"").toLowerCase().includes(productSearch.toLowerCase())).map(p=>{
+                const sellPrice=p.offerPrice||p.price;
+                return(
+                  <div key={p.id} style={card({padding:0,overflow:"hidden"})}>
+                    {p.image
+                      ?<img src={p.image} alt={p.name} style={{width:"100%",height:140,objectFit:"cover",display:"block"}}/>
+                      :<div style={{width:"100%",height:140,background:"linear-gradient(135deg,#f3e8ff,#ede9fe)",display:"flex",alignItems:"center",justifyContent:"center"}}><Icon path={ICONS.box} size={40} color="#c084fc"/></div>
+                    }
+                    <div style={{padding:"12px 14px"}}>
+                      {p.category&&<div style={{fontSize:10,fontWeight:700,color:"#7c3aed",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:4}}>{p.category}</div>}
+                      <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:3}}>{p.name}</div>
+                      {p.description&&<div style={{fontSize:11,color:"var(--text-muted)",marginBottom:8,lineHeight:1.4,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{p.description}</div>}
+                      <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
+                        <span style={{fontWeight:800,fontSize:16,color:"#7c3aed"}}>RM{sellPrice}</span>
+                        {p.offerPrice&&<span style={{fontSize:11,color:"var(--text-muted)",textDecoration:"line-through"}}>RM{p.price}</span>}
+                        {p.discount&&<span style={{fontSize:10,background:"#fef2f2",color:"#991b1b",padding:"1px 5px",borderRadius:4,fontWeight:700}}>{p.discount}% OFF</span>}
+                      </div>
+                      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+                        <span style={{fontSize:11,color:p.inventory>0?"#15803d":"#991b1b",fontWeight:600,background:p.inventory>0?"#f0fdf4":"#fef2f2",padding:"2px 8px",borderRadius:6}}>{p.inventory>0?`Stock: ${p.inventory}`:"Out of stock"}</span>
+                      </div>
+                      <div style={{display:"flex",gap:6}}>
+                        <button onClick={()=>setEditProduct(p)} style={gBtn({flex:1,padding:"6px 0",fontSize:12})}>Edit</button>
+                        <button onClick={()=>{if(window.confirm(`Delete "${p.name}"?`))handleDeleteProduct(p.id);}} style={{flex:1,padding:"6px 0",borderRadius:"var(--radius,12px)",border:"1px solid #fca5a5",background:"#fef2f2",color:"#991b1b",cursor:"pointer",fontSize:12,fontWeight:600}}>Delete</button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {products.filter(p=>p.name.toLowerCase().includes(productSearch.toLowerCase())||(p.category||"").toLowerCase().includes(productSearch.toLowerCase())).length===0&&
+                <div style={{gridColumn:"1/-1",textAlign:"center",padding:"48px 0",color:"var(--text-muted)",fontSize:13}}>No products yet. Click "+ Add Product" to get started.</div>
+              }
+            </div>
+            {/* Product Add/Edit Modal */}
+            {(addProduct||editProduct)&&<ProductModal product={editProduct} onClose={()=>{setAddProduct(false);setEditProduct(null);}} onSave={(form)=>handleSaveProduct(form,!editProduct)}/>}
+          </div>}
+
           {tab==="analytics"&&<div>
             <h1 style={{margin:"0 0 18px",fontSize:26,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px"}}>{t("nav.analytics")}</h1>
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14,marginBottom:16}}>
@@ -1571,12 +1720,34 @@ export default function BeaubookDashboard(){
                 );})}
               </div>
             </div>
-            <div style={card({padding:18})}>
+            <div style={card({padding:18,marginBottom:14})}>
               <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>Top Services</div>
               {services.map(s=>{const cnt=bookings.filter(b=>b.service===s.id&&b.status!=="cancelled").length;const mx=Math.max(...services.map(sv=>bookings.filter(b=>b.service===sv.id&&b.status!=="cancelled").length),1);return(
                 <div key={s.id} style={{marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"var(--text-muted)",marginBottom:4}}><span>{s.name}</span><span style={{fontWeight:600,color:"#7e22ce"}}>{cnt} · RM{cnt*s.price}</span></div><div style={{height:6,background:"#f3e8ff",borderRadius:3}}><div style={{height:"100%",width:`${(cnt/mx)*100}%`,background:"linear-gradient(90deg,#a855f7,#7e22ce)",borderRadius:3}}/></div></div>
               );})}
             </div>
+            {products.length>0&&(()=>{
+              const allSoldItems=bookings.filter(b=>b.status!=="cancelled").flatMap(b=>Array.isArray(b.products)?b.products:[]);
+              const productSalesMap={};allSoldItems.forEach(item=>{if(!productSalesMap[item.productId])productSalesMap[item.productId]={name:item.name,qty:0,revenue:0};productSalesMap[item.productId].qty+=item.qty;productSalesMap[item.productId].revenue+=item.unitPrice*item.qty;});
+              const productSales=Object.values(productSalesMap).sort((a,b)=>b.revenue-a.revenue);
+              const totalProductRev=productSales.reduce((s,p)=>s+p.revenue,0);
+              const maxRev=Math.max(...productSales.map(p=>p.revenue),1);
+              return(<div style={card({padding:18})}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+                  <div style={{fontWeight:700,fontSize:14,color:"var(--text)"}}> Product Sales</div>
+                  <div style={{fontSize:13,fontWeight:800,color:"#7c3aed"}}>Total: RM{totalProductRev}</div>
+                </div>
+                {productSales.length===0?<div style={{textAlign:"center",color:"var(--text-muted)",fontSize:12,padding:"16px 0"}}>No product sales yet.</div>:productSales.map(p=>(
+                  <div key={p.name} style={{marginBottom:10}}>
+                    <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"var(--text-muted)",marginBottom:4}}>
+                      <span>{p.name}</span>
+                      <span style={{fontWeight:600,color:"#7e22ce"}}>{p.qty} sold · RM{p.revenue}</span>
+                    </div>
+                    <div style={{height:6,background:"#f3e8ff",borderRadius:3}}><div style={{height:"100%",width:`${(p.revenue/maxRev)*100}%`,background:"linear-gradient(90deg,#10b981,#0d9488)",borderRadius:3}}/></div>
+                  </div>
+                ))}
+              </div>);
+            })()}
           </div>}
 
           {/* ═══ SETTINGS ═══ */}
@@ -1721,7 +1892,7 @@ export default function BeaubookDashboard(){
       </div>
 
       {/* ─── MODALS ─── */}
-      <AddModal show={showAdd} onClose={()=>setShowAdd(false)} onAdd={handleAddBooking} initialDate={addDate} initialTime={addTime} initialStaff={addInitStaff} leaveRecords={leaveRecords} staffList={staffList} services={services}/>
+      <AddModal show={showAdd} onClose={()=>setShowAdd(false)} onAdd={handleAddBooking} initialDate={addDate} initialTime={addTime} initialStaff={addInitStaff} leaveRecords={leaveRecords} staffList={staffList} services={services} products={products}/>
       <DetailModal booking={selBooking} onClose={()=>{setSelBooking(null);setNotifTriggered(false);}} onAccept={handleAccept} onCancel={handleCancel} onSave={handleSaveEdit} onReschedule={handleReschedule} leaveRecords={leaveRecords} staffList={staffList} services={services} autoEdit={notifTriggered}/>
       <LeaveModal staffMember={leaveStaff} bookings={bookings} staffList={staffList} services={services} onClose={()=>setLeaveStaff(null)} onConfirm={handleLeave}/>
       <ScheduleModal staffMember={schedStaff} schedule={schedStaff?schedules[schedStaff.id]:null} onClose={()=>setSchedStaff(null)} onSave={handleSaveSched}/>

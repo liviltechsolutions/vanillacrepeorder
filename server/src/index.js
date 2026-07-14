@@ -17,6 +17,7 @@ app.use("/api/customers", require("./routes/customers")(prisma));
 app.use("/api/closed-dates", require("./routes/closedDates")(prisma));
 app.use("/api/closed-weekdays", require("./routes/closedWeekdays")(prisma));
 app.use("/api/services", require("./routes/services")(prisma));
+app.use("/api/products", require("./routes/products")(prisma));
 app.use("/api/settings", require("./routes/settings")(prisma));
 
 const PORT = process.env.PORT || 4000;

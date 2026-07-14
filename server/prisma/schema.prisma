@@ -39,6 +39,20 @@ model Booking {
   txnId      String?
   seat       String?
   history    Json     @default("[]")
+  products   Json     @default("[]")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  price       Int
+  offerPrice  Int?
+  discount    Int?
+  inventory   Int      @default(0)
+  category    String?
+  image       String?
+  createdAt   DateTime @default(now())
 }
 
 model LeaveRecord {
