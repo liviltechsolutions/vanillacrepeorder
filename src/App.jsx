@@ -117,8 +117,9 @@ const ICONS={
 function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leaveRecords,staffList,services}){
   const [f,setF]=useState({customer:"",phone:"",service:1,staff:initialStaff||1,date:initialDate||TODAY,time:initialTime||"09:00",remark:"",payStatus:"unpaid",payMethod:"",amtPaid:0,tip:0,txnId:"",seat:""});
   const [staffWarning,setStaffWarning]=useState(null);
+  const [submitting,setSubmitting]=useState(false);
   useMemo(()=>{
-    if(show) setF({customer:"",phone:"",service:services[0]?.id||1,staff:initialStaff||(staffList[0]?.id)||1,date:initialDate||TODAY,time:initialTime||"09:00",remark:"",payStatus:"unpaid",payMethod:"",amtPaid:0,tip:0,txnId:"",seat:""});
+    if(show){setF({customer:"",phone:"",service:services[0]?.id||1,staff:initialStaff||(staffList[0]?.id)||1,date:initialDate||TODAY,time:initialTime||"09:00",remark:"",payStatus:"unpaid",payMethod:"",amtPaid:0,tip:0,txnId:"",seat:""});setSubmitting(false);}
   },[show,initialDate,initialTime,initialStaff]);
   useEffect(()=>{if(show)setStaffWarning(null);},[show]);
   const isOL=(sid)=>leaveRecords.some(r=>r.dates.includes(f.date)&&r.staffId===sid);
@@ -147,7 +148,7 @@ function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leave
             <div><label style={lbl}>Phone</label><input value={f.phone} onChange={e=>up("phone",e.target.value)} placeholder="012-3456789" style={inp}/></div>
           </div>
           <div><label style={lbl}>Service</label>
-            <select value={f.service} onChange={e=>up("service",Number(e.target.value))} style={inp}>
+            <select value={f.service} onChange={e=>up("service",Number(e.target.value))} onWheel={e=>e.target.blur()} style={inp}>
               {services.map(s=><option key={s.id} value={s.id}>{s.name} — RM{s.price} ({s.duration}min)</option>)}
             </select>
           </div>
@@ -156,21 +157,21 @@ function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leave
             <div><label style={lbl}>Staff</label>
               {avail.length===0
                 ?<div style={{...inp,background:"#fef2f2",color:"#991b1b",fontSize:12}}>⚠️ All staff on leave</div>
-                :<select value={f.staff} onChange={e=>up("staff",Number(e.target.value))} style={inp}>
+                :<select value={f.staff} onChange={e=>up("staff",Number(e.target.value))} onWheel={e=>e.target.blur()} style={inp}>
                   {avail.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
               }
             </div>
             <div><label style={lbl}>Seat / Room</label>
-              <select value={f.seat} onChange={e=>up("seat",e.target.value)} style={inp}>
+              <select value={f.seat} onChange={e=>up("seat",e.target.value)} onWheel={e=>e.target.blur()} style={inp}>
                 <option value="">— Not assigned —</option>
                 {SEATS.map(s=><option key={s} value={s}>{s}</option>)}
               </select>
             </div>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}>
-            <div><label style={lbl}>Date</label><input type="date" value={f.date} onChange={e=>up("date",e.target.value)} style={inp}/></div>
-            <div><label style={lbl}>Time</label><select value={f.time} onChange={e=>up("time",e.target.value)} style={inp}>{HOURS.map(h=><option key={h} value={h}>{h}</option>)}</select></div>
+            <div><label style={lbl}>Date</label><input type="date" value={f.date} onChange={e=>up("date",e.target.value)} onWheel={e=>e.target.blur()} style={inp}/></div>
+            <div><label style={lbl}>Time</label><select value={f.time} onChange={e=>up("time",e.target.value)} onWheel={e=>e.target.blur()} style={inp}>{HOURS.map(h=><option key={h} value={h}>{h}</option>)}</select></div>
           </div>
           <div><label style={lbl}>💬 Special Request / Remark</label><input value={f.remark} onChange={e=>up("remark",e.target.value)} placeholder="e.g. no heat, prefer gentle products" style={inp}/></div>
           <div style={{background:"var(--bg)",borderRadius:9,padding:"11px 13px"}}>
@@ -182,7 +183,7 @@ function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leave
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:7}}>
               <div><label style={lbl}>Method</label>
-                <select value={f.payMethod} onChange={e=>up("payMethod",e.target.value)} style={inp}>
+                <select value={f.payMethod} onChange={e=>up("payMethod",e.target.value)} onWheel={e=>e.target.blur()} style={inp}>
                   <option value="">Select...</option>
                   {PAY_METHODS.map(k=><option key={k} value={k}>{PAY_ICONS[k]} {k.toUpperCase()}</option>)}
                 </select>
@@ -190,7 +191,7 @@ function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leave
               <div><label style={lbl}>Amount Paid (RM)</label>
                 <div style={{position:"relative"}}>
                   <span style={{position:"absolute",left:13,top:"50%",transform:"translateY(-50%)",fontSize:14,color:"var(--text-muted)",fontWeight:600,pointerEvents:"none"}}>RM</span>
-                  <input type="number" min={0} max={price} value={f.amtPaid} onChange={e=>up("amtPaid",e.target.value===""?"":Number(e.target.value))} style={{...inp,paddingLeft:40}}/>
+                  <input type="number" min={0} max={price} value={f.amtPaid} onChange={e=>up("amtPaid",e.target.value===""?"":Number(e.target.value))} onWheel={e=>e.target.blur()} style={{...inp,paddingLeft:40}}/>
                 </div>
               </div>
             </div>
@@ -198,7 +199,7 @@ function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leave
               <label style={lbl}>Additional Payment (RM) — tips, etc.</label>
               <div style={{position:"relative"}}>
                 <span style={{position:"absolute",left:13,top:"50%",transform:"translateY(-50%)",fontSize:14,color:"var(--text-muted)",fontWeight:600,pointerEvents:"none"}}>RM</span>
-                <input type="number" min={0} value={f.tip} onChange={e=>up("tip",e.target.value===""?"":Number(e.target.value))} placeholder="0" style={{...inp,paddingLeft:40}}/>
+                <input type="number" min={0} value={f.tip} onChange={e=>up("tip",e.target.value===""?"":Number(e.target.value))} onWheel={e=>e.target.blur()} placeholder="0" style={{...inp,paddingLeft:40}}/>
               </div>
             </div>
             {price>0&&<div style={{display:"flex",justifyContent:"space-between",padding:"6px 9px",background:"var(--surface)",borderRadius:6,border:"1px solid var(--border)",fontSize:11,marginBottom:7}}>
@@ -207,7 +208,7 @@ function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leave
             </div>}
             <div><label style={lbl}>Transaction No.</label><input value={f.txnId} onChange={e=>up("txnId",e.target.value)} placeholder="TXN..." style={inp}/></div>
           </div>
-          <button onClick={()=>{if(!f.customer||!f.phone)return;onAdd({...f,amtPaid:Number(f.amtPaid)||0,tip:Number(f.tip)||0});}} style={pBtn({padding:"11px 0",fontSize:13,width:"100%",marginTop:2})}>Add Booking</button>
+          <button onClick={()=>{if(!f.customer||!f.phone||submitting)return;setSubmitting(true);onAdd({...f,amtPaid:Number(f.amtPaid)||0,tip:Number(f.tip)||0});}} disabled={submitting} style={pBtn({padding:"11px 0",fontSize:13,width:"100%",marginTop:2,opacity:submitting?0.65:1})}>{submitting?"Adding...":"Add Booking"}</button>
         </div>
       </div>
     </div>
@@ -651,21 +652,34 @@ function CustomerEditModal({customer,extraData,onClose,onSave}){
 }
 
 // ─── NOTIFICATIONS PANEL ─────────────────────────────────────────────────────
-function NotifPanel({show,onClose,bookings,services,onSelectBooking}){
+function NotifPanel({show,onClose,bookings,services,onSelectBooking,apptToasts,onGoToBookings}){
   if(!show) return null;
   const pending=bookings.filter(b=>b.status==="pending");
   const unassigned=bookings.filter(b=>b.status==="unassigned");
   const all=[...unassigned.map(b=>({...b,_type:"unassigned"})),...pending.map(b=>({...b,_type:"pending"}))];
+  const hasUpcoming=apptToasts&&apptToasts.length>0;
+  const totalCount=all.length+(hasUpcoming?1:0);
   return(
     <div onClick={onClose} style={{position:"fixed",inset:0,zIndex:350}}>
       <div onClick={e=>e.stopPropagation()} style={{position:"absolute",top:64,right:18,width:330,background:"var(--surface)",borderRadius:16,border:"1px solid var(--border)",boxShadow:"0 8px 32px rgba(124,58,237,0.15)",overflow:"hidden"}}>
         <div style={{padding:"13px 16px",borderBottom:"1px solid #f0ebff",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <div style={{fontWeight:700,fontSize:14,color:"var(--text)",display:"flex",alignItems:"center",gap:7}}><Icon path={ICONS.bell} size={16}/>Notifications {all.length>0&&<span style={{background:"#ef4444",color:"#fff",borderRadius:10,fontSize:10,fontWeight:700,padding:"1px 6px"}}>{all.length}</span>}</div>
+          <div style={{fontWeight:700,fontSize:14,color:"var(--text)",display:"flex",alignItems:"center",gap:7}}><Icon path={ICONS.bell} size={16}/>Notifications {totalCount>0&&<span style={{background:"#ef4444",color:"#fff",borderRadius:10,fontSize:10,fontWeight:700,padding:"1px 6px"}}>{totalCount}</span>}</div>
           <button onClick={onClose} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"var(--text-muted)"}}>×</button>
         </div>
-        {all.length===0?<div style={{padding:"24px 16px",textAlign:"center",color:"var(--text-muted)",fontSize:13}}>All caught up! No pending actions.</div>:(
-          <div style={{maxHeight:360,overflowY:"auto"}}>
-            {all.map(b=>{const s=services.find(sv=>sv.id===b.service);return(
+        <div style={{maxHeight:400,overflowY:"auto"}}>
+          {hasUpcoming&&(
+            <div onClick={()=>{onGoToBookings();onClose();}} style={{padding:"12px 16px",borderBottom:"1px solid #f0ebff",display:"flex",gap:11,alignItems:"flex-start",cursor:"pointer",background:"#faf5ff"}} onMouseEnter={e=>e.currentTarget.style.background="#f3e8ff"} onMouseLeave={e=>e.currentTarget.style.background="#faf5ff"}>
+              <div style={{width:34,height:34,borderRadius:"50%",background:"linear-gradient(135deg,#6d28d9,#9333ea)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:16,flexShrink:0}}>🔔</div>
+              <div style={{flex:1}}>
+                <div style={{fontWeight:700,fontSize:13,color:"#6d28d9"}}>You have {apptToasts.length} upcoming appointment{apptToasts.length>1?"s":""}</div>
+                <div style={{fontSize:11,color:"var(--text-muted)",marginTop:2}}>{apptToasts.slice(0,2).map(({booking:b})=>`${b.customer} · ${b.time}`).join(" • ")}{apptToasts.length>2?` +${apptToasts.length-2} more`:""}</div>
+                <div style={{marginTop:4,fontSize:10,fontWeight:600,color:"#9333ea"}}>Tap to view in Bookings →</div>
+              </div>
+            </div>
+          )}
+          {all.length===0&&!hasUpcoming
+            ?<div style={{padding:"24px 16px",textAlign:"center",color:"var(--text-muted)",fontSize:13}}>All caught up! No pending actions.</div>
+            :all.map(b=>{const s=services.find(sv=>sv.id===b.service);return(
               <div key={b.id} onClick={()=>{onSelectBooking(b);onClose();}} style={{padding:"12px 16px",borderBottom:"1px solid #f5f3ff",display:"flex",gap:11,alignItems:"flex-start",cursor:"pointer",transition:"background 0.1s"}} onMouseEnter={e=>e.currentTarget.style.background="var(--bg)"} onMouseLeave={e=>e.currentTarget.style.background=""}>
                 <div style={{width:34,height:34,borderRadius:"50%",background:b._type==="unassigned"?"linear-gradient(135deg,#7e22ce,#a855f7)":"linear-gradient(135deg,#d97706,#fbbf24)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",flexShrink:0}}><Icon path={b._type==="unassigned"?ICONS.alert:ICONS.clock} size={15}/></div>
                 <div style={{flex:1}}>
@@ -676,8 +690,7 @@ function NotifPanel({show,onClose,bookings,services,onSelectBooking}){
                 <Icon path={ICONS.chevRight} size={13} color="#c084fc"/>
               </div>
             );})}
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
@@ -915,6 +928,8 @@ export default function BeaubookDashboard(){
     patchBooking(b.id,{...draft,history}).then(updated=>{setBookings(p=>p.map(bk=>bk.id===b.id?updated:bk));setSelBooking(updated);showToast("Changes saved!");});
   }
   function handleAddBooking(form){
+    const dup=bookings.find(b=>b.status!=="cancelled"&&b.staff===Number(form.staff)&&b.date===form.date&&b.time===form.time);
+    if(dup){showToast(`⚠️ ${dup.customer} already booked at ${form.time} with the same staff`);return;}
     fetch("/api/bookings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)}).then(r=>r.json()).then(created=>{setBookings(p=>[...p,created]);setShowAdd(false);showToast("Booking added!");});
   }
   function handleLeave(staffId,dates,lt,reason,affected,reassign){
@@ -964,7 +979,7 @@ export default function BeaubookDashboard(){
 
   const pendingAll=bookings.filter(b=>b.status==="pending");
   const unassignedAll=bookings.filter(b=>b.status==="unassigned");
-  const notifCount=pendingAll.length+unassignedAll.length;
+  const notifCount=pendingAll.length+unassignedAll.length+(apptToasts.length>0?1:0);
   const wkDates=getWkDates(weekBase);
   const selHoliday=getHoliday(selectedDate);
   const selClosed=getClosed(selectedDate);
@@ -1085,18 +1100,18 @@ export default function BeaubookDashboard(){
           {toast&&<div style={{position:"fixed",top:68,right:16,zIndex:9999,padding:"8px 14px",borderRadius:9,background:toast.type==="success"?"#f0fdf4":"#fef2f2",border:`1px solid ${toast.type==="success"?"#86efac":"#fca5a5"}`,color:toast.type==="success"?"#15803d":"#991b1b",fontWeight:600,fontSize:11,boxShadow:"0 4px 20px rgba(0,0,0,0.1)",display:"flex",alignItems:"center",gap:6}}>
             {toast.type==="success"?"✓":"✕"} {toast.msg}
           </div>}
-          {/* Appointment reminder toasts */}
-          {apptToasts.map(({id,booking:b},idx)=>{const s=svc(b.service);return(
-            <div key={id} onClick={()=>{setSelBooking(b);setApptToasts(p=>p.filter(t=>t.id!==id));}} style={{position:"fixed",bottom:20+(idx*96),right:16,zIndex:9998,padding:"14px 16px",borderRadius:14,background:"linear-gradient(135deg,#6d28d9,#9333ea)",color:"#fff",boxShadow:"0 8px 32px rgba(109,40,217,0.45)",display:"flex",alignItems:"center",gap:12,width:300,cursor:"pointer",animation:"slideIn 0.3s ease"}}>
+          {/* Appointment reminder — single summary toast */}
+          {apptToasts.length>0&&(
+            <div onClick={()=>{setTab("bookings");setApptToasts([]);}} style={{position:"fixed",bottom:20,right:16,zIndex:9998,padding:"14px 16px",borderRadius:14,background:"linear-gradient(135deg,#6d28d9,#9333ea)",color:"#fff",boxShadow:"0 8px 32px rgba(109,40,217,0.45)",display:"flex",alignItems:"center",gap:12,width:310,cursor:"pointer",animation:"slideIn 0.3s ease"}}>
               <div style={{fontSize:24,flexShrink:0}}>🔔</div>
               <div style={{flex:1,minWidth:0}}>
-                <div style={{fontWeight:700,fontSize:13,marginBottom:2}}>Upcoming: {b.customer}</div>
-                <div style={{fontSize:11,opacity:.88}}>{s?.name} · {b.time}</div>
-                <div style={{fontSize:10,opacity:.7,marginTop:2}}>{settings.notifyBefore} min reminder</div>
+                <div style={{fontWeight:700,fontSize:13,marginBottom:3}}>You have {apptToasts.length} upcoming appointment{apptToasts.length>1?"s":""}</div>
+                <div style={{fontSize:11,opacity:.88,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{apptToasts.slice(0,2).map(({booking:b})=>`${b.customer} · ${b.time}`).join(" • ")}{apptToasts.length>2?` +${apptToasts.length-2} more`:""}</div>
+                <div style={{fontSize:10,opacity:.7,marginTop:3}}>Tap to view in Bookings</div>
               </div>
-              <button onClick={e=>{e.stopPropagation();setApptToasts(p=>p.filter(t=>t.id!==id));}} style={{background:"rgba(255,255,255,0.2)",border:"none",color:"#fff",borderRadius:6,width:22,height:22,cursor:"pointer",fontSize:16,lineHeight:1,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>×</button>
+              <button onClick={e=>{e.stopPropagation();setApptToasts([]);}} style={{background:"rgba(255,255,255,0.2)",border:"none",color:"#fff",borderRadius:6,width:22,height:22,cursor:"pointer",fontSize:16,lineHeight:1,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>×</button>
             </div>
-          );})}
+          )}
           <style>{`@keyframes slideIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}`}</style>
 
           {/* ═══ CALENDAR ═══ */}
@@ -1180,9 +1195,11 @@ export default function BeaubookDashboard(){
                               {covering.map(b=>{
                                 const sc=BC[b.status]||BC.confirmed;const pc2=PC[b.payStatus]||PC.unpaid;
                                 const isStart=b.time===hour;
-                                if(!isStart)return<div key={b.id} onClick={e=>{e.stopPropagation();setSelBooking(b);}} style={{background:sc.bg,borderLeft:`3px solid ${sc.br}`,minHeight:36,cursor:"pointer"}}/>;
+                                const bm=timeToMin(b.time);const dur=svc(b.service)?.duration||60;const sm=timeToMin(hour);
+                                const isLast=sm+30>=bm+dur;
+                                if(!isStart)return<div key={b.id} onClick={e=>{e.stopPropagation();setSelBooking(b);}} style={{background:sc.bg,borderLeft:`3px solid ${sc.br}`,borderRight:`1px solid ${sc.br}`,borderBottom:isLast?`1px solid ${sc.br}`:"none",borderTop:"none",borderRadius:isLast?"0 0 7px 7px":0,margin:isLast?"-4px -5px 2px -5px":"-4px -5px 0 -5px",minHeight:32,cursor:"pointer",position:"relative",zIndex:2}}/>;
                                 return(
-                                  <div key={b.id} onClick={e=>{e.stopPropagation();setSelBooking(b);}} style={{background:sc.bg,border:`1px solid ${sc.br}`,borderRadius:7,padding:"4px 7px",cursor:"pointer",marginBottom:2}}>
+                                  <div key={b.id} onClick={e=>{e.stopPropagation();setSelBooking(b);}} style={{background:sc.bg,border:`1px solid ${sc.br}`,borderBottom:isLast?`1px solid ${sc.br}`:"none",borderRadius:isLast?7:"7px 7px 0 0",padding:"4px 7px",marginBottom:isLast?2:-3,cursor:"pointer",position:"relative",zIndex:1}}>
                                     <div style={{fontSize:13,fontWeight:700,color:sc.tx,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{b.customer}</div>
                                     <div style={{display:"flex",gap:4,alignItems:"center",flexWrap:"wrap"}}>
                                       <span style={{fontSize:11,color:"var(--text-muted)",overflow:"hidden",textOverflow:"ellipsis",maxWidth:80}}>{svc(b.service)?.name}</span>
@@ -1700,7 +1717,7 @@ export default function BeaubookDashboard(){
       {editCustomer&&<CustomerEditModal customer={editCustomer} extraData={customerExtra[editCustomer.phone]} onClose={()=>setEditCustomer(null)} onSave={handleSaveCustomer}/>}
       <CloseDayModal show={showCloseDay} onClose={()=>setShowCloseDay(false)} initialDate={selectedDate} closedDates={closedDates} closedWeekdays={closedWeekdays} onMark={handleMarkClosed} onUnmark={handleUnmarkClosed} onMarkWeekday={handleMarkClosedWeekday} onUnmarkWeekday={handleUnmarkClosedWeekday}/>
       {addService&&<ServiceModal onClose={()=>setAddService(false)} onSave={handleAddService}/>}
-      <NotifPanel show={showNotif} onClose={()=>setShowNotif(false)} bookings={bookings} services={services} onSelectBooking={(b)=>{setSelBooking(b);setNotifTriggered(true);setShowNotif(false);setTab("bookings");}}/>
+      <NotifPanel show={showNotif} onClose={()=>setShowNotif(false)} bookings={bookings} services={services} onSelectBooking={(b)=>{setSelBooking(b);setNotifTriggered(true);setShowNotif(false);setTab("bookings");}} apptToasts={apptToasts} onGoToBookings={()=>{setTab("bookings");setApptToasts([]);setShowNotif(false);}}/>
     </div>
   );
 }
