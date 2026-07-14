@@ -29,7 +29,7 @@ const SETTING_FIELDS = [
   "companyName", "location", "notifyOnPending", "notifyBefore",
   "contactPhone", "address", "personInCharge",
   "facebook", "instagram", "tiktok", "xhs", "youtube", "twitter", "whatsapp",
-  "email", "emailVerified",
+  "email", "emailVerified", "seats",
 ];
 
 function pickPublic(s) {
@@ -55,6 +55,7 @@ module.exports = (prisma) => {
       "companyName", "location", "notifyOnPending", "notifyBefore",
       "contactPhone", "address", "personInCharge",
       "facebook", "instagram", "tiktok", "xhs", "youtube", "twitter", "whatsapp",
+      "seats",
     ];
     const data = {};
     allowed.forEach(f => { if (req.body[f] !== undefined) data[f] = req.body[f]; });

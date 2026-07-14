@@ -11,7 +11,7 @@ const PC={paid:{bg:"#f0fdf4",br:"#86efac",tx:"#15803d"},unpaid:{bg:"#fef2f2",br:
 const BC={confirmed:{bg:"#f0fdf4",br:"#86efac",tx:"#15803d"},pending:{bg:"#fffbeb",br:"#fcd34d",tx:"#92400e"},cancelled:{bg:"#fef2f2",br:"#fca5a5",tx:"#991b1b"},unassigned:{bg:"#fdf4ff",br:"#e9d5ff",tx:"#7e22ce"},sale:{bg:"#fff7ed",br:"#fbbf24",tx:"#92400e"}};
 const POSITIONS=["Junior Beautician","Senior Beautician","Lead Stylist","Nail Technician","Therapist","Manager","Freelancer"];
 const SKILL_OPTIONS=["Haircut","Colouring","Treatment","Manicure","Pedicure","Facial","Threading","Massage","Makeup","Lash Extension"];
-const SEATS=["Seat A1","Seat A2","Seat B1","Seat B2","Room 1","Room 2","Room 3","VIP Room"];
+const DEFAULT_SEATS=["Seat A1","Seat A2","Seat B1","Seat B2","Room 1","Room 2","Room 3","VIP Room"];
 // Malaysia national public holidays — gazetted federal holidays
 const MY_HOLIDAYS_2026={
   "2026-01-01":"New Year's Day",
@@ -219,7 +219,7 @@ function QuickSaleModal({show,onClose,onSave,products}){
 }
 
 // ─── ADD BOOKING MODAL ───────────────────────────────────────────────────────
-function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leaveRecords,staffList,services,products}){
+function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leaveRecords,staffList,services,products,seats}){
   const [f,setF]=useState({customer:"",phone:"",service:1,staff:initialStaff||1,date:initialDate||TODAY,time:initialTime||"09:00",remark:"",payStatus:"unpaid",payMethod:"",amtPaid:0,tip:0,txnId:"",seat:"",products:[]});
   const [staffWarning,setStaffWarning]=useState(null);
   const [submitting,setSubmitting]=useState(false);
@@ -276,7 +276,7 @@ function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leave
             <div><label style={lbl}>Seat / Room</label>
               <select value={f.seat} onChange={e=>up("seat",e.target.value)} onWheel={e=>e.target.blur()} style={inp}>
                 <option value="">— Not assigned —</option>
-                {SEATS.map(s=><option key={s} value={s}>{s}</option>)}
+                {(seats||DEFAULT_SEATS).map(s=><option key={s} value={s}>{s}</option>)}
               </select>
             </div>
           </div>
@@ -324,11 +324,12 @@ function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leave
 }
 
 // ─── DETAIL / EDIT MODAL ─────────────────────────────────────────────────────
-function DetailModal({booking,onClose,onAccept,onCancel,onSave,onReschedule,leaveRecords,staffList,services,autoEdit}){
+function DetailModal({booking,onClose,onAccept,onCancel,onSave,onReschedule,leaveRecords,staffList,services,autoEdit,seats,products}){
   const [edit,setEdit]=useState(false);
   const [draft,setDraft]=useState(null);
   const [reschedMode,setReschedMode]=useState(false);
   const [reschedDraft,setReschedDraft]=useState({date:"",time:""});
+  const [draftProdSearch,setDraftProdSearch]=useState("");
   if(!booking) return null;
   const b=booking;
   const sc=BC[b.status]||BC.confirmed;
@@ -336,14 +337,17 @@ function DetailModal({booking,onClose,onAccept,onCancel,onSave,onReschedule,leav
   const sv=services.find(s=>s.id===b.service);
   const st=staffList.find(s=>s.id===b.staff);
   const price=sv?.price||0;
-  const balance=Math.max(0,price-(b.amtPaid||0));
+  const bProdTotal=(Array.isArray(b.products)?b.products:[]).reduce((s,p)=>s+p.unitPrice*p.qty,0);
+  const balance=Math.max(0,(price+bProdTotal)-(b.amtPaid||0));
   const isOL=(sid,date)=>leaveRecords.some(r=>r.dates.includes(date)&&r.staffId===sid);
   const avail=draft?staffList.filter(s=>!isOL(s.id,draft.date)||s.id===b.staff):staffList;
   const nowDraft=draft||{};
   const dPrice=services.find(s=>s.id===nowDraft.service)?.price||0;
-  const dBal=Math.max(0,dPrice-(nowDraft.amtPaid||0));
+  const dProdTotal=(Array.isArray(nowDraft.products)?nowDraft.products:[]).reduce((s,p)=>s+p.unitPrice*p.qty,0);
+  const dGrandTotal=dPrice+dProdTotal;
+  const dBal=Math.max(0,dGrandTotal-(Number(nowDraft.amtPaid)||0));
 
-  const openEdit=()=>{setDraft({date:b.date,time:b.time,service:b.service,staff:b.staff,remark:b.remark||"",payStatus:b.payStatus,payMethod:b.payMethod||"",amtPaid:b.amtPaid||0,tip:b.tip||0,txnId:b.txnId||"",seat:b.seat||""});setEdit(true);};
+  const openEdit=()=>{setDraft({date:b.date,time:b.time,service:b.service,staff:b.staff,remark:b.remark||"",payStatus:b.payStatus,payMethod:b.payMethod||"",amtPaid:b.amtPaid||0,tip:b.tip||0,txnId:b.txnId||"",seat:b.seat||"",products:Array.isArray(b.products)?b.products:[]});setEdit(true);setDraftProdSearch("");};
   const saveEdit=()=>{onSave(b,{...draft,amtPaid:Number(draft.amtPaid)||0,tip:Number(draft.tip)||0});setEdit(false);};
   // If triggered from notification, open edit mode immediately
   if(autoEdit&&!edit&&!draft&&b.status!=="cancelled"){openEdit();}
@@ -371,12 +375,13 @@ function DetailModal({booking,onClose,onAccept,onCancel,onSave,onReschedule,leav
             <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:8}}>
               <span style={{fontSize:18}}>{b.payStatus==="paid"?"✅":b.payStatus==="partial"?"⚠️":"❌"}</span>
               <div style={{flex:1}}><div style={{fontWeight:700,fontSize:14,color:pc.tx}}>{b.payStatus==="paid"?"Payment Successful":"Payment Pending"} — {b.payStatus}</div>{b.payMethod&&<div style={{fontSize:12,color:pc.tx,opacity:.8}}>{PAY_ICONS[b.payMethod]} {b.payMethod.toUpperCase()}</div>}{b.txnId&&<div style={{fontSize:11,color:pc.tx,opacity:.7,fontFamily:"monospace"}}>{b.txnId}</div>}</div>
-              <div style={{fontWeight:700,fontSize:16,color:pc.tx}}>RM {price}</div>
+              <div style={{fontWeight:700,fontSize:16,color:pc.tx}}>RM {price+bProdTotal}</div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7}}>
               <div style={{background:"rgba(255,255,255,0.7)",borderRadius:8,padding:"7px 10px"}}><div style={{fontSize:10,color:pc.tx,opacity:.7}}>Amount Paid</div><div style={{fontSize:16,fontWeight:700,color:"#15803d"}}>RM {b.amtPaid||0}</div></div>
-              <div style={{background:"rgba(255,255,255,0.7)",borderRadius:8,padding:"7px 10px"}}><div style={{fontSize:10,color:pc.tx,opacity:.7}}>{balance===0?"Fully Paid":"Remaining Balance"}</div><div style={{fontSize:16,fontWeight:700,color:balance===0?"#15803d":"#991b1b"}}>{balance===0?"✓ Paid":`RM ${balance}`}</div></div>
+              <div style={{background:"rgba(255,255,255,0.7)",borderRadius:8,padding:"7px 10px"}}><div style={{fontSize:10,color:pc.tx,opacity:.7}}>{balance===0?"Fully Paid":"Outstanding"}</div><div style={{fontSize:16,fontWeight:700,color:balance===0?"#15803d":"#991b1b"}}>{balance===0?"✓ Paid":`RM ${balance}`}</div></div>
             </div>
+            {bProdTotal>0&&<div style={{marginTop:7,background:"rgba(255,255,255,0.7)",borderRadius:8,padding:"7px 10px"}}><div style={{fontSize:10,color:pc.tx,opacity:.7}}>Products</div><div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:3}}>{(Array.isArray(b.products)?b.products:[]).map(p=><span key={p.productId} style={{fontSize:11,background:"#f3e8ff",color:"#7c3aed",borderRadius:5,padding:"2px 7px"}}>{p.name} ×{p.qty} — RM{p.unitPrice*p.qty}</span>)}</div></div>}
             {b.tip>0&&<div style={{marginTop:7,background:"rgba(255,255,255,0.7)",borderRadius:8,padding:"7px 10px"}}><div style={{fontSize:10,color:pc.tx,opacity:.7}}>Additional Payment (tips)</div><div style={{fontSize:16,fontWeight:700,color:"#7e22ce"}}>RM {b.tip}</div></div>}
           </div>
 
@@ -428,33 +433,39 @@ function DetailModal({booking,onClose,onAccept,onCancel,onSave,onReschedule,leav
               <div style={{display:"flex",flexDirection:"column",gap:7}}>
                 <div><label style={lbl}>Service</label><select value={draft.service} onChange={e=>setDraft(p=>({...p,service:Number(e.target.value)}))} style={inp}>{services.map(s=><option key={s.id} value={s.id}>{s.name} — RM{s.price}</option>)}</select></div>
                 <div><label style={lbl}>Staff</label><select value={draft.staff} onChange={e=>setDraft(p=>({...p,staff:Number(e.target.value)}))} style={inp}>{avail.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></div>
-                <div><label style={lbl}>🪑 Seat / Room</label><select value={draft.seat||""} onChange={e=>setDraft(p=>({...p,seat:e.target.value}))} style={inp}><option value="">— Not assigned —</option>{SEATS.map(s=><option key={s} value={s}>{s}</option>)}</select></div>
+                <div><label style={lbl}>🪑 Seat / Room</label><select value={draft.seat||""} onChange={e=>setDraft(p=>({...p,seat:e.target.value}))} style={inp}><option value="">— Not assigned —</option>{(seats||DEFAULT_SEATS).map(s=><option key={s} value={s}>{s}</option>)}</select></div>
               </div>
             </div>
             <div><label style={lbl}>💬 Remark</label><input value={draft.remark} onChange={e=>setDraft(p=>({...p,remark:e.target.value}))} placeholder="Special request..." style={inp}/></div>
+            {/* Products in edit */}
+            <ProductPicker products={products||[]} selected={draft.products||[]} search={draftProdSearch} onSearch={setDraftProdSearch}
+              onAdd={p=>{const sp=p.offerPrice||p.price;setDraft(prev=>({...prev,products:[...(prev.products||[]),{productId:p.id,name:p.name,unitPrice:sp,qty:1}]}));}}
+              onQty={(pid,qty)=>setDraft(prev=>({...prev,products:qty>0?(prev.products||[]).map(x=>x.productId===pid?{...x,qty}:x):(prev.products||[]).filter(x=>x.productId!==pid)}))}
+            />
             <div style={{background:"var(--bg)",borderRadius:8,padding:"9px 11px"}}>
               <div style={{fontSize:9,fontWeight:700,color:"#7e22ce",marginBottom:6}}>💳 Payment</div>
-              <div style={{display:"flex",gap:4,marginBottom:7}}>{["paid","unpaid","partial"].map(ps=>{const pc2=PC[ps];const sel=draft.payStatus===ps;return <button key={ps} onClick={()=>setDraft(p=>({...p,payStatus:ps}))} style={{flex:1,padding:"5px 2px",borderRadius:5,border:sel?`2px solid ${pc2.br}`:"1px solid var(--border)",background:sel?pc2.bg:"#fff",color:sel?pc2.tx:"#9090b0",fontWeight:sel?700:400,fontSize:9,cursor:"pointer"}}>{ps}</button>;})}
+              <div style={{display:"flex",gap:4,marginBottom:7}}>{["paid","unpaid","partial"].map(ps=>{const pc2=PC[ps];const sel=draft.payStatus===ps;return <button key={ps} onClick={()=>{const curProdTotal=(Array.isArray(draft.products)?draft.products:[]).reduce((s,p)=>s+p.unitPrice*p.qty,0);const full=dPrice+curProdTotal;setDraft(p=>({...p,payStatus:ps,amtPaid:ps==="paid"?full:ps==="unpaid"?0:p.amtPaid}));}} style={{flex:1,padding:"7px 2px",borderRadius:7,border:sel?`2px solid ${pc2.br}`:"1px solid var(--border)",background:sel?pc2.bg:"var(--surface)",color:sel?pc2.tx:"var(--text-muted)",fontWeight:sel?700:400,fontSize:10,cursor:"pointer"}}>{ps==="paid"?"✅ PAID":ps==="unpaid"?"❌ UNPAID":"⚠️ PARTIAL"}</button>;})}
               </div>
+              {draft.payStatus==="partial"&&<div style={{padding:"6px 9px",background:"#fffbeb",borderRadius:6,border:"1px solid #fcd34d",fontSize:11,color:"#92400e",marginBottom:6}}>Outstanding: <strong>RM {dBal}</strong> — fill the amount received below</div>}
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7,marginBottom:6}}>
                 <div><label style={lbl}>Method</label><select value={draft.payMethod} onChange={e=>setDraft(p=>({...p,payMethod:e.target.value}))} style={inp}><option value="">Select...</option>{PAY_METHODS.map(k=><option key={k} value={k}>{PAY_ICONS[k]} {k}</option>)}</select></div>
-                <div><label style={lbl}>Amt Paid (RM)</label>
+                {draft.payStatus!=="unpaid"&&<div><label style={lbl}>Amt Paid (RM)</label>
                   <div style={{position:"relative"}}>
                     <span style={{position:"absolute",left:13,top:"50%",transform:"translateY(-50%)",fontSize:13,color:"var(--text-muted)",fontWeight:600,pointerEvents:"none"}}>RM</span>
-                    <input type="number" min={0} value={draft.amtPaid} onChange={e=>setDraft(p=>({...p,amtPaid:e.target.value===""?"":Number(e.target.value)}))} style={{...inp,paddingLeft:38}}/>
+                    <input type="number" min={0} max={dGrandTotal} value={draft.amtPaid} onChange={e=>setDraft(p=>({...p,amtPaid:e.target.value===""?"":Number(e.target.value)}))} onWheel={e=>e.target.blur()} style={{...inp,paddingLeft:38}}/>
                   </div>
-                </div>
+                </div>}
               </div>
               <div style={{marginBottom:6}}>
                 <label style={lbl}>Additional Payment (RM) — tips, etc.</label>
                 <div style={{position:"relative"}}>
                   <span style={{position:"absolute",left:13,top:"50%",transform:"translateY(-50%)",fontSize:13,color:"var(--text-muted)",fontWeight:600,pointerEvents:"none"}}>RM</span>
-                  <input type="number" min={0} value={draft.tip} onChange={e=>setDraft(p=>({...p,tip:e.target.value===""?"":Number(e.target.value)}))} placeholder="0" style={{...inp,paddingLeft:38}}/>
+                  <input type="number" min={0} value={draft.tip} onChange={e=>setDraft(p=>({...p,tip:e.target.value===""?"":Number(e.target.value)}))} onWheel={e=>e.target.blur()} placeholder="0" style={{...inp,paddingLeft:38}}/>
                 </div>
               </div>
               <div style={{display:"flex",justifyContent:"space-between",padding:"5px 8px",background:"var(--surface)",borderRadius:5,border:"1px solid var(--border)",fontSize:11,marginBottom:6}}>
-                <span>Total: <strong>RM {dPrice}</strong>{Number(draft.tip)>0&&<span style={{color:"#7e22ce"}}> + RM{Number(draft.tip)} tip</span>}</span>
-                <span style={{color:dBal===0?"#15803d":"#991b1b",fontWeight:600}}>Balance: RM {dBal}</span>
+                <span>Total: <strong>RM {dGrandTotal}</strong>{Number(draft.tip)>0&&<span style={{color:"#7e22ce"}}> + RM{Number(draft.tip)} tip</span>}{dProdTotal>0&&dPrice>0&&<span style={{color:"var(--text-muted)",fontSize:10}}> (svc+prod)</span>}</span>
+                <span style={{color:dBal===0?"#15803d":"#991b1b",fontWeight:600}}>{dBal===0?"Fully paid":"Bal: RM "+dBal}</span>
               </div>
               <div><label style={lbl}>TXN No.</label><input value={draft.txnId} onChange={e=>setDraft(p=>({...p,txnId:e.target.value}))} placeholder="TXN..." style={inp}/></div>
             </div>
@@ -626,28 +637,29 @@ function CloseDayModal({show,onClose,initialDate,closedDates,closedWeekdays,onMa
 }
 
 // ─── ADD SERVICE MODAL ───────────────────────────────────────────────────────
-function ServiceModal({onClose,onSave}){
-  const [form,setForm]=useState({name:"",price:"",duration:30});
+function ServiceModal({service,onClose,onSave}){
+  const isEdit=!!service;
+  const [form,setForm]=useState(service?{name:service.name,price:service.price,duration:service.duration}:{name:"",price:"",duration:30});
   const up=(k,v)=>setForm(p=>({...p,[k]:v}));
+  const DURATIONS=[15,20,30,45,60,75,90,120];
   return(
     <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:400,display:"flex",alignItems:"center",justifyContent:"center",padding:12}}>
       <div onClick={e=>e.stopPropagation()} style={{background:"var(--surface)",borderRadius:16,padding:20,width:400,maxWidth:"100%",boxShadow:"0 24px 64px rgba(0,0,0,0.25)"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-          <div style={{fontWeight:700,fontSize:16,color:"var(--text)"}}>Add Service</div>
+          <div style={{fontWeight:700,fontSize:16,color:"var(--text)"}}>{isEdit?"✏️ Edit Service":"➕ Add Service"}</div>
           <button onClick={onClose} style={{background:"none",border:"none",fontSize:24,cursor:"pointer",color:"var(--text-muted)",padding:"0 4px"}}>×</button>
         </div>
         <div style={{display:"flex",flexDirection:"column",gap:10}}>
           <div><label style={lbl}>Service Name</label><input value={form.name} onChange={e=>up("name",e.target.value)} placeholder="e.g. Hot Oil Massage" style={inp}/></div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}>
-            <div><label style={lbl}>Price (RM)</label><input type="number" min={0} value={form.price} onChange={e=>up("price",Number(e.target.value))} style={inp}/></div>
+            <div><label style={lbl}>Price (RM)</label><input type="number" min={0} value={form.price} onChange={e=>up("price",e.target.value)} onWheel={e=>e.target.blur()} style={inp}/></div>
             <div><label style={lbl}>Duration</label>
-              <select value={form.duration} onChange={e=>up("duration",Number(e.target.value))} style={inp}>
-                <option value={30}>30 min</option>
-                <option value={60}>60 min</option>
+              <select value={form.duration} onChange={e=>up("duration",Number(e.target.value))} onWheel={e=>e.target.blur()} style={inp}>
+                {DURATIONS.map(d=><option key={d} value={d}>{d} min</option>)}
               </select>
             </div>
           </div>
-          <button onClick={()=>{if(!form.name||!form.price)return;onSave(form);}} style={pBtn({padding:"10px 0",fontSize:13})}>Add Service</button>
+          <button onClick={()=>{if(!form.name||!form.price)return;onSave({...form,id:service?.id});}} style={pBtn({padding:"10px 0",fontSize:13})}>{isEdit?"Save Changes":"Add Service"}</button>
         </div>
       </div>
     </div>
@@ -810,7 +822,7 @@ function ProductModal({product,onClose,onSave}){
   const isNew=!product;
   const [f,setF]=useState(product||{name:"",description:"",price:"",offerPrice:"",discount:"",inventory:"",category:"",image:""});
   const up=(k,v)=>setF(p=>({...p,[k]:v}));
-  const handleImg=e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>up("image",ev.target.result);reader.readAsDataURL(file);};
+  const handleImg=e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{const img=new Image();img.onload=()=>{const MAX=600;const scale=Math.min(1,MAX/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext("2d").drawImage(img,0,0,c.width,c.height);up("image",c.toDataURL("image/jpeg",0.75));};img.src=ev.target.result;};reader.readAsDataURL(file);};
   return(
     <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",padding:12}}>
       <div onClick={e=>e.stopPropagation()} style={{background:"var(--surface)",borderRadius:16,padding:20,width:480,maxWidth:"100%",maxHeight:"93vh",overflowY:"auto",boxShadow:"0 24px 64px rgba(0,0,0,0.25)"}}>
@@ -945,6 +957,12 @@ export default function BeaubookDashboard(){
   const [closedWeekdays,setClosedWeekdays]=useState([]);
   const [services,setServices]=useState([]);
   const [addService,setAddService]=useState(false);
+  const [editService,setEditService]=useState(null);
+  const [seats,setSeats]=useState(DEFAULT_SEATS);
+  const [seatInput,setSeatInput]=useState("");
+  const [analyticsRange,setAnalyticsRange]=useState("month");
+  const [analyticsFrom,setAnalyticsFrom]=useState("");
+  const [analyticsTo,setAnalyticsTo]=useState("");
   const [products,setProducts]=useState([]);
   const [editProduct,setEditProduct]=useState(null);
   const [addProduct,setAddProduct]=useState(false);
@@ -989,6 +1007,7 @@ export default function BeaubookDashboard(){
     fetch("/api/settings").then(r=>r.json()).then(s=>{
       setSettings(s);
       setProfileForm({companyName:s.companyName||"",location:s.location||"",contactPhone:s.contactPhone||"",address:s.address||"",personInCharge:s.personInCharge||"",facebook:s.facebook||"",instagram:s.instagram||"",tiktok:s.tiktok||"",xhs:s.xhs||"",youtube:s.youtube||"",twitter:s.twitter||"",whatsapp:s.whatsapp||""});
+      if(Array.isArray(s.seats)&&s.seats.length>0)setSeats(s.seats);
     });
   },[]);
 
@@ -1083,6 +1102,16 @@ export default function BeaubookDashboard(){
   }
   function handleAddService(form){
     fetch("/api/services",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)}).then(r=>r.json()).then(created=>{setServices(p=>[...p,created]);setAddService(false);showToast("Service added!");});
+  }
+  function handleEditServiceSave(form){
+    fetch(`/api/services/${form.id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)}).then(r=>r.json()).then(updated=>{setServices(p=>p.map(s=>s.id===updated.id?updated:s));setEditService(null);showToast("Service updated!");});
+  }
+  function handleDeleteService(id){
+    fetch(`/api/services/${id}`,{method:"DELETE"}).then(()=>{setServices(p=>p.filter(s=>s.id!==id));showToast("Service deleted.","error");});
+  }
+  function handleSaveSeats(newSeats){
+    setSeats(newSeats);
+    fetch("/api/settings",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({seats:newSeats})}).catch(()=>{});
   }
 
   function handleAccept(id){patchBooking(id,{status:"confirmed"}).then(updated=>{setBookings(p=>p.map(b=>b.id===id?updated:b));setSelBooking(p=>p?.id===id?updated:p);showToast("Booking confirmed!");});}
@@ -1726,7 +1755,8 @@ export default function BeaubookDashboard(){
                     <div style={{fontWeight:800,fontSize:18,color:"#7c3aed",letterSpacing:"-0.5px"}}>RM {s.price}</div>
                     <div style={{fontSize:11,color:"var(--text-muted)",marginTop:1}}>per session</div>
                   </div>
-                  <button style={gBtn({fontSize:12,padding:"7px 14px"})}>Edit</button>
+                  <button onClick={()=>setEditService(s)} style={gBtn({fontSize:12,padding:"7px 14px"})}>Edit</button>
+                  <button onClick={()=>{if(window.confirm(`Delete "${s.name}"?`))handleDeleteService(s.id);}} style={{padding:"7px 14px",borderRadius:"var(--radius,12px)",border:"1px solid #fca5a5",background:"#fef2f2",color:"#991b1b",cursor:"pointer",fontSize:12,fontWeight:600}}>Delete</button>
                 </div>
               ))}
             </div>
@@ -1777,59 +1807,112 @@ export default function BeaubookDashboard(){
             {(addProduct||editProduct)&&<ProductModal product={editProduct} onClose={()=>{setAddProduct(false);setEditProduct(null);}} onSave={(form)=>handleSaveProduct(form,!editProduct)}/>}
           </div>}
 
-          {tab==="analytics"&&<div>
-            <h1 style={{margin:"0 0 18px",fontSize:26,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px"}}>{t("nav.analytics")}</h1>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14,marginBottom:16}}>
-              {[{l:"This Month Revenue",v:"RM 1,840",c:"+18%",acc:"#7c3aed"},{l:"Total Bookings",v:"38",c:"+12%",acc:"#0891b2"},{l:"Avg per Booking",v:"RM 120",c:"+5%",acc:"#16a34a"}].map(s=>(
-                <div key={s.l} style={statCard(s.acc,{padding:"20px 22px"})}>
-                  <div style={{fontSize:11,color:"var(--text-muted)",marginBottom:10,textTransform:"uppercase",letterSpacing:"0.05em",fontWeight:600}}>{s.l}</div>
-                  <div style={{fontSize:28,fontWeight:800,color:"var(--text)",letterSpacing:"-1px",lineHeight:1,marginBottom:6}}>{s.v}</div>
-                  <div style={{fontSize:12,color:"#16a34a",fontWeight:700,display:"flex",alignItems:"center",gap:4}}><span>↑</span> {s.c} vs last month</div>
-                </div>
-              ))}
-            </div>
-            <div style={card({padding:18,marginBottom:14})}>
-              <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>Payment Overview</div>
-              <div style={{display:"flex",gap:10}}>
-                {Object.entries(PC).map(([k,c])=>{const cnt=bookings.filter(b=>b.payStatus===k).length;const paid=bookings.filter(b=>b.payStatus===k).reduce((s,b)=>s+(b.amtPaid||0),0);const total=bookings.filter(b=>b.payStatus===k).reduce((s,b)=>s+(svc(b.service)?.price||0),0);return(
-                  <div key={k} style={{flex:1,padding:"12px 10px",background:c.bg,border:`1px solid ${c.br}`,borderRadius:12,textAlign:"center"}}>
-                    <div style={{fontSize:22,fontWeight:700,color:c.tx}}>{cnt}</div>
-                    <div style={{fontSize:11,color:c.tx,fontWeight:600,marginBottom:4,textTransform:"capitalize"}}>{k}</div>
-                    <div style={{fontSize:10,color:c.tx,opacity:.7}}>Paid: RM{paid}</div>
-                    <div style={{fontSize:10,color:c.tx,opacity:.7}}>Total: RM{total}</div>
-                  </div>
-                );})}
+          {tab==="analytics"&&(()=>{
+            // ── Date range filter ──────────────────────────────
+            const today=TODAY;
+            const d=new Date(today);
+            const weekStart=new Date(d);weekStart.setDate(d.getDate()-d.getDay());
+            const monthStart=`${today.slice(0,7)}-01`;
+            const yearStart=`${today.slice(0,4)}-01-01`;
+            const fmt=dt=>dt.toISOString().split("T")[0];
+            const ranges={today:{from:today,to:today},week:{from:fmt(weekStart),to:today},month:{from:monthStart,to:today},year:{from:yearStart,to:today},custom:{from:analyticsFrom||monthStart,to:analyticsTo||today}};
+            const{from:rFrom,to:rTo}=ranges[analyticsRange]||ranges.month;
+            const inRange=b=>b.date>=rFrom&&b.date<=rTo;
+            const activeBk=bookings.filter(b=>b.status!=="cancelled"&&inRange(b));
+            const svcRevenue=activeBk.reduce((s,b)=>s+(svc(b.service)?.price||0),0);
+            const prodRevenue=activeBk.flatMap(b=>Array.isArray(b.products)?b.products:[]).reduce((s,p)=>s+p.unitPrice*p.qty,0);
+            const totalRev=svcRevenue+prodRevenue;
+            const totalPaid=activeBk.reduce((s,b)=>s+(b.amtPaid||0),0);
+            const totalOutstanding=activeBk.filter(b=>b.payStatus!=="paid").reduce((s,b)=>{const gt=(svc(b.service)?.price||0)+(Array.isArray(b.products)?b.products:[]).reduce((a,p)=>a+p.unitPrice*p.qty,0);return s+Math.max(0,gt-(b.amtPaid||0));},0);
+            // Sales records (all bookings with products in range)
+            const salesRecords=bookings.filter(b=>b.status!=="cancelled"&&inRange(b)&&Array.isArray(b.products)&&b.products.length>0).sort((a,b)=>b.date.localeCompare(a.date));
+            return(<div>
+              <h1 style={{margin:"0 0 14px",fontSize:26,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px"}}>{t("nav.analytics")}</h1>
+              {/* Date range filter */}
+              <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:16,alignItems:"center"}}>
+                {[["today","Today"],["week","This Week"],["month","This Month"],["year","This Year"],["custom","Custom"]].map(([k,l])=>(
+                  <button key={k} onClick={()=>setAnalyticsRange(k)} style={{padding:"6px 14px",borderRadius:8,border:analyticsRange===k?"2px solid #7e22ce":"1px solid var(--border)",background:analyticsRange===k?"#f3e8ff":"var(--surface)",color:analyticsRange===k?"#7e22ce":"var(--text-muted)",fontWeight:analyticsRange===k?700:400,fontSize:12,cursor:"pointer"}}>{l}</button>
+                ))}
+                {analyticsRange==="custom"&&<div style={{display:"flex",gap:6,alignItems:"center"}}>
+                  <input type="date" value={analyticsFrom} onChange={e=>setAnalyticsFrom(e.target.value)} style={{...inp,width:"auto",fontSize:12,padding:"5px 9px"}}/>
+                  <span style={{fontSize:12,color:"var(--text-muted)"}}>to</span>
+                  <input type="date" value={analyticsTo} onChange={e=>setAnalyticsTo(e.target.value)} style={{...inp,width:"auto",fontSize:12,padding:"5px 9px"}}/>
+                </div>}
               </div>
-            </div>
-            <div style={card({padding:18,marginBottom:14})}>
-              <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>Top Services</div>
-              {services.map(s=>{const cnt=bookings.filter(b=>b.service===s.id&&b.status!=="cancelled").length;const mx=Math.max(...services.map(sv=>bookings.filter(b=>b.service===sv.id&&b.status!=="cancelled").length),1);return(
-                <div key={s.id} style={{marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"var(--text-muted)",marginBottom:4}}><span>{s.name}</span><span style={{fontWeight:600,color:"#7e22ce"}}>{cnt} · RM{cnt*s.price}</span></div><div style={{height:6,background:"#f3e8ff",borderRadius:3}}><div style={{height:"100%",width:`${(cnt/mx)*100}%`,background:"linear-gradient(90deg,#a855f7,#7e22ce)",borderRadius:3}}/></div></div>
-              );})}
-            </div>
-            {products.length>0&&(()=>{
-              const allSoldItems=bookings.filter(b=>b.status!=="cancelled").flatMap(b=>Array.isArray(b.products)?b.products:[]);
-              const productSalesMap={};allSoldItems.forEach(item=>{if(!productSalesMap[item.productId])productSalesMap[item.productId]={name:item.name,qty:0,revenue:0};productSalesMap[item.productId].qty+=item.qty;productSalesMap[item.productId].revenue+=item.unitPrice*item.qty;});
-              const productSales=Object.values(productSalesMap).sort((a,b)=>b.revenue-a.revenue);
-              const totalProductRev=productSales.reduce((s,p)=>s+p.revenue,0);
-              const maxRev=Math.max(...productSales.map(p=>p.revenue),1);
-              return(<div style={card({padding:18})}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-                  <div style={{fontWeight:700,fontSize:14,color:"var(--text)"}}> Product Sales</div>
-                  <div style={{fontSize:13,fontWeight:800,color:"#7c3aed"}}>Total: RM{totalProductRev}</div>
-                </div>
-                {productSales.length===0?<div style={{textAlign:"center",color:"var(--text-muted)",fontSize:12,padding:"16px 0"}}>No product sales yet.</div>:productSales.map(p=>(
-                  <div key={p.name} style={{marginBottom:10}}>
-                    <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"var(--text-muted)",marginBottom:4}}>
-                      <span>{p.name}</span>
-                      <span style={{fontWeight:600,color:"#7e22ce"}}>{p.qty} sold · RM{p.revenue}</span>
-                    </div>
-                    <div style={{height:6,background:"#f3e8ff",borderRadius:3}}><div style={{height:"100%",width:`${(p.revenue/maxRev)*100}%`,background:"linear-gradient(90deg,#10b981,#0d9488)",borderRadius:3}}/></div>
+              {/* Stat cards */}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:12,marginBottom:16}}>
+                {[{l:"Total Revenue",v:`RM ${totalRev}`,acc:"#7c3aed"},{l:"Amount Collected",v:`RM ${totalPaid}`,acc:"#16a34a"},{l:"Outstanding",v:`RM ${totalOutstanding}`,acc:"#dc2626"},{l:"Bookings",v:activeBk.length,acc:"#0891b2"},{l:"Product Revenue",v:`RM ${prodRevenue}`,acc:"#10b981"}].map(s=>(
+                  <div key={s.l} style={statCard(s.acc,{padding:"16px 18px"})}>
+                    <div style={{fontSize:10,color:"var(--text-muted)",marginBottom:8,textTransform:"uppercase",letterSpacing:"0.05em",fontWeight:600}}>{s.l}</div>
+                    <div style={{fontSize:22,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px",lineHeight:1}}>{s.v}</div>
                   </div>
                 ))}
-              </div>);
-            })()}
-          </div>}
+              </div>
+              {/* Payment overview */}
+              <div style={card({padding:18,marginBottom:14})}>
+                <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>Payment Overview</div>
+                <div style={{display:"flex",gap:10}}>
+                  {Object.entries(PC).map(([k,c])=>{const cnt=activeBk.filter(b=>b.payStatus===k).length;const paid=activeBk.filter(b=>b.payStatus===k).reduce((s,b)=>s+(b.amtPaid||0),0);return(
+                    <div key={k} style={{flex:1,padding:"12px 10px",background:c.bg,border:`1px solid ${c.br}`,borderRadius:12,textAlign:"center"}}>
+                      <div style={{fontSize:22,fontWeight:700,color:c.tx}}>{cnt}</div>
+                      <div style={{fontSize:11,color:c.tx,fontWeight:600,marginBottom:4,textTransform:"capitalize"}}>{k}</div>
+                      <div style={{fontSize:10,color:c.tx,opacity:.7}}>Paid: RM{paid}</div>
+                    </div>
+                  );})}
+                </div>
+              </div>
+              {/* Top services */}
+              <div style={card({padding:18,marginBottom:14})}>
+                <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>Top Services</div>
+                {services.map(sv2=>{const cnt2=activeBk.filter(b=>b.service===sv2.id).length;const mx2=Math.max(...services.map(x=>activeBk.filter(b=>b.service===x.id).length),1);return(
+                  <div key={sv2.id} style={{marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"var(--text-muted)",marginBottom:4}}><span>{sv2.name}</span><span style={{fontWeight:600,color:"#7e22ce"}}>{cnt2} · RM{cnt2*sv2.price}</span></div><div style={{height:6,background:"#f3e8ff",borderRadius:3}}><div style={{height:"100%",width:`${(cnt2/mx2)*100}%`,background:"linear-gradient(90deg,#a855f7,#7e22ce)",borderRadius:3}}/></div></div>
+                );})}
+                {services.length===0&&<div style={{textAlign:"center",color:"var(--text-muted)",fontSize:12,padding:"8px 0"}}>No services.</div>}
+              </div>
+              {/* Product sales bar chart */}
+              {(()=>{
+                const allSoldItems=activeBk.flatMap(b=>Array.isArray(b.products)?b.products:[]);
+                if(allSoldItems.length===0)return null;
+                const map={};allSoldItems.forEach(item=>{if(!map[item.productId])map[item.productId]={name:item.name,qty:0,revenue:0};map[item.productId].qty+=item.qty;map[item.productId].revenue+=item.unitPrice*item.qty;});
+                const ps=Object.values(map).sort((a,b)=>b.revenue-a.revenue);
+                const totalProdRev=ps.reduce((s,p)=>s+p.revenue,0);
+                const maxRev=Math.max(...ps.map(p=>p.revenue),1);
+                return(<div style={card({padding:18,marginBottom:14})}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+                    <div style={{fontWeight:700,fontSize:14,color:"var(--text)"}}>🛍️ Product Sales</div>
+                    <div style={{fontSize:13,fontWeight:800,color:"#7c3aed"}}>Total: RM{totalProdRev}</div>
+                  </div>
+                  {ps.map(p=>(<div key={p.name} style={{marginBottom:10}}>
+                    <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"var(--text-muted)",marginBottom:4}}><span>{p.name}</span><span style={{fontWeight:600,color:"#7e22ce"}}>{p.qty} sold · RM{p.revenue}</span></div>
+                    <div style={{height:6,background:"#f3e8ff",borderRadius:3}}><div style={{height:"100%",width:`${(p.revenue/maxRev)*100}%`,background:"linear-gradient(90deg,#10b981,#0d9488)",borderRadius:3}}/></div>
+                  </div>))}
+                </div>);
+              })()}
+              {/* Sales records table */}
+              {salesRecords.length>0&&<div style={card({padding:18,marginBottom:14})}>
+                <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>📋 Sales Records</div>
+                <div style={{overflowX:"auto"}}>
+                  <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
+                    <thead><tr style={{borderBottom:"2px solid var(--border)"}}>
+                      {["Date","Customer","Items Sold","Amount"].map(h=><th key={h} style={{textAlign:"left",padding:"6px 8px",color:"var(--text-muted)",fontWeight:700,fontSize:11,textTransform:"uppercase",letterSpacing:"0.04em"}}>{h}</th>)}
+                    </tr></thead>
+                    <tbody>
+                      {salesRecords.map(b=>{
+                        const bProd=Array.isArray(b.products)?b.products:[];
+                        const bTotal=bProd.reduce((s,p)=>s+p.unitPrice*p.qty,0)+(svc(b.service)?.price||0);
+                        return(<tr key={b.id} style={{borderBottom:"1px solid var(--border)",cursor:"pointer"}} onClick={()=>setSelBooking(b)}>
+                          <td style={{padding:"8px 8px",color:"var(--text)"}}>{b.date}</td>
+                          <td style={{padding:"8px 8px",color:"var(--text)",fontWeight:500}}>{b.customer}</td>
+                          <td style={{padding:"8px 8px",color:"var(--text-muted)"}}>{bProd.map(p=>`${p.name}×${p.qty}`).join(", ")}</td>
+                          <td style={{padding:"8px 8px",fontWeight:700,color:"#7c3aed"}}>RM{bTotal}</td>
+                        </tr>);
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>}
+            </div>);
+          })()}
 
           {/* ═══ SETTINGS ═══ */}
           {tab==="settings"&&<div>
@@ -1957,6 +2040,23 @@ export default function BeaubookDashboard(){
                 </div>
               </div>
 
+              {/* Seats & Rooms */}
+              <div style={card({padding:22})}>
+                <div style={{fontWeight:700,fontSize:15,color:"var(--text)",marginBottom:14,paddingBottom:12,borderBottom:"1px solid var(--border)"}}>🪑 Seats & Rooms</div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:12}}>
+                  {seats.map((s,i)=>(
+                    <div key={i} style={{display:"flex",alignItems:"center",gap:5,padding:"5px 10px",background:"var(--bg)",borderRadius:8,border:"1px solid var(--border)",fontSize:13}}>
+                      <span>{s}</span>
+                      <button onClick={()=>handleSaveSeats(seats.filter((_,j)=>j!==i))} style={{background:"none",border:"none",cursor:"pointer",color:"#991b1b",fontSize:16,lineHeight:1,padding:0}}>×</button>
+                    </div>
+                  ))}
+                </div>
+                <div style={{display:"flex",gap:8}}>
+                  <input value={seatInput} onChange={e=>setSeatInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&seatInput.trim()){handleSaveSeats([...seats,seatInput.trim()]);setSeatInput("");}}} placeholder="e.g. VIP Room 2" style={{...inp,flex:1}}/>
+                  <button onClick={()=>{if(!seatInput.trim())return;handleSaveSeats([...seats,seatInput.trim()]);setSeatInput("");}} style={pBtn({padding:"9px 18px",fontSize:13})}>Add</button>
+                </div>
+              </div>
+
               {/* Sign Out */}
               <div style={card({padding:22})}>
                 <div style={{fontWeight:700,fontSize:15,color:"var(--text)",marginBottom:4,paddingBottom:12,borderBottom:"1px solid var(--border)"}}>Sign Out</div>
@@ -1973,16 +2073,16 @@ export default function BeaubookDashboard(){
       </div>
 
       {/* ─── MODALS ─── */}
-      <AddModal show={showAdd} onClose={()=>setShowAdd(false)} onAdd={handleAddBooking} initialDate={addDate} initialTime={addTime} initialStaff={addInitStaff} leaveRecords={leaveRecords} staffList={staffList} services={services} products={products}/>
+      <AddModal show={showAdd} onClose={()=>setShowAdd(false)} onAdd={handleAddBooking} initialDate={addDate} initialTime={addTime} initialStaff={addInitStaff} leaveRecords={leaveRecords} staffList={staffList} services={services} products={products} seats={seats}/>
       <QuickSaleModal show={showQuickSale} onClose={()=>setShowQuickSale(false)} onSave={handleQuickSale} products={products}/>
-      <DetailModal booking={selBooking} onClose={()=>{setSelBooking(null);setNotifTriggered(false);}} onAccept={handleAccept} onCancel={handleCancel} onSave={handleSaveEdit} onReschedule={handleReschedule} leaveRecords={leaveRecords} staffList={staffList} services={services} autoEdit={notifTriggered}/>
+      <DetailModal booking={selBooking} onClose={()=>{setSelBooking(null);setNotifTriggered(false);}} onAccept={handleAccept} onCancel={handleCancel} onSave={handleSaveEdit} onReschedule={handleReschedule} leaveRecords={leaveRecords} staffList={staffList} services={services} autoEdit={notifTriggered} seats={seats} products={products}/>
+      {(addService||editService)&&<ServiceModal service={editService} onClose={()=>{setAddService(false);setEditService(null);}} onSave={editService?handleEditServiceSave:handleAddService}/>}
       <LeaveModal staffMember={leaveStaff} bookings={bookings} staffList={staffList} services={services} onClose={()=>setLeaveStaff(null)} onConfirm={handleLeave}/>
       <ScheduleModal staffMember={schedStaff} schedule={schedStaff?schedules[schedStaff.id]:null} onClose={()=>setSchedStaff(null)} onSave={handleSaveSched}/>
       {editStaff&&<StaffModal staffMember={editStaff} onClose={()=>setEditStaff(null)} onSave={handleSaveStaff} isNew={false}/>}
       {addStaff&&<StaffModal staffMember={null} onClose={()=>setAddStaff(false)} onSave={handleSaveStaff} isNew={true}/>}
       {editCustomer&&<CustomerEditModal customer={editCustomer} extraData={customerExtra[editCustomer.phone]} onClose={()=>setEditCustomer(null)} onSave={handleSaveCustomer}/>}
       <CloseDayModal show={showCloseDay} onClose={()=>setShowCloseDay(false)} initialDate={selectedDate} closedDates={closedDates} closedWeekdays={closedWeekdays} onMark={handleMarkClosed} onUnmark={handleUnmarkClosed} onMarkWeekday={handleMarkClosedWeekday} onUnmarkWeekday={handleUnmarkClosedWeekday}/>
-      {addService&&<ServiceModal onClose={()=>setAddService(false)} onSave={handleAddService}/>}
       <NotifPanel show={showNotif} onClose={()=>setShowNotif(false)} bookings={bookings} services={services} onSelectBooking={(b)=>{setSelBooking(b);setNotifTriggered(true);setShowNotif(false);setTab("bookings");}} apptToasts={apptToasts} onGoToBookings={()=>{setTab("bookings");setApptToasts([]);setShowNotif(false);}}/>
     </div>
   );

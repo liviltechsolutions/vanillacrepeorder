@@ -119,4 +119,5 @@ model Settings {
   email            String?
   emailVerified    Boolean @default(false)
   emailVerifyToken String?
+  seats            Json    @default("[]")
 }
