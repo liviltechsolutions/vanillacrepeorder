@@ -330,7 +330,10 @@ function DetailModal({booking,onClose,onAccept,onCancel,onSave,onReschedule,onQu
   const [reschedMode,setReschedMode]=useState(false);
   const [reschedDraft,setReschedDraft]=useState({date:"",time:""});
   const [draftProdSearch,setDraftProdSearch]=useState("");
-  const [partialAmt,setPartialAmt]=useState("");
+  const [qStatus,setQStatus]=useState(booking?.payStatus||"unpaid");
+  const [qAmt,setQAmt]=useState(String(booking?.amtPaid||""));
+  const [qMethod,setQMethod]=useState(booking?.payMethod||"");
+  useEffect(()=>{if(booking){setQStatus(booking.payStatus);setQAmt(String(booking.amtPaid||""));setQMethod(booking.payMethod||"");}},[booking?.id,booking?.payStatus,booking?.amtPaid,booking?.payMethod]);
   if(!booking) return null;
   const b=booking;
   const sc=BC[b.status]||BC.confirmed;
@@ -414,27 +417,29 @@ function DetailModal({booking,onClose,onAccept,onCancel,onSave,onReschedule,onQu
             {/* Quick payment */}
             {b.status!=="cancelled"&&<div style={{marginTop:12,padding:"12px 14px",background:"var(--bg)",borderRadius:12,border:"1px solid var(--border)"}}>
               <div style={{fontSize:11,fontWeight:700,color:"var(--text-muted)",marginBottom:8,textTransform:"uppercase",letterSpacing:"0.04em"}}>Payment Status</div>
-              <div style={{display:"flex",gap:6,marginBottom:8}}>
+              <div style={{display:"flex",gap:6,marginBottom:qStatus!=="unpaid"?8:0}}>
                 {[["paid","✅ PAID","#15803d","#f0fdf4","#86efac"],["partial","⚠️ PARTIAL","#92400e","#fffbeb","#fcd34d"],["unpaid","❌ UNPAID","#991b1b","#fef2f2","#fca5a5"]].map(([ps,label,tx,bg,br])=>{
-                  const sel=b.payStatus===ps;
+                  const sel=qStatus===ps;
                   return<button key={ps} onClick={()=>{
-                    if(sel)return;
-                    if(ps==="paid"){onQuickPay(b.id,"paid",price+bProdTotal);}
-                    else if(ps==="unpaid"){onQuickPay(b.id,"unpaid",0);}
-                    else{setPartialAmt(String(b.amtPaid||""));}
-                  }} style={{flex:1,padding:"9px 4px",borderRadius:8,border:sel?`2px solid ${br}`:`1px solid ${br}`,background:sel?bg:"var(--surface)",color:sel?tx:"var(--text-muted)",fontWeight:sel?700:500,fontSize:11,cursor:sel?"default":"pointer"}}>{label}</button>;
+                    if(ps==="paid"){setQStatus("paid");setQAmt(String(price+bProdTotal));}
+                    else if(ps==="unpaid"){onQuickPay(b.id,"unpaid",0,"");}
+                    else{setQStatus("partial");}
+                  }} style={{flex:1,padding:"9px 4px",borderRadius:8,border:sel?`2px solid ${br}`:`1px solid ${br}`,background:sel?bg:"var(--surface)",color:sel?tx:"var(--text-muted)",fontWeight:sel?700:500,fontSize:11,cursor:"pointer"}}>{label}</button>;
                 })}
               </div>
-              {/* Partial amount input — show when selecting partial OR already partial */}
-              {(b.payStatus==="partial"||partialAmt!=="")&&<div style={{display:"flex",flexDirection:"column",gap:6}}>
-                {balance>0&&<div style={{padding:"6px 10px",background:"#fffbeb",border:"1px solid #fcd34d",borderRadius:7,fontSize:12,color:"#92400e",fontWeight:600}}>Outstanding: RM {balance}</div>}
-                <div style={{display:"flex",gap:7,alignItems:"center"}}>
-                  <div style={{position:"relative",flex:1}}>
+              {qStatus!=="unpaid"&&<div style={{display:"flex",flexDirection:"column",gap:6}}>
+                {qStatus==="partial"&&(()=>{const outs=Math.max(0,(price+bProdTotal)-(Number(qAmt)||0));return outs>0?<div style={{padding:"6px 10px",background:"#fffbeb",border:"1px solid #fcd34d",borderRadius:7,fontSize:12,color:"#92400e",fontWeight:600}}>Outstanding: RM {outs}</div>:null;})()}
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
+                  <div style={{position:"relative"}}>
                     <span style={{position:"absolute",left:11,top:"50%",transform:"translateY(-50%)",fontSize:13,color:"var(--text-muted)",fontWeight:600,pointerEvents:"none"}}>RM</span>
-                    <input type="number" min={0} value={partialAmt} onChange={e=>setPartialAmt(e.target.value)} onWheel={e=>e.target.blur()} placeholder={String(b.amtPaid||0)} style={{...inp,paddingLeft:36,fontSize:13}}/>
+                    <input type="number" min={0} value={qAmt} onChange={e=>setQAmt(e.target.value)} onWheel={e=>e.target.blur()} placeholder="0" style={{...inp,paddingLeft:36,fontSize:13,width:"100%",boxSizing:"border-box"}}/>
                   </div>
-                  <button onClick={()=>{if(partialAmt==="")return;onQuickPay(b.id,"partial",Number(partialAmt));setPartialAmt("");}} style={pBtn({padding:"9px 14px",fontSize:12})}>Save</button>
+                  <select value={qMethod} onChange={e=>setQMethod(e.target.value)} onWheel={e=>e.target.blur()} style={inp}>
+                    <option value="">Method...</option>
+                    {PAY_METHODS.map(k=><option key={k} value={k}>{PAY_ICONS[k]} {k.toUpperCase()}</option>)}
+                  </select>
                 </div>
+                <button onClick={()=>onQuickPay(b.id,qStatus,Number(qAmt)||0,qMethod)} style={pBtn({padding:"9px 14px",fontSize:12})}>Save Payment</button>
               </div>}
             </div>}
             {/* Call / WhatsApp */}
@@ -2154,7 +2159,7 @@ export default function BeaubookDashboard(){
       {/* ─── MODALS ─── */}
       <AddModal show={showAdd} onClose={()=>setShowAdd(false)} onAdd={handleAddBooking} initialDate={addDate} initialTime={addTime} initialStaff={addInitStaff} leaveRecords={leaveRecords} staffList={staffList} services={services} products={products} seats={seats}/>
       <QuickSaleModal show={showQuickSale} onClose={()=>setShowQuickSale(false)} onSave={handleQuickSale} products={products}/>
-      <DetailModal booking={selBooking} onClose={()=>{setSelBooking(null);setNotifTriggered(false);}} onAccept={handleAccept} onCancel={handleCancel} onSave={handleSaveEdit} onReschedule={handleReschedule} onQuickPay={(id,ps,amt)=>patchBooking(id,{payStatus:ps,amtPaid:amt}).then(updated=>{setBookings(p=>p.map(b=>b.id===id?updated:b));setSelBooking(updated);showToast("Payment updated!");})} leaveRecords={leaveRecords} staffList={staffList} services={services} autoEdit={notifTriggered} seats={seats} products={products}/>
+      <DetailModal booking={selBooking} onClose={()=>{setSelBooking(null);setNotifTriggered(false);}} onAccept={handleAccept} onCancel={handleCancel} onSave={handleSaveEdit} onReschedule={handleReschedule} onQuickPay={(id,ps,amt,method)=>patchBooking(id,{payStatus:ps,amtPaid:amt,...(method?{payMethod:method}:{})}).then(updated=>{setBookings(p=>p.map(b=>b.id===id?updated:b));setSelBooking(updated);showToast("Payment updated!");})} leaveRecords={leaveRecords} staffList={staffList} services={services} autoEdit={notifTriggered} seats={seats} products={products}/>
       {(addService||editService)&&<ServiceModal service={editService} onClose={()=>{setAddService(false);setEditService(null);}} onSave={editService?handleEditServiceSave:handleAddService}/>}
       <LeaveModal staffMember={leaveStaff} bookings={bookings} staffList={staffList} services={services} onClose={()=>setLeaveStaff(null)} onConfirm={handleLeave}/>
       <ScheduleModal staffMember={schedStaff} schedule={schedStaff?schedules[schedStaff.id]:null} onClose={()=>setSchedStaff(null)} onSave={handleSaveSched}/>
