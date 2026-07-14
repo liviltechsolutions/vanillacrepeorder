@@ -1191,13 +1191,13 @@ export default function BeaubookDashboard(){
                           const covering=getSlotBks(selectedDate,hour,s.id);
                           const onLeave=isOL(s.id,selectedDate);
                           return(
-                            <div key={s.id} onClick={()=>{if(!onLeave){setAddDate(selectedDate);setAddTime(hour);setAddInitStaff(s.id);setShowAdd(true);}}} style={{borderLeft:"1px solid var(--bg)",padding:"3px 5px",minHeight:28,cursor:onLeave?"not-allowed":"pointer",background:onLeave?"repeating-linear-gradient(45deg,#fef2f2,#fef2f2 3px,#fff 3px,#fff 6px)":"transparent"}}>
+                            <div key={s.id} onClick={()=>{if(!onLeave){setAddDate(selectedDate);setAddTime(hour);setAddInitStaff(s.id);setShowAdd(true);}}} style={{borderLeft:"1px solid var(--bg)",padding:"3px 5px",minHeight:28,cursor:onLeave?"not-allowed":"pointer",background:onLeave?"repeating-linear-gradient(45deg,#fef2f2,#fef2f2 3px,#fff 3px,#fff 6px)":"transparent",position:"relative",overflow:"visible"}}>
                               {covering.map(b=>{
                                 const sc=BC[b.status]||BC.confirmed;const pc2=PC[b.payStatus]||PC.unpaid;
                                 const isStart=b.time===hour;
                                 const bm=timeToMin(b.time);const dur=svc(b.service)?.duration||60;const sm=timeToMin(hour);
                                 const isLast=sm+30>=bm+dur;
-                                if(!isStart)return<div key={b.id} onClick={e=>{e.stopPropagation();setSelBooking(b);}} style={{background:sc.bg,borderLeft:`3px solid ${sc.br}`,borderRight:`1px solid ${sc.br}`,borderBottom:isLast?`1px solid ${sc.br}`:"none",borderTop:"none",borderRadius:isLast?"0 0 7px 7px":0,margin:isLast?"-4px -5px 2px -5px":"-4px -5px 0 -5px",minHeight:32,cursor:"pointer",position:"relative",zIndex:2}}/>;
+                                if(!isStart)return<div key={b.id} onClick={e=>{e.stopPropagation();setSelBooking(b);}} style={{position:"absolute",top:-4,bottom:isLast?2:-4,left:0,right:0,background:sc.bg,borderLeft:`3px solid ${sc.br}`,borderRight:`1px solid ${sc.br}`,borderBottom:isLast?`1px solid ${sc.br}`:"none",borderTop:"none",borderRadius:isLast?"0 0 7px 7px":0,cursor:"pointer",zIndex:2}}/>;
                                 return(
                                   <div key={b.id} onClick={e=>{e.stopPropagation();setSelBooking(b);}} style={{background:sc.bg,border:`1px solid ${sc.br}`,borderBottom:isLast?`1px solid ${sc.br}`:"none",borderRadius:isLast?7:"7px 7px 0 0",padding:"4px 7px",marginBottom:isLast?2:-3,cursor:"pointer",position:"relative",zIndex:1}}>
                                     <div style={{fontSize:13,fontWeight:700,color:sc.tx,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{b.customer}</div>
