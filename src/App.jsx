@@ -114,10 +114,12 @@ const ICONS={
 };
 
 // ─── ADD BOOKING MODAL ───────────────────────────────────────────────────────
-function AddModal({show,onClose,onAdd,initialDate,initialTime,leaveRecords,staffList,services}){
-  const [f,setF]=useState({customer:"",phone:"",service:1,staff:1,date:initialDate||TODAY,time:initialTime||"09:00",remark:"",payStatus:"unpaid",payMethod:"",amtPaid:0,tip:0,txnId:"",seat:""});
+function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leaveRecords,staffList,services}){
+  const [f,setF]=useState({customer:"",phone:"",service:1,staff:initialStaff||1,date:initialDate||TODAY,time:initialTime||"09:00",remark:"",payStatus:"unpaid",payMethod:"",amtPaid:0,tip:0,txnId:"",seat:""});
   const [staffWarning,setStaffWarning]=useState(null);
-  useMemo(()=>{if(show)setF(p=>({...p,date:initialDate||TODAY,time:initialTime||"09:00"}));},[show,initialDate,initialTime]);
+  useMemo(()=>{
+    if(show) setF({customer:"",phone:"",service:services[0]?.id||1,staff:initialStaff||(staffList[0]?.id)||1,date:initialDate||TODAY,time:initialTime||"09:00",remark:"",payStatus:"unpaid",payMethod:"",amtPaid:0,tip:0,txnId:"",seat:""});
+  },[show,initialDate,initialTime,initialStaff]);
   useEffect(()=>{if(show)setStaffWarning(null);},[show]);
   const isOL=(sid)=>leaveRecords.some(r=>r.dates.includes(f.date)&&r.staffId===sid);
   const avail=staffList.filter(s=>!isOL(s.id));
@@ -747,6 +749,7 @@ export default function BeaubookDashboard(){
   const [showAdd,setShowAdd]=useState(false);
   const [addDate,setAddDate]=useState(TODAY);
   const [addTime,setAddTime]=useState("09:00");
+  const [addInitStaff,setAddInitStaff]=useState(0);
   const [showNotif,setShowNotif]=useState(false);
   const [toast,setToast]=useState(null);
   const [sidebarOpen,setSidebarOpen]=useState(true);
@@ -1112,7 +1115,7 @@ export default function BeaubookDashboard(){
               </div>
               <div style={{display:"flex",gap:7}}>
                 <button onClick={()=>setShowCloseDay(true)} style={gBtn({display:"flex",alignItems:"center",gap:5,padding:"7px 12px",fontSize:12})}><Icon path={ICONS.lock} size={13}/>Mark Closed</button>
-                <button onClick={()=>{setAddDate(selectedDate);setAddTime("09:00");setShowAdd(true);}} style={pBtn({display:"flex",alignItems:"center",gap:5,padding:"7px 14px",fontSize:12})}><Icon path={ICONS.plus} size={14}/>Add booking</button>
+                <button onClick={()=>{setAddDate(selectedDate);setAddTime("09:00");setAddInitStaff(0);setShowAdd(true);}} style={pBtn({display:"flex",alignItems:"center",gap:5,padding:"7px 14px",fontSize:12})}><Icon path={ICONS.plus} size={14}/>Add booking</button>
               </div>
             </div>
             {unassignedAll.length>0&&<div style={{background:"#fdf4ff",border:"1px solid #e9d5ff",borderRadius:12,padding:"10px 14px",marginBottom:12,display:"flex",alignItems:"center",gap:9}}>
@@ -1173,7 +1176,7 @@ export default function BeaubookDashboard(){
                           const covering=getSlotBks(selectedDate,hour,s.id);
                           const onLeave=isOL(s.id,selectedDate);
                           return(
-                            <div key={s.id} onClick={()=>{if(!onLeave){setAddDate(selectedDate);setAddTime(hour);setShowAdd(true);}}} style={{borderLeft:"1px solid var(--bg)",padding:"3px 5px",minHeight:28,cursor:onLeave?"not-allowed":"pointer",background:onLeave?"repeating-linear-gradient(45deg,#fef2f2,#fef2f2 3px,#fff 3px,#fff 6px)":"transparent"}}>
+                            <div key={s.id} onClick={()=>{if(!onLeave){setAddDate(selectedDate);setAddTime(hour);setAddInitStaff(s.id);setShowAdd(true);}}} style={{borderLeft:"1px solid var(--bg)",padding:"3px 5px",minHeight:28,cursor:onLeave?"not-allowed":"pointer",background:onLeave?"repeating-linear-gradient(45deg,#fef2f2,#fef2f2 3px,#fff 3px,#fff 6px)":"transparent"}}>
                               {covering.map(b=>{
                                 const sc=BC[b.status]||BC.confirmed;const pc2=PC[b.payStatus]||PC.unpaid;
                                 const isStart=b.time===hour;
@@ -1688,7 +1691,7 @@ export default function BeaubookDashboard(){
       </div>
 
       {/* ─── MODALS ─── */}
-      <AddModal show={showAdd} onClose={()=>setShowAdd(false)} onAdd={handleAddBooking} initialDate={addDate} initialTime={addTime} leaveRecords={leaveRecords} staffList={staffList} services={services}/>
+      <AddModal show={showAdd} onClose={()=>setShowAdd(false)} onAdd={handleAddBooking} initialDate={addDate} initialTime={addTime} initialStaff={addInitStaff} leaveRecords={leaveRecords} staffList={staffList} services={services}/>
       <DetailModal booking={selBooking} onClose={()=>{setSelBooking(null);setNotifTriggered(false);}} onAccept={handleAccept} onCancel={handleCancel} onSave={handleSaveEdit} onReschedule={handleReschedule} leaveRecords={leaveRecords} staffList={staffList} services={services} autoEdit={notifTriggered}/>
       <LeaveModal staffMember={leaveStaff} bookings={bookings} staffList={staffList} services={services} onClose={()=>setLeaveStaff(null)} onConfirm={handleLeave}/>
       <ScheduleModal staffMember={schedStaff} schedule={schedStaff?schedules[schedStaff.id]:null} onClose={()=>setSchedStaff(null)} onSave={handleSaveSched}/>
