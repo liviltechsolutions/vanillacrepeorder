@@ -15,6 +15,7 @@ app.use("/api/leave", require("./routes/leave")(prisma));
 app.use("/api/schedules", require("./routes/schedules")(prisma));
 app.use("/api/customers", require("./routes/customers")(prisma));
 app.use("/api/closed-dates", require("./routes/closedDates")(prisma));
+app.use("/api/open-overrides", require("./routes/openOverrides")(prisma));
 app.use("/api/closed-weekdays", require("./routes/closedWeekdays")(prisma));
 app.use("/api/services", require("./routes/services")(prisma));
 app.use("/api/products", require("./routes/products")(prisma));

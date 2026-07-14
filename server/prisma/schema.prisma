@@ -86,6 +86,11 @@ model ClosedDate {
   reason String?
 }
 
+model OpenOverride {
+  date   String  @id
+  reason String?
+}
+
 model ClosedWeekday {
   weekday Int     @id
   reason  String?

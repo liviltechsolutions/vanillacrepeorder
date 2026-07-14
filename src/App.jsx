@@ -596,29 +596,35 @@ function ScheduleModal({staffMember,schedule,onClose,onSave}){
 }
 
 // ─── MARK MERCHANT CLOSED MODAL ──────────────────────────────────────────────
-function CloseDayModal({show,onClose,initialDate,closedDates,closedWeekdays,onMark,onUnmark,onMarkWeekday,onUnmarkWeekday}){
+function CloseDayModal({show,onClose,initialDate,closedDates,closedWeekdays,openOverrides,onMark,onUnmark,onMarkWeekday,onUnmarkWeekday,onMarkOpen,onUnmarkOpen}){
   const [mode,setMode]=useState("date");
   const [date,setDate]=useState(initialDate);
   const [reason,setReason]=useState("");
   const [wdReason,setWdReason]=useState("");
-  useEffect(()=>{if(show)setDate(initialDate);},[show,initialDate]);
+  const [openDate,setOpenDate]=useState(initialDate);
+  const [openReason,setOpenReason]=useState("");
+  useEffect(()=>{if(show){setDate(initialDate);setOpenDate(initialDate);}},[show,initialDate]);
   if(!show) return null;
   const upcoming=closedDates.filter(c=>c.date>=TODAY).sort((a,b)=>a.date.localeCompare(b.date));
+  const upcomingOpen=(openOverrides||[]).filter(o=>o.date>=TODAY).sort((a,b)=>a.date.localeCompare(b.date));
   const isWdClosed=d=>closedWeekdays.find(c=>c.weekday===d);
   const toggleWeekday=d=>{const existing=isWdClosed(d);if(existing)onUnmarkWeekday(d);else onMarkWeekday(d,wdReason);};
   const selectGroup=days=>days.forEach(d=>{if(!isWdClosed(d))onMarkWeekday(d,wdReason);});
+  const openDateWeekday=openDate?new Date(openDate+"T00:00:00").getDay():null;
+  const openDateIsNormallyClosed=openDate&&(closedWeekdays.find(c=>c.weekday===openDateWeekday)||closedDates.find(c=>c.date===openDate));
   return(
     <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:400,display:"flex",alignItems:"center",justifyContent:"center",padding:12}}>
-      <div onClick={e=>e.stopPropagation()} style={{background:"var(--surface)",borderRadius:16,padding:20,width:440,maxWidth:"100%",maxHeight:"93vh",overflowY:"auto",boxShadow:"0 24px 64px rgba(0,0,0,0.25)"}}>
+      <div onClick={e=>e.stopPropagation()} style={{background:"var(--surface)",borderRadius:16,padding:20,width:460,maxWidth:"100%",maxHeight:"93vh",overflowY:"auto",boxShadow:"0 24px 64px rgba(0,0,0,0.25)"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-          <div style={{fontWeight:700,fontSize:16,color:"var(--text)"}}>Mark Merchant Closed</div>
+          <div style={{fontWeight:700,fontSize:16,color:"var(--text)"}}>Schedule Exceptions</div>
           <button onClick={onClose} style={{background:"none",border:"none",fontSize:24,cursor:"pointer",color:"var(--text-muted)",padding:"0 4px"}}>×</button>
         </div>
-        <div style={{display:"flex",gap:2,background:"#f3e8ff",borderRadius:9,padding:3,marginBottom:14}}>
-          {[["date","Specific Date"],["weekday","Recurring Weekday"]].map(([k,l])=>(
-            <button key={k} onClick={()=>setMode(k)} style={{flex:1,padding:"7px 9px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:mode===k?"#6d28d9":"transparent",color:mode===k?"#fff":"#7e22ce"}}>{l}</button>
+        <div style={{display:"flex",gap:2,background:"var(--bg)",borderRadius:9,padding:3,marginBottom:14}}>
+          {[["date","🔒 Mark Closed"],["weekday","🔁 Recurring"],["open","✅ Force Open"]].map(([k,l])=>(
+            <button key={k} onClick={()=>setMode(k)} style={{flex:1,padding:"7px 6px",borderRadius:7,border:"none",cursor:"pointer",fontSize:11,fontWeight:700,background:mode===k?(k==="open"?"#15803d":"#6d28d9"):"transparent",color:mode===k?"#fff":k==="open"?"#15803d":"#7e22ce"}}>{l}</button>
           ))}
         </div>
+
         {mode==="date"&&<div style={{display:"flex",flexDirection:"column",gap:10}}>
           <div><label style={lbl}>Date</label><input type="date" value={date} onChange={e=>setDate(e.target.value)} style={inp}/></div>
           <div><label style={lbl}>Reason</label><input value={reason} onChange={e=>setReason(e.target.value)} placeholder="e.g. renovation, public holiday closure" style={inp}/></div>
@@ -635,11 +641,12 @@ function CloseDayModal({show,onClose,initialDate,closedDates,closedWeekdays,onMa
             </div>
           </div>}
         </div>}
+
         {mode==="weekday"&&<div style={{display:"flex",flexDirection:"column",gap:10}}>
-          <div><label style={lbl}>Reason</label><input value={wdReason} onChange={e=>setWdReason(e.target.value)} placeholder="e.g. always closed on rest day" style={inp}/></div>
+          <div><label style={lbl}>Reason (applies to all selected days)</label><input value={wdReason} onChange={e=>setWdReason(e.target.value)} placeholder="e.g. always closed on rest day" style={inp}/></div>
           <div style={{display:"flex",gap:5}}>
             {DAY_NAMES.map((dn,d)=>{const active=!!isWdClosed(d);return(
-              <button key={d} onClick={()=>toggleWeekday(d)} style={{flex:1,padding:"10px 2px",borderRadius:9,border:active?"2px solid #ef4444":"1px solid var(--border)",background:active?"#fef2f2":"#fff",color:active?"#991b1b":"#64648a",fontWeight:active?700:500,fontSize:12,cursor:"pointer"}}>{dn}</button>
+              <button key={d} onClick={()=>toggleWeekday(d)} style={{flex:1,padding:"10px 2px",borderRadius:9,border:active?"2px solid #ef4444":"1px solid var(--border)",background:active?"#fef2f2":"var(--surface)",color:active?"#991b1b":"#64648a",fontWeight:active?700:500,fontSize:12,cursor:"pointer"}}>{dn}</button>
             );})}
           </div>
           <div style={{display:"flex",gap:8}}>
@@ -653,6 +660,36 @@ function CloseDayModal({show,onClose,initialDate,closedDates,closedWeekdays,onMa
                 <div key={c.weekday} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 11px",background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:9}}>
                   <div style={{flex:1}}><div style={{fontWeight:600,fontSize:13,color:"#991b1b"}}>Every {DAY_NAMES[c.weekday]}</div>{c.reason&&<div style={{fontSize:12,color:"#991b1b",opacity:.8}}>{c.reason}</div>}</div>
                   <button onClick={()=>onUnmarkWeekday(c.weekday)} style={{background:"none",border:"none",cursor:"pointer",color:"#991b1b",fontSize:18,padding:"0 4px"}}>×</button>
+                </div>
+              ))}
+            </div>
+          </div>}
+        </div>}
+
+        {mode==="open"&&<div style={{display:"flex",flexDirection:"column",gap:10}}>
+          <div style={{padding:"10px 13px",background:"#f0fdf4",border:"1px solid #86efac",borderRadius:10,fontSize:12,color:"#15803d",lineHeight:1.5}}>
+            Use this to <strong>force a specific date open</strong> even if it falls on a recurring closed weekday or a marked closed date.<br/>
+            <span style={{opacity:.8}}>Example: Every Thursday is closed, but you want to open on 17 Jul (Thursday).</span>
+          </div>
+          <div><label style={lbl}>Date to Force Open</label><input type="date" value={openDate} onChange={e=>setOpenDate(e.target.value)} style={inp}/></div>
+          {openDate&&!openDateIsNormallyClosed&&<div style={{padding:"8px 11px",background:"#fffbeb",border:"1px solid #fcd34d",borderRadius:8,fontSize:12,color:"#92400e"}}>
+            ℹ️ {fmtDFull(openDate)} is not currently marked as closed — override not needed, but you can still save it.
+          </div>}
+          {openDate&&openDateIsNormallyClosed&&<div style={{padding:"8px 11px",background:"#f0fdf4",border:"1px solid #86efac",borderRadius:8,fontSize:12,color:"#15803d",fontWeight:600}}>
+            ✅ {fmtDFull(openDate)} ({DAY_NAMES[openDateWeekday]}) is normally closed — this override will mark it as open.
+          </div>}
+          <div><label style={lbl}>Note (optional)</label><input value={openReason} onChange={e=>setOpenReason(e.target.value)} placeholder="e.g. special event, replacement day" style={inp}/></div>
+          <button onClick={()=>{if(!openDate)return;onMarkOpen(openDate,openReason);setOpenReason("");}} style={{padding:"10px 0",fontSize:13,borderRadius:10,border:"none",background:"linear-gradient(135deg,#16a34a,#15803d)",color:"#fff",fontWeight:700,cursor:"pointer"}}>✅ Mark This Day as Open</button>
+          {upcomingOpen.length>0&&<div style={{marginTop:6}}>
+            <div style={{...sectionLbl,marginBottom:7,color:"#15803d"}}>Upcoming Open Overrides</div>
+            <div style={{display:"flex",flexDirection:"column",gap:6}}>
+              {upcomingOpen.map(o=>(
+                <div key={o.date} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 11px",background:"#f0fdf4",border:"1px solid #86efac",borderRadius:9}}>
+                  <div style={{flex:1}}>
+                    <div style={{fontWeight:600,fontSize:13,color:"#15803d"}}>{fmtDFull(o.date)} <span style={{fontSize:11,opacity:.7}}>({DAY_NAMES[new Date(o.date+"T00:00:00").getDay()]})</span></div>
+                    {o.reason&&<div style={{fontSize:12,color:"#15803d",opacity:.8}}>{o.reason}</div>}
+                  </div>
+                  <button onClick={()=>onUnmarkOpen(o.date)} style={{background:"none",border:"none",cursor:"pointer",color:"#991b1b",fontSize:18,padding:"0 4px"}}>×</button>
                 </div>
               ))}
             </div>
@@ -980,6 +1017,7 @@ export default function BeaubookDashboard(){
   const [notifTriggered,setNotifTriggered]=useState(false);
   const [staffMonth,setStaffMonth]=useState({m:new Date().getMonth(),y:new Date().getFullYear()});
   const [closedDates,setClosedDates]=useState([]);
+  const [openOverrides,setOpenOverrides]=useState([]);
   const [showCloseDay,setShowCloseDay]=useState(false);
   const [closedWeekdays,setClosedWeekdays]=useState([]);
   const [services,setServices]=useState([]);
@@ -1029,6 +1067,7 @@ export default function BeaubookDashboard(){
     fetch("/api/customers").then(r=>r.json()).then(({extra,notes})=>{setCustomerExtra(extra);setCustNotes(notes);});
     fetch("/api/closed-dates").then(r=>r.json()).then(setClosedDates);
     fetch("/api/closed-weekdays").then(r=>r.json()).then(setClosedWeekdays);
+    fetch("/api/open-overrides").then(r=>r.json()).then(setOpenOverrides);
     fetch("/api/services").then(r=>r.json()).then(setServices);
     fetch("/api/products").then(r=>r.json()).then(setProducts);
     fetch("/api/settings").then(r=>r.json()).then(s=>{
@@ -1104,12 +1143,24 @@ export default function BeaubookDashboard(){
 
   function patchBooking(id,data){return fetch(`/api/bookings/${id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)}).then(r=>r.json());}
   const getClosed=date=>{
+    // Open override takes highest priority — this date is forced open
+    if(openOverrides.find(o=>o.date===date))return null;
     const specific=closedDates.find(c=>c.date===date);
     if(specific)return specific;
     const weekday=new Date(date+"T00:00:00").getDay();
     const recurring=closedWeekdays.find(c=>c.weekday===weekday);
     return recurring?{date,reason:recurring.reason,recurring:true}:null;
   };
+  const isOpenOverride=date=>!!openOverrides.find(o=>o.date===date);
+  function handleMarkOpenOverride(date,reason){
+    fetch("/api/open-overrides",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({date,reason})}).then(r=>r.json()).then(saved=>{
+      setOpenOverrides(p=>[...p.filter(o=>o.date!==date),saved].sort((a,b)=>a.date.localeCompare(b.date)));
+      showToast("Marked as open override!");
+    });
+  }
+  function handleUnmarkOpenOverride(date){
+    fetch(`/api/open-overrides/${date}`,{method:"DELETE"}).then(()=>{setOpenOverrides(p=>p.filter(o=>o.date!==date));showToast("Open override removed.");});
+  }
   function handleMarkClosed(date,reason){
     fetch("/api/closed-dates",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({date,reason})}).then(r=>r.json()).then(saved=>{
       setClosedDates(p=>[...p.filter(c=>c.date!==date),saved].sort((a,b2)=>a.date.localeCompare(b2.date)));
@@ -1360,7 +1411,7 @@ export default function BeaubookDashboard(){
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8,flexWrap:"wrap",gap:8}}>
               <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
                 <h1 style={{margin:0,fontSize:18,fontWeight:800,color:"var(--text)",letterSpacing:"-0.3px"}}>{t("nav.calendar")}</h1>
-                <span style={{fontSize:12,color:"var(--text-muted)"}}>{new Date(selectedDate+"T00:00:00").toLocaleDateString("en-MY",{weekday:"short",day:"numeric",month:"short",year:"numeric"})}{selHoliday&&<span style={{color:"#dc2626",fontWeight:600}}> · {selHoliday}</span>}{selClosed&&<span style={{color:"#dc2626",fontWeight:600}}> · Closed</span>}</span>
+                <span style={{fontSize:12,color:"var(--text-muted)"}}>{new Date(selectedDate+"T00:00:00").toLocaleDateString("en-MY",{weekday:"short",day:"numeric",month:"short",year:"numeric"})}{selHoliday&&<span style={{color:"#dc2626",fontWeight:600}}> · {selHoliday}</span>}{selClosed&&<span style={{color:"#dc2626",fontWeight:600}}> · Closed</span>}{isOpenOverride(selectedDate)&&<span style={{color:"#15803d",fontWeight:600,background:"#dcfce7",padding:"1px 7px",borderRadius:4,marginLeft:4}}>✅ Open Override</span>}</span>
                 {/* Compact stat chips */}
                 {[{l:"Today",v:todayStats.total,c:"#7c3aed"},{l:"Confirmed",v:todayStats.confirmed,c:"#16a34a"},{l:"Pending",v:todayStats.pending,c:"#d97706"}].map(s=>(
                   <div key={s.l} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 12px",background:"var(--surface)",border:"1px solid var(--border)",borderLeft:`3px solid ${s.c}`,borderRadius:8,boxShadow:"var(--shadow-sm)"}}>
@@ -1484,25 +1535,26 @@ export default function BeaubookDashboard(){
                     const cnt=bookings.filter(b=>b.date===date&&b.status!=="cancelled").length;
                     const pendCnt=bookings.filter(b=>b.date===date&&b.status==="pending").length;
                     const unaCnt=bookings.filter(b=>b.date===date&&b.status==="unassigned").length;
-                    const holiday=getHoliday(date);const closed=getClosed(date);
+                    const holiday=getHoliday(date);const closed=getClosed(date);const openOvr=isOpenOverride(date);
                     const isToday=date===TODAY;const isSel=date===selectedDate;
                     return(
-                      <div key={date} onClick={()=>{setSelectedDate(date);setCalView("week");const d=new Date(date);const dy=d.getDay();const base=new Date(d);base.setDate(d.getDate()-dy);setWeekBase(base.toISOString().split("T")[0]);}} style={{borderRadius:8,border:closed?"2px solid #fca5a5":isSel?"2px solid #9333ea":isToday?"2px solid #c084fc":"1px solid var(--border)",background:closed?"#fef2f2":isSel?"#f3e8ff":isToday?"#fdf4ff":"var(--surface)",cursor:"pointer",padding:"5px 6px",overflow:"hidden"}}>
+                      <div key={date} onClick={()=>{setSelectedDate(date);setCalView("week");const d=new Date(date);const dy=d.getDay();const base=new Date(d);base.setDate(d.getDate()-dy);setWeekBase(base.toISOString().split("T")[0]);}} style={{borderRadius:8,border:openOvr?"2px solid #86efac":closed?"2px solid #fca5a5":isSel?"2px solid #9333ea":isToday?"2px solid #c084fc":"1px solid var(--border)",background:openOvr?"#f0fdf4":isSel?"#f3e8ff":isToday?"#fdf4ff":"var(--surface)",cursor:"pointer",padding:"5px 6px",overflow:"hidden"}}>
                         <div style={{fontSize:13,fontWeight:isSel||isToday?700:500,color:isSel?"#7c3aed":isToday?"#9333ea":"var(--text)"}}>{parseInt(date.split("-")[2])}</div>
                         {holiday&&<div style={{fontSize:9,color:"#dc2626",fontWeight:600,marginTop:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{holiday}</div>}
-                        {closed&&<div style={{marginTop:2,padding:"1px 5px",borderRadius:20,display:"inline-block",fontSize:9,fontWeight:700,background:"#ef4444",color:"#fff"}}>Closed</div>}
+                        {openOvr&&<div style={{marginTop:2,padding:"1px 5px",borderRadius:20,display:"inline-block",fontSize:9,fontWeight:700,background:"#16a34a",color:"#fff"}}>Open ✓</div>}
+                        {!openOvr&&closed&&<div style={{marginTop:2,padding:"1px 5px",borderRadius:20,display:"inline-block",fontSize:9,fontWeight:700,background:"#ef4444",color:"#fff"}}>Closed</div>}
                         {cnt>0&&<div style={{marginTop:2}}>
                           <div style={{fontSize:10,color:"#7c3aed",fontWeight:700}}>{cnt} appt{cnt>1?"s":""}</div>
                           {pendCnt>0&&<div style={{fontSize:9,color:"#d97706",fontWeight:600}}>{pendCnt} pending</div>}
                           {unaCnt>0&&<div style={{fontSize:9,color:"#9333ea",fontWeight:600}}>{unaCnt} unassigned</div>}
                         </div>}
-                        {cnt===0&&!holiday&&!closed&&<div style={{fontSize:9,color:"var(--text-light)",marginTop:2}}>Free</div>}
+                        {cnt===0&&!holiday&&!closed&&!openOvr&&<div style={{fontSize:9,color:"var(--text-light)",marginTop:2}}>Free</div>}
                       </div>
                     );
                   })}
                 </div>
                 <div style={{display:"flex",gap:10,marginTop:6,justifyContent:"center",flexWrap:"wrap",flexShrink:0}}>
-                  {[["#86efac","Confirmed"],["#fbbf24","Pending"],["#a855f7","Unassigned"],["#fca5a5","Closed"],["#dc2626","Holiday"]].map(([c,l])=>(
+                  {[["#86efac","Confirmed"],["#fbbf24","Pending"],["#a855f7","Unassigned"],["#fca5a5","Closed"],["#dc2626","Holiday"],["#16a34a","Open Override"]].map(([c,l])=>(
                     <div key={l} style={{display:"flex",alignItems:"center",gap:4,fontSize:11,color:"var(--text-muted)"}}><span style={{width:6,height:6,borderRadius:"50%",background:c,display:"inline-block",flexShrink:0}}/>{l}</div>
                   ))}
                 </div>
@@ -2109,7 +2161,7 @@ export default function BeaubookDashboard(){
       {editStaff&&<StaffModal staffMember={editStaff} onClose={()=>setEditStaff(null)} onSave={handleSaveStaff} isNew={false}/>}
       {addStaff&&<StaffModal staffMember={null} onClose={()=>setAddStaff(false)} onSave={handleSaveStaff} isNew={true}/>}
       {editCustomer&&<CustomerEditModal customer={editCustomer} extraData={customerExtra[editCustomer.phone]} onClose={()=>setEditCustomer(null)} onSave={handleSaveCustomer}/>}
-      <CloseDayModal show={showCloseDay} onClose={()=>setShowCloseDay(false)} initialDate={selectedDate} closedDates={closedDates} closedWeekdays={closedWeekdays} onMark={handleMarkClosed} onUnmark={handleUnmarkClosed} onMarkWeekday={handleMarkClosedWeekday} onUnmarkWeekday={handleUnmarkClosedWeekday}/>
+      <CloseDayModal show={showCloseDay} onClose={()=>setShowCloseDay(false)} initialDate={selectedDate} closedDates={closedDates} closedWeekdays={closedWeekdays} openOverrides={openOverrides} onMark={handleMarkClosed} onUnmark={handleUnmarkClosed} onMarkWeekday={handleMarkClosedWeekday} onUnmarkWeekday={handleUnmarkClosedWeekday} onMarkOpen={handleMarkOpenOverride} onUnmarkOpen={handleUnmarkOpenOverride}/>
       <NotifPanel show={showNotif} onClose={()=>setShowNotif(false)} bookings={bookings} services={services} onSelectBooking={(b)=>{setSelBooking(b);setNotifTriggered(true);setShowNotif(false);setTab("bookings");}} apptToasts={apptToasts} onGoToBookings={()=>{setTab("bookings");setApptToasts([]);setShowNotif(false);}}/>
     </div>
   );
