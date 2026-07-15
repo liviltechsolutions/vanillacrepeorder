@@ -1892,14 +1892,16 @@ export default function BeaubookDashboard(){
           </div>}
 
           {tab==="analytics"&&(()=>{
-            // ── Date range filter ──────────────────────────────
-            const today=TODAY;
-            const d=new Date(today);
-            const weekStart=new Date(d);weekStart.setDate(d.getDate()-d.getDay());
+            // ── Date range filter — always use fresh local date to avoid stale module-level constant ──
+            const _nt=new Date();
+            const _p=n=>String(n).padStart(2,"0");
+            const today=`${_nt.getFullYear()}-${_p(_nt.getMonth()+1)}-${_p(_nt.getDate())}`;
+            // Derive weekStart purely in local-time to avoid UTC/local round-trip shifting
+            const _ws=new Date(_nt);_ws.setDate(_nt.getDate()-_nt.getDay());
+            const weekStart=`${_ws.getFullYear()}-${_p(_ws.getMonth()+1)}-${_p(_ws.getDate())}`;
             const monthStart=`${today.slice(0,7)}-01`;
             const yearStart=`${today.slice(0,4)}-01-01`;
-            const fmt=dt=>dt.toISOString().split("T")[0];
-            const ranges={today:{from:today,to:today},week:{from:fmt(weekStart),to:today},month:{from:monthStart,to:today},year:{from:yearStart,to:today},custom:{from:analyticsFrom||monthStart,to:analyticsTo||today}};
+            const ranges={today:{from:today,to:today},week:{from:weekStart,to:today},month:{from:monthStart,to:today},year:{from:yearStart,to:today},custom:{from:analyticsFrom||monthStart,to:analyticsTo||today}};
             const{from:rFrom,to:rTo}=ranges[analyticsRange]||ranges.month;
             const inRange=b=>b.date>=rFrom&&b.date<=rTo;
             const activeBk=bookings.filter(b=>b.status!=="cancelled"&&inRange(b));
@@ -1922,6 +1924,7 @@ export default function BeaubookDashboard(){
                   <span style={{fontSize:12,color:"var(--text-muted)"}}>to</span>
                   <input type="date" value={analyticsTo} onChange={e=>setAnalyticsTo(e.target.value)} style={{...inp,width:"auto",fontSize:12,padding:"5px 9px"}}/>
                 </div>}
+                <span style={{fontSize:11,color:"var(--text-muted)",marginLeft:"auto",fontStyle:"italic"}}>{rFrom===rTo?fmtD(rFrom):`${fmtD(rFrom)} – ${fmtD(rTo)}`}</span>
               </div>
               {/* Stat cards */}
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:12,marginBottom:16}}>
