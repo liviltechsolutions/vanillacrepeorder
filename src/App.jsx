@@ -1895,13 +1895,20 @@ export default function BeaubookDashboard(){
             // ── Date range filter — always use fresh local date to avoid stale module-level constant ──
             const _nt=new Date();
             const _p=n=>String(n).padStart(2,"0");
-            const today=`${_nt.getFullYear()}-${_p(_nt.getMonth()+1)}-${_p(_nt.getDate())}`;
-            // Derive weekStart purely in local-time to avoid UTC/local round-trip shifting
+            const _ds=d=>`${d.getFullYear()}-${_p(d.getMonth()+1)}-${_p(d.getDate())}`;
+            const today=_ds(_nt);
+            // Week: Sunday → Saturday of the current calendar week (full 7 days)
             const _ws=new Date(_nt);_ws.setDate(_nt.getDate()-_nt.getDay());
-            const weekStart=`${_ws.getFullYear()}-${_p(_ws.getMonth()+1)}-${_p(_ws.getDate())}`;
+            const _we=new Date(_ws);_we.setDate(_ws.getDate()+6);
+            const weekStart=_ds(_ws);const weekEnd=_ds(_we);
+            // Month: 1st → last day of current month
             const monthStart=`${today.slice(0,7)}-01`;
+            const _me=new Date(_nt.getFullYear(),_nt.getMonth()+1,0);
+            const monthEnd=_ds(_me);
+            // Year: Jan 1 → Dec 31
             const yearStart=`${today.slice(0,4)}-01-01`;
-            const ranges={today:{from:today,to:today},week:{from:weekStart,to:today},month:{from:monthStart,to:today},year:{from:yearStart,to:today},custom:{from:analyticsFrom||monthStart,to:analyticsTo||today}};
+            const yearEnd=`${today.slice(0,4)}-12-31`;
+            const ranges={today:{from:today,to:today},week:{from:weekStart,to:weekEnd},month:{from:monthStart,to:monthEnd},year:{from:yearStart,to:yearEnd},custom:{from:analyticsFrom||monthStart,to:analyticsTo||today}};
             const{from:rFrom,to:rTo}=ranges[analyticsRange]||ranges.month;
             const inRange=b=>b.date>=rFrom&&b.date<=rTo;
             const activeBk=bookings.filter(b=>b.status!=="cancelled"&&inRange(b));
