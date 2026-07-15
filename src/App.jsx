@@ -122,6 +122,7 @@ function ProductPicker({products,selected,search,onSearch,onAdd,onQty}){
   if(!products||products.length===0) return null;
   const inp2={width:"100%",padding:"7px 11px",borderRadius:8,border:"1px solid var(--border)",background:"var(--input-bg)",color:"var(--text)",fontSize:12,outline:"none",boxSizing:"border-box"};
   const cats=["All",...Array.from(new Set(products.map(p=>p.category).filter(Boolean))).sort()];
+  const showList=!!(search||(catFilter!=="All"));
   const filtered=products.filter(p=>{
     const ms=!search||p.name.toLowerCase().includes(search.toLowerCase());
     const mc=catFilter==="All"||p.category===catFilter;
@@ -129,18 +130,19 @@ function ProductPicker({products,selected,search,onSearch,onAdd,onQty}){
   });
   return(
     <div style={{background:"var(--bg)",borderRadius:9,padding:"11px 13px"}}>
-      <div style={{fontSize:12,fontWeight:700,color:"#7e22ce",marginBottom:8}}>🛍️ Add Products (optional)</div>
+      <div style={{fontSize:12,fontWeight:700,color:"#7e22ce",marginBottom:8}}>🛒 Add Sales (optional)</div>
       <input value={search} onChange={e=>onSearch(e.target.value)} placeholder="Search product by name..." style={{...inp2,marginBottom:6}} onWheel={e=>e.target.blur()}/>
-      {cats.length>1&&<div style={{display:"flex",gap:4,overflowX:"auto",marginBottom:7,paddingBottom:2,scrollbarWidth:"none"}}>
-        {cats.map(c=><button key={c} onClick={()=>setCatFilter(c)} style={{padding:"3px 11px",borderRadius:20,border:catFilter===c?"2px solid #7c3aed":"1px solid var(--border)",background:catFilter===c?"#7c3aed":"var(--surface)",color:catFilter===c?"#fff":"var(--text-muted)",fontSize:11,fontWeight:catFilter===c?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>{c}</button>)}
+      {cats.length>1&&<div style={{display:"flex",gap:4,overflowX:"auto",marginBottom:showList?6:0,paddingBottom:2,scrollbarWidth:"none"}}>
+        {cats.map(c=><button key={c} onClick={()=>setCatFilter(prev=>prev===c&&c!=="All"?"All":c)} style={{padding:"3px 11px",borderRadius:20,border:catFilter===c?"2px solid #7c3aed":"1px solid var(--border)",background:catFilter===c?"#7c3aed":"var(--surface)",color:catFilter===c?"#fff":"var(--text-muted)",fontSize:11,fontWeight:catFilter===c?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>{c}</button>)}
       </div>}
-      <div style={{maxHeight:140,overflowY:"auto",display:"flex",flexDirection:"column",gap:4,marginBottom:selected.length>0?8:0}}>
-        {filtered.length===0&&<div style={{textAlign:"center",color:"var(--text-muted)",fontSize:12,padding:"10px 0"}}>No products found</div>}
+      {!showList&&<div style={{textAlign:"center",fontSize:11,color:"var(--text-muted)",padding:"6px 0 2px",fontStyle:"italic"}}>Search by name or tap a category to browse</div>}
+      {showList&&<div style={{maxHeight:160,overflowY:"auto",display:"flex",flexDirection:"column",gap:4,marginBottom:selected.length>0?8:0,border:"1px solid var(--border)",borderRadius:8,padding:4,background:"var(--surface)"}}>
+        {filtered.length===0&&<div style={{textAlign:"center",color:"var(--text-muted)",fontSize:12,padding:"12px 0"}}>No products found</div>}
         {filtered.map(p=>{
           const inCart=selected.find(x=>x.productId===p.id);
           const sellPrice=p.offerPrice||p.price;
-          return<div key={p.id} style={{display:"flex",alignItems:"center",gap:8,padding:"5px 8px",background:"var(--surface)",borderRadius:7,border:"1px solid var(--border)",fontSize:12}}>
-            {p.image&&<img src={p.image} alt="" style={{width:28,height:28,borderRadius:4,objectFit:"cover",flexShrink:0}}/>}
+          return<div key={p.id} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 8px",borderRadius:7,fontSize:12,cursor:"default",background:"var(--bg)"}}>
+            {p.image&&<img src={p.image} alt="" style={{width:30,height:30,borderRadius:5,objectFit:"cover",flexShrink:0}}/>}
             <div style={{flex:1,minWidth:0}}>
               <div style={{fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.name}</div>
               <div style={{fontSize:10,color:"var(--text-muted)"}}>RM{sellPrice}{p.inventory>0?` · Stock: ${p.inventory}`:" · Out of stock"}{p.category?` · ${p.category}`:""}</div>
@@ -151,15 +153,15 @@ function ProductPicker({products,selected,search,onSearch,onAdd,onQty}){
                   <span style={{fontWeight:700,minWidth:16,textAlign:"center"}}>{inCart.qty}</span>
                   <button onClick={()=>onQty(p.id,inCart.qty+1)} style={{width:22,height:22,borderRadius:5,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",color:"#7c3aed",fontWeight:700}}>+</button>
                 </div>
-              :<button disabled={p.inventory===0} onClick={()=>onAdd(p)} style={{padding:"3px 10px",borderRadius:6,border:"none",background:p.inventory===0?"#e5e7eb":"#7c3aed",color:"#fff",fontSize:11,fontWeight:600,cursor:p.inventory===0?"not-allowed":"pointer"}}>Add</button>
+              :<button disabled={p.inventory===0} onClick={()=>onAdd(p)} style={{padding:"3px 10px",borderRadius:6,border:"none",background:p.inventory===0?"#e5e7eb":"#7c3aed",color:"#fff",fontSize:11,fontWeight:600,cursor:p.inventory===0?"not-allowed":"pointer",flexShrink:0}}>Add</button>
             }
           </div>;
         })}
-      </div>
-      {selected.length>0&&<div style={{borderTop:"1px solid var(--border)",paddingTop:7}}>
-        <div style={{fontSize:11,fontWeight:700,color:"var(--text-muted)",marginBottom:4}}>SELECTED PRODUCTS</div>
+      </div>}
+      {selected.length>0&&<div style={{borderTop:"1px solid var(--border)",paddingTop:7,marginTop:showList?0:6}}>
+        <div style={{fontSize:11,fontWeight:700,color:"var(--text-muted)",marginBottom:4}}>SELECTED</div>
         {selected.map(p=><div key={p.productId} style={{display:"flex",justifyContent:"space-between",fontSize:12,padding:"2px 0"}}><span>{p.name} × {p.qty}</span><span style={{fontWeight:600,color:"#7c3aed"}}>RM{p.unitPrice*p.qty}</span></div>)}
-        <div style={{display:"flex",justifyContent:"space-between",fontSize:12,fontWeight:700,color:"#7c3aed",borderTop:"1px solid var(--border)",marginTop:5,paddingTop:5}}><span>Products Total</span><span>RM{selected.reduce((s,p)=>s+p.unitPrice*p.qty,0)}</span></div>
+        <div style={{display:"flex",justifyContent:"space-between",fontSize:12,fontWeight:700,color:"#7c3aed",borderTop:"1px solid var(--border)",marginTop:5,paddingTop:5}}><span>Sales Total</span><span>RM{selected.reduce((s,p)=>s+p.unitPrice*p.qty,0)}</span></div>
       </div>}
     </div>
   );
