@@ -638,7 +638,7 @@ function CloseDayModal({show,onClose,initialDate,closedDates,closedWeekdays,open
           <button onClick={onClose} style={{background:"none",border:"none",fontSize:24,cursor:"pointer",color:"var(--text-muted)",padding:"0 4px"}}>×</button>
         </div>
         <div style={{display:"flex",gap:2,background:"var(--bg)",borderRadius:9,padding:3,marginBottom:14}}>
-          {[["date","🔒 Mark Closed"],["weekday","🔁 Recurring"],["open","✅ Force Open"]].map(([k,l])=>(
+          {[["date","🔒 Mark Closed"],["weekday","🔁 Recurring"],["open","✅ Open"]].map(([k,l])=>(
             <button key={k} onClick={()=>setMode(k)} style={{flex:1,padding:"7px 6px",borderRadius:7,border:"none",cursor:"pointer",fontSize:11,fontWeight:700,background:mode===k?(k==="open"?"#15803d":"#6d28d9"):"transparent",color:mode===k?"#fff":k==="open"?"#15803d":"#7e22ce"}}>{l}</button>
           ))}
         </div>
@@ -689,7 +689,7 @@ function CloseDayModal({show,onClose,initialDate,closedDates,closedWeekdays,open
             Use this to <strong>force a specific date open</strong> even if it falls on a recurring closed weekday or a marked closed date.<br/>
             <span style={{opacity:.8}}>Example: Every Thursday is closed, but you want to open on 17 Jul (Thursday).</span>
           </div>
-          <div><label style={lbl}>Date to Force Open</label><input type="date" value={openDate} onChange={e=>setOpenDate(e.target.value)} style={inp}/></div>
+          <div><label style={lbl}>Date to Open</label><input type="date" value={openDate} onChange={e=>setOpenDate(e.target.value)} style={inp}/></div>
           {openDate&&!openDateIsNormallyClosed&&<div style={{padding:"8px 11px",background:"#fffbeb",border:"1px solid #fcd34d",borderRadius:8,fontSize:12,color:"#92400e"}}>
             ℹ️ {fmtDFull(openDate)} is not currently marked as closed — override not needed, but you can still save it.
           </div>}
