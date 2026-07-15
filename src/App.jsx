@@ -1919,8 +1919,84 @@ export default function BeaubookDashboard(){
             const totalOutstanding=activeBk.filter(b=>b.payStatus!=="paid").reduce((s,b)=>{const gt=(svc(b.service)?.price||0)+(Array.isArray(b.products)?b.products:[]).reduce((a,p)=>a+p.unitPrice*p.qty,0);return s+Math.max(0,gt-(b.amtPaid||0));},0);
             // Sales records (all bookings with products in range)
             const salesRecords=bookings.filter(b=>b.status!=="cancelled"&&inRange(b)&&Array.isArray(b.products)&&b.products.length>0).sort((a,b)=>b.date.localeCompare(a.date));
+            const periodLabel=rFrom===rTo?fmtD(rFrom):`${fmtD(rFrom)} – ${fmtD(rTo)}`;
+            // ── Export CSV ──────────────────────────────────────────────────────
+            const doExportCSV=()=>{
+              const hdr=["Date","Time","Customer","Phone","Service","Staff","Seat","Status","Pay Status","Pay Method","Amount Paid (RM)","Products","Total (RM)"];
+              const lines=[hdr.join(",")];
+              [...activeBk].sort((a,b2)=>a.date.localeCompare(b2.date)||a.time.localeCompare(b2.time)).forEach(b=>{
+                const bProds=(Array.isArray(b.products)?b.products:[]).map(p=>`${p.name}x${p.qty}`).join(";");
+                const bTotal=(svc(b.service)?.price||0)+(Array.isArray(b.products)?b.products:[]).reduce((s,p)=>s+p.unitPrice*p.qty,0);
+                const cells=[b.date,b.time,b.customer,b.phone,svc(b.service)?.name||"",stf(b.staff)?.name||"",b.seat||"",b.status,b.payStatus,b.payMethod||"",b.amtPaid||0,bProds,bTotal];
+                lines.push(cells.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(","));
+              });
+              const blob=new Blob(["﻿"+lines.join("\n")],{type:"text/csv;charset=utf-8;"});
+              const url=URL.createObjectURL(blob);
+              const a=document.createElement("a");a.href=url;a.download=`beaubook-report-${rFrom}-to-${rTo}.csv`;
+              document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+              showToast("CSV exported!");
+            };
+            // ── Print Report ─────────────────────────────────────────────────
+            const doPrint=()=>{
+              const compName=settings?.companyName||"BeauBook";
+              const payBreak=["paid","partial","unpaid"].map(k=>{const cnt=activeBk.filter(b=>b.payStatus===k).length;const amt=activeBk.filter(b=>b.payStatus===k).reduce((s,b)=>s+(b.amtPaid||0),0);return{k,cnt,amt};});
+              const svcRows=services.map(sv=>{const cnt=activeBk.filter(b=>b.service===sv.id).length;return{name:sv.name,cnt,rev:cnt*sv.price};}).filter(x=>x.cnt>0).sort((a,b)=>b.rev-a.rev);
+              const prodMap={};activeBk.flatMap(b=>Array.isArray(b.products)?b.products:[]).forEach(p=>{if(!prodMap[p.productId])prodMap[p.productId]={name:p.name,qty:0,rev:0};prodMap[p.productId].qty+=p.qty;prodMap[p.productId].rev+=p.unitPrice*p.qty;});
+              const prodRows=Object.values(prodMap).sort((a,b)=>b.rev-a.rev);
+              const sorted=[...activeBk].sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time));
+              const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${compName} – Report</title><style>
+*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;padding:24px 28px;color:#111;font-size:12px;}
+h1{font-size:20px;font-weight:700;margin-bottom:3px;}
+.sub{color:#666;font-size:11px;margin-bottom:18px;}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:18px;}
+.stat{border:1px solid #ddd;border-radius:7px;padding:9px 11px;}
+.stat .lbl{font-size:8px;text-transform:uppercase;color:#888;margin-bottom:3px;letter-spacing:.05em;}
+.stat .val{font-size:16px;font-weight:700;}
+h2{font-size:12px;font-weight:700;margin:14px 0 7px;padding-bottom:4px;border-bottom:1px solid #e5e5e5;text-transform:uppercase;letter-spacing:.04em;color:#444;}
+table{width:100%;border-collapse:collapse;margin-bottom:4px;font-size:11px;}
+th{background:#f5f5f5;text-align:left;padding:5px 7px;font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:#555;font-weight:700;}
+td{padding:5px 7px;border-bottom:1px solid #f0f0f0;vertical-align:top;}
+.pay-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px;}
+.pay-box{border:1px solid #eee;border-radius:7px;padding:9px;text-align:center;}
+.pay-box .num{font-size:18px;font-weight:700;}
+.pay-box .lbl{font-size:10px;color:#666;text-transform:capitalize;margin-top:2px;}
+.pay-box .amt{font-size:10px;color:#999;margin-top:1px;}
+.footer{margin-top:18px;font-size:9px;color:#bbb;text-align:center;padding-top:10px;border-top:1px solid #eee;}
+@media print{@page{size:A4;margin:14mm}body{padding:0}}
+</style></head><body>
+<h1>${compName} – Analytics Report</h1>
+<div class="sub">Period: ${periodLabel} &nbsp;·&nbsp; Generated: ${new Date().toLocaleString()}</div>
+<div class="stats">
+  <div class="stat"><div class="lbl">Total Revenue</div><div class="val">RM ${totalRev}</div></div>
+  <div class="stat"><div class="lbl">Collected</div><div class="val">RM ${totalPaid}</div></div>
+  <div class="stat"><div class="lbl">Outstanding</div><div class="val">RM ${totalOutstanding}</div></div>
+  <div class="stat"><div class="lbl">Bookings</div><div class="val">${activeBk.length}</div></div>
+  <div class="stat"><div class="lbl">Product Rev.</div><div class="val">RM ${prodRevenue}</div></div>
+</div>
+<h2>Payment Overview</h2>
+<div class="pay-grid">${payBreak.map(x=>`<div class="pay-box"><div class="num">${x.cnt}</div><div class="lbl">${x.k}</div><div class="amt">Collected: RM ${x.amt}</div></div>`).join("")}</div>
+<h2>Top Services</h2>
+<table><thead><tr><th>Service</th><th>Bookings</th><th>Revenue</th></tr></thead><tbody>${svcRows.map(s=>`<tr><td>${s.name}</td><td>${s.cnt}</td><td>RM ${s.rev}</td></tr>`).join("")}${svcRows.length===0?`<tr><td colspan="3" style="color:#aaa;text-align:center;padding:8px">No service bookings</td></tr>`:""}</tbody></table>
+${prodRows.length>0?`<h2>Product Sales</h2><table><thead><tr><th>Product</th><th>Qty Sold</th><th>Revenue</th></tr></thead><tbody>${prodRows.map(p=>`<tr><td>${p.name}</td><td>${p.qty}</td><td>RM ${p.rev}</td></tr>`).join("")}</tbody></table>`:""}
+<h2>Booking Details (${sorted.length})</h2>
+<table><thead><tr><th>Date</th><th>Time</th><th>Customer</th><th>Phone</th><th>Service</th><th>Staff</th><th>Status</th><th>Pay</th><th>Method</th><th>Amt Paid</th><th>Products</th></tr></thead><tbody>
+${sorted.map(b=>{const bProds=(Array.isArray(b.products)?b.products:[]).map(p=>`${p.name}×${p.qty}`).join(", ");return`<tr><td>${b.date}</td><td>${b.time}</td><td>${b.customer}</td><td>${b.phone}</td><td>${svc(b.service)?.name||"-"}</td><td>${stf(b.staff)?.name||"-"}</td><td>${b.status}</td><td>${b.payStatus}</td><td>${b.payMethod||"-"}</td><td>RM ${b.amtPaid||0}</td><td>${bProds||"-"}</td></tr>`;}).join("")}
+</tbody></table>
+<div class="footer">Generated by BeauBook &nbsp;·&nbsp; ${compName} &nbsp;·&nbsp; ${new Date().toLocaleDateString()}</div>
+</body></html>`;
+              const w=window.open("","_blank","width=960,height=720");
+              if(!w){showToast("Pop-up blocked — please allow pop-ups","error");return;}
+              w.document.write(html);w.document.close();
+              w.addEventListener("load",()=>{w.focus();w.print();});
+            };
             return(<div>
-              <h1 style={{margin:"0 0 14px",fontSize:26,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px"}}>{t("nav.analytics")}</h1>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+                <h1 style={{fontSize:26,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px"}}>{t("nav.analytics")}</h1>
+                <div style={{display:"flex",gap:8}}>
+                  <button onClick={doExportCSV} style={gBtn({fontSize:12,padding:"7px 14px"})}>📊 Export CSV</button>
+                  <button onClick={doPrint} style={gBtn({fontSize:12,padding:"7px 14px"})}>🖨️ Print Report</button>
+                </div>
+              </div>
               {/* Date range filter */}
               <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:16,alignItems:"center"}}>
                 {[["today","Today"],["week","This Week"],["month","This Month"],["year","This Year"],["custom","Custom"]].map(([k,l])=>(
