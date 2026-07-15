@@ -118,21 +118,32 @@ const ICONS={
 
 // ─── SHARED PRODUCT PICKER ───────────────────────────────────────────────────
 function ProductPicker({products,selected,search,onSearch,onAdd,onQty}){
+  const [catFilter,setCatFilter]=useState("All");
   if(!products||products.length===0) return null;
   const inp2={width:"100%",padding:"7px 11px",borderRadius:8,border:"1px solid var(--border)",background:"var(--input-bg)",color:"var(--text)",fontSize:12,outline:"none",boxSizing:"border-box"};
+  const cats=["All",...Array.from(new Set(products.map(p=>p.category).filter(Boolean))).sort()];
+  const filtered=products.filter(p=>{
+    const ms=!search||p.name.toLowerCase().includes(search.toLowerCase());
+    const mc=catFilter==="All"||p.category===catFilter;
+    return ms&&mc;
+  });
   return(
     <div style={{background:"var(--bg)",borderRadius:9,padding:"11px 13px"}}>
       <div style={{fontSize:12,fontWeight:700,color:"#7e22ce",marginBottom:8}}>🛍️ Add Products (optional)</div>
-      <input value={search} onChange={e=>onSearch(e.target.value)} placeholder="Search product..." style={{...inp2,marginBottom:7}} onWheel={e=>e.target.blur()}/>
-      <div style={{maxHeight:130,overflowY:"auto",display:"flex",flexDirection:"column",gap:4,marginBottom:selected.length>0?8:0}}>
-        {products.filter(p=>p.name.toLowerCase().includes((search||"").toLowerCase())).map(p=>{
+      <input value={search} onChange={e=>onSearch(e.target.value)} placeholder="Search product by name..." style={{...inp2,marginBottom:6}} onWheel={e=>e.target.blur()}/>
+      {cats.length>1&&<div style={{display:"flex",gap:4,overflowX:"auto",marginBottom:7,paddingBottom:2,scrollbarWidth:"none"}}>
+        {cats.map(c=><button key={c} onClick={()=>setCatFilter(c)} style={{padding:"3px 11px",borderRadius:20,border:catFilter===c?"2px solid #7c3aed":"1px solid var(--border)",background:catFilter===c?"#7c3aed":"var(--surface)",color:catFilter===c?"#fff":"var(--text-muted)",fontSize:11,fontWeight:catFilter===c?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>{c}</button>)}
+      </div>}
+      <div style={{maxHeight:140,overflowY:"auto",display:"flex",flexDirection:"column",gap:4,marginBottom:selected.length>0?8:0}}>
+        {filtered.length===0&&<div style={{textAlign:"center",color:"var(--text-muted)",fontSize:12,padding:"10px 0"}}>No products found</div>}
+        {filtered.map(p=>{
           const inCart=selected.find(x=>x.productId===p.id);
           const sellPrice=p.offerPrice||p.price;
           return<div key={p.id} style={{display:"flex",alignItems:"center",gap:8,padding:"5px 8px",background:"var(--surface)",borderRadius:7,border:"1px solid var(--border)",fontSize:12}}>
             {p.image&&<img src={p.image} alt="" style={{width:28,height:28,borderRadius:4,objectFit:"cover",flexShrink:0}}/>}
             <div style={{flex:1,minWidth:0}}>
               <div style={{fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.name}</div>
-              <div style={{fontSize:10,color:"var(--text-muted)"}}>RM{sellPrice}{p.inventory>0?` · Stock: ${p.inventory}`:" · Out of stock"}</div>
+              <div style={{fontSize:10,color:"var(--text-muted)"}}>RM{sellPrice}{p.inventory>0?` · Stock: ${p.inventory}`:" · Out of stock"}{p.category?` · ${p.category}`:""}</div>
             </div>
             {inCart
               ?<div style={{display:"flex",alignItems:"center",gap:4}}>
@@ -887,9 +898,10 @@ function NotifPanel({show,onClose,bookings,services,onSelectBooking,apptToasts,o
 
 // ─── PRODUCT MODAL ───────────────────────────────────────────────────────────
 const PRODUCT_CATS=["Hair Care","Skin Care","Nail Care","Colour & Dye","Tools & Equipment","Supplements","Other"];
-function ProductModal({product,onClose,onSave}){
+function ProductModal({product,onClose,onSave,categories}){
   const isNew=!product;
   const [f,setF]=useState(product||{name:"",description:"",price:"",offerPrice:"",discount:"",inventory:"",category:"",image:""});
+  const allCats=[...new Set([...PRODUCT_CATS,...(categories||[])])].sort();
   const up=(k,v)=>setF(p=>({...p,[k]:v}));
   const handleImg=e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{const img=new Image();img.onload=()=>{const MAX=600;const scale=Math.min(1,MAX/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext("2d").drawImage(img,0,0,c.width,c.height);up("image",c.toDataURL("image/jpeg",0.75));};img.src=ev.target.result;};reader.readAsDataURL(file);};
   return(
@@ -915,10 +927,8 @@ function ProductModal({product,onClose,onSave}){
           <div><label style={lbl}>Description</label><textarea value={f.description} onChange={e=>up("description",e.target.value)} placeholder="Short description..." rows={2} style={{...inp,resize:"vertical"}}/></div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}>
             <div><label style={lbl}>Category</label>
-              <select value={f.category} onChange={e=>up("category",e.target.value)} onWheel={e=>e.target.blur()} style={inp}>
-                <option value="">— Select —</option>
-                {PRODUCT_CATS.map(c=><option key={c} value={c}>{c}</option>)}
-              </select>
+              <input list="prod-cat-list" value={f.category} onChange={e=>up("category",e.target.value)} placeholder="Select or type new…" style={inp} autoComplete="off"/>
+              <datalist id="prod-cat-list">{allCats.map(c=><option key={c} value={c}/>)}</datalist>
             </div>
             <div><label style={lbl}>Inventory (stock)</label><input type="number" min={0} value={f.inventory} onChange={e=>up("inventory",e.target.value)} onWheel={e=>e.target.blur()} placeholder="0" style={inp}/></div>
           </div>
@@ -1888,7 +1898,7 @@ export default function BeaubookDashboard(){
               }
             </div>
             {/* Product Add/Edit Modal */}
-            {(addProduct||editProduct)&&<ProductModal product={editProduct} onClose={()=>{setAddProduct(false);setEditProduct(null);}} onSave={(form)=>handleSaveProduct(form,!editProduct)}/>}
+            {(addProduct||editProduct)&&<ProductModal product={editProduct} onClose={()=>{setAddProduct(false);setEditProduct(null);}} onSave={(form)=>handleSaveProduct(form,!editProduct)} categories={[...new Set(products.map(p=>p.category).filter(Boolean))]}/>}
           </div>}
 
           {tab==="analytics"&&(()=>{
