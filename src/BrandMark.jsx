@@ -1,11 +1,45 @@
 import React from 'react';
 
-// Matches the app's purple gradient "B" badge used in the login screen and sidebar.
-// variant="badge" — purple rounded square with white B (for nav / footer)
-// variant="mark"  — just the B in purple (for hero / light backgrounds)
+// Matches the Beaubook brand logo:
+// - Vertical arms: solid teal, rounded pill
+// - Horizontal arms: same teal at reduced opacity (lighter appearance)
+// - Centre: orange/coral ring with white core
+// variant="badge" — teal rounded-square background, white arms  (nav / footer)
+// variant="mark"  — teal arms on transparent               (hero / light bg)
+
+const TEAL   = '#0d9488';   // matches --primary-2 in LandingPage.css
+const ORANGE = '#e6784a';   // matches --accent in LandingPage.css
+
+const ARMS = [
+  { angle:   0, near: 15, far: 47, width: 18, opacity: 1    }, // top
+  { angle: 180, near: 15, far: 47, width: 18, opacity: 1    }, // bottom
+  { angle:  90, near: 15, far: 36, width: 15, opacity: 0.42 }, // right
+  { angle: -90, near: 15, far: 36, width: 15, opacity: 0.42 }, // left
+];
+
 export default function BrandMark({ size = 32, variant = 'mark' }) {
-  const isBadge = variant === 'badge';
-  const uid = `bb-${variant}`;
+  const isBadge  = variant === 'badge';
+  const armColor = isBadge ? '#ffffff' : TEAL;
+
+  const cross = (
+    <g transform="translate(56,56)">
+      {ARMS.map(({ angle, near, far, width, opacity }, i) => (
+        <line
+          key={i}
+          x1="0" y1={-near}
+          x2="0" y2={-far}
+          stroke={armColor}
+          strokeWidth={width}
+          strokeOpacity={opacity}
+          strokeLinecap="round"
+          transform={`rotate(${angle})`}
+        />
+      ))}
+      {/* white core so the ring reads as a hollow circle on any bg */}
+      <circle cx="0" cy="0" r="9"  fill={isBadge ? 'rgba(255,255,255,0.25)' : 'none'} />
+      <circle cx="0" cy="0" r="11" fill="none" stroke={ORANGE} strokeWidth="8" />
+    </g>
+  );
 
   return (
     <svg
@@ -18,25 +52,15 @@ export default function BrandMark({ size = 32, variant = 'mark' }) {
       {isBadge && (
         <>
           <defs>
-            <linearGradient id={uid} x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#6d28d9" />
-              <stop offset="100%" stopColor="#9333ea" />
+            <linearGradient id="bb-badge-grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%"   stopColor="#14967a" />
+              <stop offset="100%" stopColor="#0f766e" />
             </linearGradient>
           </defs>
-          <rect x="0" y="0" width="112" height="112" rx="26" fill={`url(#${uid})`} />
+          <rect x="0" y="0" width="112" height="112" rx="27" fill="url(#bb-badge-grad)" />
         </>
       )}
-      <text
-        x="56"
-        y="82"
-        textAnchor="middle"
-        fill={isBadge ? '#ffffff' : '#7c3aed'}
-        fontSize="80"
-        fontWeight="800"
-        fontFamily="'Inter', Arial, sans-serif"
-      >
-        B
-      </text>
+      {cross}
     </svg>
   );
 }
