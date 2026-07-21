@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from "react";
+import BrandMark from "./BrandMark";
 
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 const HOURS=[];
@@ -83,7 +84,7 @@ function dateRange(from,to){const out=[];const cur=new Date(from+"T00:00:00");co
 // ─── STYLES ──────────────────────────────────────────────────────────────────
 const card=(e={})=>({background:"var(--surface)",borderRadius:"var(--radius-lg,16px)",border:"1px solid var(--border)",boxShadow:"var(--shadow-sm)",...e});
 const pBtn=(e={})=>({background:"linear-gradient(135deg,#0d9488,#10b981)",color:"#fff",border:"none",borderRadius:"var(--radius,12px)",padding:"10px 20px",cursor:"pointer",fontSize:14,fontWeight:600,letterSpacing:"-0.01em",...e});
-const gBtn=(e={})=>({border:"1px solid var(--border)",background:"var(--surface)",borderRadius:"var(--radius,12px)",padding:"8px 16px",cursor:"pointer",fontSize:13,color:"#7c3aed",fontWeight:600,...e});
+const gBtn=(e={})=>({border:"1px solid var(--border)",background:"var(--surface)",borderRadius:"var(--radius,12px)",padding:"8px 16px",cursor:"pointer",fontSize:13,color:"#0d9488",fontWeight:600,...e});
 const inp={width:"100%",padding:"10px 13px",border:"1px solid var(--border)",borderRadius:"var(--radius,12px)",fontSize:14,outline:"none",boxSizing:"border-box",fontFamily:"inherit",background:"var(--input-bg)",color:"var(--text)"};
 const lbl={fontSize:12,fontWeight:600,color:"var(--text-muted)",display:"block",marginBottom:5,letterSpacing:"0.02em",textTransform:"uppercase"};
 const sectionLbl={fontSize:11,fontWeight:700,color:"var(--text-muted)",letterSpacing:"0.08em",textTransform:"uppercase"};
@@ -130,10 +131,10 @@ function ProductPicker({products,selected,search,onSearch,onAdd,onQty}){
   });
   return(
     <div style={{background:"var(--bg)",borderRadius:9,padding:"11px 13px"}}>
-      <div style={{fontSize:12,fontWeight:700,color:"#7e22ce",marginBottom:8}}>🛒 Add Sales (optional)</div>
+      <div style={{fontSize:12,fontWeight:700,color:"#0f766e",marginBottom:8}}>🛒 Add Sales (optional)</div>
       <input value={search} onChange={e=>onSearch(e.target.value)} placeholder="Search product by name..." style={{...inp2,marginBottom:6}} onWheel={e=>e.target.blur()}/>
       {cats.length>1&&<div style={{display:"flex",gap:4,overflowX:"auto",marginBottom:showList?6:0,paddingBottom:2,scrollbarWidth:"none"}}>
-        {cats.map(c=><button key={c} onClick={()=>setCatFilter(prev=>prev===c&&c!=="All"?"All":c)} style={{padding:"3px 11px",borderRadius:20,border:catFilter===c?"2px solid #7c3aed":"1px solid var(--border)",background:catFilter===c?"#7c3aed":"var(--surface)",color:catFilter===c?"#fff":"var(--text-muted)",fontSize:11,fontWeight:catFilter===c?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>{c}</button>)}
+        {cats.map(c=><button key={c} onClick={()=>setCatFilter(prev=>prev===c&&c!=="All"?"All":c)} style={{padding:"3px 11px",borderRadius:20,border:catFilter===c?"2px solid #0d9488":"1px solid var(--border)",background:catFilter===c?"#0d9488":"var(--surface)",color:catFilter===c?"#fff":"var(--text-muted)",fontSize:11,fontWeight:catFilter===c?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>{c}</button>)}
       </div>}
       {!showList&&<div style={{textAlign:"center",fontSize:11,color:"var(--text-muted)",padding:"6px 0 2px",fontStyle:"italic"}}>Search by name or tap a category to browse</div>}
       {showList&&<div style={{maxHeight:160,overflowY:"auto",display:"flex",flexDirection:"column",gap:4,marginBottom:selected.length>0?8:0,border:"1px solid var(--border)",borderRadius:8,padding:4,background:"var(--surface)"}}>
@@ -149,19 +150,19 @@ function ProductPicker({products,selected,search,onSearch,onAdd,onQty}){
             </div>
             {inCart
               ?<div style={{display:"flex",alignItems:"center",gap:4}}>
-                  <button onClick={()=>onQty(p.id,inCart.qty-1)} style={{width:22,height:22,borderRadius:5,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",color:"#7c3aed",fontWeight:700}}>−</button>
+                  <button onClick={()=>onQty(p.id,inCart.qty-1)} style={{width:22,height:22,borderRadius:5,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",color:"#0d9488",fontWeight:700}}>−</button>
                   <span style={{fontWeight:700,minWidth:16,textAlign:"center"}}>{inCart.qty}</span>
-                  <button onClick={()=>onQty(p.id,inCart.qty+1)} style={{width:22,height:22,borderRadius:5,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",color:"#7c3aed",fontWeight:700}}>+</button>
+                  <button onClick={()=>onQty(p.id,inCart.qty+1)} style={{width:22,height:22,borderRadius:5,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",color:"#0d9488",fontWeight:700}}>+</button>
                 </div>
-              :<button disabled={p.inventory===0} onClick={()=>onAdd(p)} style={{padding:"3px 10px",borderRadius:6,border:"none",background:p.inventory===0?"#e5e7eb":"#7c3aed",color:"#fff",fontSize:11,fontWeight:600,cursor:p.inventory===0?"not-allowed":"pointer",flexShrink:0}}>Add</button>
+              :<button disabled={p.inventory===0} onClick={()=>onAdd(p)} style={{padding:"3px 10px",borderRadius:6,border:"none",background:p.inventory===0?"#e5e7eb":"#0d9488",color:"#fff",fontSize:11,fontWeight:600,cursor:p.inventory===0?"not-allowed":"pointer",flexShrink:0}}>Add</button>
             }
           </div>;
         })}
       </div>}
       {selected.length>0&&<div style={{borderTop:"1px solid var(--border)",paddingTop:7,marginTop:showList?0:6}}>
         <div style={{fontSize:11,fontWeight:700,color:"var(--text-muted)",marginBottom:4}}>SELECTED</div>
-        {selected.map(p=><div key={p.productId} style={{display:"flex",justifyContent:"space-between",fontSize:12,padding:"2px 0"}}><span>{p.name} × {p.qty}</span><span style={{fontWeight:600,color:"#7c3aed"}}>RM{p.unitPrice*p.qty}</span></div>)}
-        <div style={{display:"flex",justifyContent:"space-between",fontSize:12,fontWeight:700,color:"#7c3aed",borderTop:"1px solid var(--border)",marginTop:5,paddingTop:5}}><span>Sales Total</span><span>RM{selected.reduce((s,p)=>s+p.unitPrice*p.qty,0)}</span></div>
+        {selected.map(p=><div key={p.productId} style={{display:"flex",justifyContent:"space-between",fontSize:12,padding:"2px 0"}}><span>{p.name} × {p.qty}</span><span style={{fontWeight:600,color:"#0d9488"}}>RM{p.unitPrice*p.qty}</span></div>)}
+        <div style={{display:"flex",justifyContent:"space-between",fontSize:12,fontWeight:700,color:"#0d9488",borderTop:"1px solid var(--border)",marginTop:5,paddingTop:5}}><span>Sales Total</span><span>RM{selected.reduce((s,p)=>s+p.unitPrice*p.qty,0)}</span></div>
       </div>}
     </div>
   );
@@ -222,7 +223,7 @@ function QuickSaleModal({show,onClose,onSave,products}){
               <span>Total: <strong>RM {prodTotal}</strong></span>
               <span style={{color:(Number(f.amtPaid)||0)>=prodTotal?"#15803d":"#991b1b",fontWeight:600}}>Balance: RM {Math.max(0,prodTotal-(Number(f.amtPaid)||0))}</span>
             </div>}
-            <button onClick={()=>{if(submitting)return;setSubmitting(true);onSave({...f,amtPaid:Number(f.amtPaid)||0,tip:0,customer:f.customer||"Walk-in",phone:f.phone||"-"});}} disabled={submitting} style={{padding:"11px 0",fontSize:13,width:"100%",borderRadius:10,border:"none",background:"linear-gradient(135deg,#7c3aed,#6d28d9)",color:"#fff",fontWeight:700,cursor:submitting?"not-allowed":"pointer",opacity:submitting?0.65:1}}>{submitting?"Saving...":"Record Sale"}</button>
+            <button onClick={()=>{if(submitting)return;setSubmitting(true);onSave({...f,amtPaid:Number(f.amtPaid)||0,tip:0,customer:f.customer||"Walk-in",phone:f.phone||"-"});}} disabled={submitting} style={{padding:"11px 0",fontSize:13,width:"100%",borderRadius:10,border:"none",background:"linear-gradient(135deg,#0d9488,#0f766e)",color:"#fff",fontWeight:700,cursor:submitting?"not-allowed":"pointer",opacity:submitting?0.65:1}}>{submitting?"Saving...":"Record Sale"}</button>
           </>}
           {f.products.length===0&&<div style={{textAlign:"center",padding:"18px 0",color:"var(--text-muted)",fontSize:13}}>Add at least one product to record a sale.</div>}
         </div>
@@ -299,7 +300,7 @@ function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leave
           </div>
           <div><label style={lbl}>💬 Special Request / Remark</label><input value={f.remark} onChange={e=>up("remark",e.target.value)} placeholder="e.g. no heat, prefer gentle products" style={inp}/></div>
           <div style={{background:"var(--bg)",borderRadius:9,padding:"11px 13px"}}>
-            <div style={{fontSize:12,fontWeight:700,color:"#7e22ce",marginBottom:8}}>💳 Payment</div>
+            <div style={{fontSize:12,fontWeight:700,color:"#0f766e",marginBottom:8}}>💳 Payment</div>
             <div style={{display:"flex",gap:5,marginBottom:8}}>
               {["paid","unpaid","partial"].map(ps=>{const pc=PC[ps];const sel=f.payStatus===ps;return(
                 <button key={ps} onClick={()=>up("payStatus",ps)} style={{flex:1,padding:"6px 2px",borderRadius:6,border:sel?`2px solid ${pc.br}`:"1px solid var(--border)",background:sel?pc.bg:"#fff",color:sel?pc.tx:"#9090b0",fontWeight:sel?700:400,fontSize:10,cursor:"pointer"}}>{ps==="paid"?"Paid ✓":ps==="unpaid"?"Unpaid":"Partial"}</button>
@@ -326,7 +327,7 @@ function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leave
                 <input type="number" min={0} value={f.tip} onChange={e=>up("tip",e.target.value===""?"":Number(e.target.value))} onWheel={e=>e.target.blur()} placeholder="0" style={{...inp,paddingLeft:40}}/>
               </div>
             </div>
-            {(price>0||f.products.length>0)&&(()=>{const prodTotal=f.products.reduce((s,p)=>s+p.unitPrice*p.qty,0);const grandTotal=price+prodTotal;return<div style={{display:"flex",justifyContent:"space-between",padding:"6px 9px",background:"var(--surface)",borderRadius:6,border:"1px solid var(--border)",fontSize:11,marginBottom:7}}><span>Total: <strong>RM {grandTotal}</strong>{Number(f.tip)>0&&<span style={{color:"#7e22ce"}}> + RM{Number(f.tip)} tip</span>}{prodTotal>0&&price>0&&<span style={{color:"#7e22ce",fontSize:10}}> (svc RM{price} + prod RM{prodTotal})</span>}</span><span style={{color:(Number(f.amtPaid)||0)>=grandTotal?"#15803d":"#991b1b",fontWeight:600}}>Balance: RM {Math.max(0,grandTotal-(Number(f.amtPaid)||0))}</span></div>;})()}
+            {(price>0||f.products.length>0)&&(()=>{const prodTotal=f.products.reduce((s,p)=>s+p.unitPrice*p.qty,0);const grandTotal=price+prodTotal;return<div style={{display:"flex",justifyContent:"space-between",padding:"6px 9px",background:"var(--surface)",borderRadius:6,border:"1px solid var(--border)",fontSize:11,marginBottom:7}}><span>Total: <strong>RM {grandTotal}</strong>{Number(f.tip)>0&&<span style={{color:"#0f766e"}}> + RM{Number(f.tip)} tip</span>}{prodTotal>0&&price>0&&<span style={{color:"#0f766e",fontSize:10}}> (svc RM{price} + prod RM{prodTotal})</span>}</span><span style={{color:(Number(f.amtPaid)||0)>=grandTotal?"#15803d":"#991b1b",fontWeight:600}}>Balance: RM {Math.max(0,grandTotal-(Number(f.amtPaid)||0))}</span></div>;})()}
             <div><label style={lbl}>Transaction No.</label><input value={f.txnId} onChange={e=>up("txnId",e.target.value)} placeholder="TXN..." style={inp}/></div>
           </div>
           <button onClick={()=>{if(!f.customer||!f.phone||submitting)return;setSubmitting(true);onAdd({...f,amtPaid:Number(f.amtPaid)||0,tip:Number(f.tip)||0});}} disabled={submitting} style={pBtn({padding:"11px 0",fontSize:13,width:"100%",marginTop:2,opacity:submitting?0.65:1})}>{submitting?"Adding...":"Add Booking"}</button>
@@ -372,7 +373,7 @@ function DetailModal({booking,onClose,onAccept,onCancel,onSave,onReschedule,onQu
   return(
     <div onClick={()=>{onClose();setEdit(false);}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:400,display:"flex",alignItems:"center",justifyContent:"center",padding:12}}>
       <div onClick={e=>e.stopPropagation()} style={{background:"var(--surface)",borderRadius:16,width:460,maxWidth:"100%",maxHeight:"93vh",overflowY:"auto",boxShadow:"0 24px 64px rgba(0,0,0,0.25)"}}>
-        <div style={{padding:"16px 20px 12px",borderBottom:"1px solid #f0ebff",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,background:"var(--surface)",zIndex:1,borderRadius:"16px 16px 0 0"}}>
+        <div style={{padding:"16px 20px 12px",borderBottom:"1px solid #ebfffa",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,background:"var(--surface)",zIndex:1,borderRadius:"16px 16px 0 0"}}>
           <div><div style={{fontWeight:700,fontSize:18,color:"var(--text)"}}>Booking Details</div><div style={{fontSize:11,color:"var(--text-muted)"}}>#{String(b.id).padStart(5,"0")}</div></div>
           <div style={{display:"flex",gap:8,alignItems:"center"}}>
             {!edit&&b.status!=="cancelled"&&!reschedMode&&<button onClick={()=>{setReschedDraft({date:b.date,time:b.time});setReschedMode(true);}} style={gBtn({fontSize:12,padding:"6px 11px",display:"flex",alignItems:"center",gap:5})}>📅 Reschedule</button>}
@@ -383,7 +384,7 @@ function DetailModal({booking,onClose,onAccept,onCancel,onSave,onReschedule,onQu
         <div style={{padding:"16px 20px"}}>
           {/* Customer pill */}
           <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",background:"var(--bg)",borderRadius:12,marginBottom:14}}>
-            <div style={{width:42,height:42,borderRadius:"50%",background:"linear-gradient(135deg,#9333ea,#c084fc)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:17,flexShrink:0}}>{b.customer[0]}</div>
+            <div style={{width:42,height:42,borderRadius:"50%",background:"linear-gradient(135deg,#0d9488,#84fcdc)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:17,flexShrink:0}}>{b.customer[0]}</div>
             <div style={{flex:1}}><div style={{fontWeight:700,fontSize:16,color:"var(--text)"}}>{b.customer}</div><div style={{fontSize:12,color:"var(--text-muted)"}}>{b.phone}</div></div>
             <span style={{padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:600,background:sc.bg,color:sc.tx,border:`1px solid ${sc.br}`}}>{b.status}</span>
           </div>
@@ -398,18 +399,18 @@ function DetailModal({booking,onClose,onAccept,onCancel,onSave,onReschedule,onQu
               <div style={{background:"rgba(255,255,255,0.7)",borderRadius:8,padding:"7px 10px"}}><div style={{fontSize:10,color:pc.tx,opacity:.7}}>Amount Paid</div><div style={{fontSize:16,fontWeight:700,color:"#15803d"}}>RM {b.amtPaid||0}</div></div>
               <div style={{background:"rgba(255,255,255,0.7)",borderRadius:8,padding:"7px 10px"}}><div style={{fontSize:10,color:pc.tx,opacity:.7}}>{balance===0?"Fully Paid":"Outstanding"}</div><div style={{fontSize:16,fontWeight:700,color:balance===0?"#15803d":"#991b1b"}}>{balance===0?"✓ Paid":`RM ${balance}`}</div></div>
             </div>
-            {bProdTotal>0&&<div style={{marginTop:7,background:"rgba(255,255,255,0.7)",borderRadius:8,padding:"7px 10px"}}><div style={{fontSize:10,color:pc.tx,opacity:.7}}>Products</div><div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:3}}>{(Array.isArray(b.products)?b.products:[]).map(p=><span key={p.productId} style={{fontSize:11,background:"#f3e8ff",color:"#7c3aed",borderRadius:5,padding:"2px 7px"}}>{p.name} ×{p.qty} — RM{p.unitPrice*p.qty}</span>)}</div></div>}
-            {b.tip>0&&<div style={{marginTop:7,background:"rgba(255,255,255,0.7)",borderRadius:8,padding:"7px 10px"}}><div style={{fontSize:10,color:pc.tx,opacity:.7}}>Additional Payment (tips)</div><div style={{fontSize:16,fontWeight:700,color:"#7e22ce"}}>RM {b.tip}</div></div>}
+            {bProdTotal>0&&<div style={{marginTop:7,background:"rgba(255,255,255,0.7)",borderRadius:8,padding:"7px 10px"}}><div style={{fontSize:10,color:pc.tx,opacity:.7}}>Products</div><div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:3}}>{(Array.isArray(b.products)?b.products:[]).map(p=><span key={p.productId} style={{fontSize:11,background:"#e8fff9",color:"#0d9488",borderRadius:5,padding:"2px 7px"}}>{p.name} ×{p.qty} — RM{p.unitPrice*p.qty}</span>)}</div></div>}
+            {b.tip>0&&<div style={{marginTop:7,background:"rgba(255,255,255,0.7)",borderRadius:8,padding:"7px 10px"}}><div style={{fontSize:10,color:pc.tx,opacity:.7}}>Additional Payment (tips)</div><div style={{fontSize:16,fontWeight:700,color:"#0f766e"}}>RM {b.tip}</div></div>}
           </div>
 
           {/* Reschedule inline form */}
-          {reschedMode&&<div style={{marginBottom:14,padding:"14px 16px",background:"#f3e8ff",borderRadius:12,border:"1px solid #c4b5fd"}}>
-            <div style={{fontWeight:700,fontSize:13,color:"#6d28d9",marginBottom:10}}>📅 Reschedule Appointment</div>
+          {reschedMode&&<div style={{marginBottom:14,padding:"14px 16px",background:"#e8fff9",borderRadius:12,border:"1px solid #b5fdea"}}>
+            <div style={{fontWeight:700,fontSize:13,color:"#0f766e",marginBottom:10}}>📅 Reschedule Appointment</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:10}}>
               <div><label style={lbl}>New Date</label><input type="date" value={reschedDraft.date} onChange={e=>setReschedDraft(p=>({...p,date:e.target.value}))} style={inp}/></div>
               <div><label style={lbl}>New Time</label><select value={reschedDraft.time} onChange={e=>setReschedDraft(p=>({...p,time:e.target.value}))} style={inp}>{HOURS.map(h=><option key={h} value={h}>{h}</option>)}</select></div>
             </div>
-            <div style={{fontSize:11,color:"#7e22ce",marginBottom:8}}>Currently: {fmtD(b.date)}, {b.time}</div>
+            <div style={{fontSize:11,color:"#0f766e",marginBottom:8}}>Currently: {fmtD(b.date)}, {b.time}</div>
             <div style={{display:"flex",gap:8}}>
               <button onClick={()=>{onReschedule(b,reschedDraft);setReschedMode(false);}} style={pBtn({flex:1,fontSize:12,padding:"9px 0"})}>Confirm Reschedule</button>
               <button onClick={()=>setReschedMode(false)} style={gBtn({flex:1,fontSize:12,padding:"9px 0"})}>Cancel</button>
@@ -418,15 +419,15 @@ function DetailModal({booking,onClose,onAccept,onCancel,onSave,onReschedule,onQu
 
           {!edit&&<>
             {[[sv?.name,"Service","✂️"],[`${sv?.duration} min`,"Duration","⏱️"],[`${fmtD(b.date)}, ${b.time}`,"Date & Time","📅"],[st?.name||"—","Staff","👩"],[b.seat||"—","Seat / Room","🪑"],[b.payMethod?`${PAY_ICONS[b.payMethod]} ${b.payMethod.toUpperCase()}`:"-","Payment Method","💳"],[b.txnId||"—","Transaction No.","🔖"]].map(([v,l,ic])=>(
-              <div key={l} style={{display:"flex",alignItems:"center",gap:10,padding:"7px 0",borderBottom:"1px solid #f5f3ff"}}>
+              <div key={l} style={{display:"flex",alignItems:"center",gap:10,padding:"7px 0",borderBottom:"1px solid #f3fffc"}}>
                 <span style={{fontSize:14,width:20,textAlign:"center",flexShrink:0}}>{ic}</span>
                 <span style={{fontSize:12,color:"var(--text-muted)",width:110,flexShrink:0}}>{l}</span>
                 <span style={{fontSize:14,fontWeight:500,color:"var(--text)",fontFamily:l==="Transaction No."?"monospace":"inherit"}}>{v}</span>
               </div>
             ))}
-            {b.remark&&<div style={{marginTop:10,padding:"9px 11px",background:"#f3e8ff",borderRadius:9,fontSize:13,color:"#7e22ce"}}>💬 <strong>Remark:</strong> {b.remark}</div>}
+            {b.remark&&<div style={{marginTop:10,padding:"9px 11px",background:"#e8fff9",borderRadius:9,fontSize:13,color:"#0f766e"}}>💬 <strong>Remark:</strong> {b.remark}</div>}
             {b.note&&<div style={{marginTop:6,padding:"8px 11px",background:"#fffbeb",borderRadius:9,fontSize:13,color:"#92400e"}}>📝 {b.note}</div>}
-            {b.status==="unassigned"&&<div style={{marginTop:9,padding:"9px 12px",background:"#fdf4ff",border:"1px solid #e9d5ff",borderRadius:9,fontSize:13,color:"#7e22ce",fontWeight:600}}>⚠️ Staff on leave — please reassign</div>}
+            {b.status==="unassigned"&&<div style={{marginTop:9,padding:"9px 12px",background:"#f4fffc",border:"1px solid #d5fff4",borderRadius:9,fontSize:13,color:"#0f766e",fontWeight:600}}>⚠️ Staff on leave — please reassign</div>}
             {/* Quick payment */}
             {b.status!=="cancelled"&&<div style={{marginTop:12,padding:"12px 14px",background:"var(--bg)",borderRadius:12,border:"1px solid var(--border)"}}>
               <div style={{fontSize:11,fontWeight:700,color:"var(--text-muted)",marginBottom:8,textTransform:"uppercase",letterSpacing:"0.04em"}}>Payment Status</div>
@@ -465,16 +466,16 @@ function DetailModal({booking,onClose,onAccept,onCancel,onSave,onReschedule,onQu
           </>}
 
           {edit&&draft&&<div style={{display:"flex",flexDirection:"column",gap:9}}>
-            <div style={{fontWeight:600,fontSize:10,color:"#7e22ce",padding:"5px 9px",background:"#f3e8ff",borderRadius:6}}>✏️ Edit Booking</div>
+            <div style={{fontWeight:600,fontSize:10,color:"#0f766e",padding:"5px 9px",background:"#e8fff9",borderRadius:6}}>✏️ Edit Booking</div>
             <div style={{background:"var(--bg)",borderRadius:8,padding:"9px 11px"}}>
-              <div style={{fontSize:9,fontWeight:700,color:"#7e22ce",marginBottom:6}}>📅 Reschedule</div>
+              <div style={{fontSize:9,fontWeight:700,color:"#0f766e",marginBottom:6}}>📅 Reschedule</div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7}}>
                 <div><label style={lbl}>Date</label><input type="date" value={draft.date} onChange={e=>setDraft(p=>({...p,date:e.target.value}))} style={inp}/></div>
                 <div><label style={lbl}>Time</label><select value={draft.time} onChange={e=>setDraft(p=>({...p,time:e.target.value}))} style={inp}>{HOURS.map(h=><option key={h} value={h}>{h}</option>)}</select></div>
               </div>
             </div>
             <div style={{background:"var(--bg)",borderRadius:8,padding:"9px 11px"}}>
-              <div style={{fontSize:9,fontWeight:700,color:"#7e22ce",marginBottom:6}}>✂️ Service & Staff</div>
+              <div style={{fontSize:9,fontWeight:700,color:"#0f766e",marginBottom:6}}>✂️ Service & Staff</div>
               <div style={{display:"flex",flexDirection:"column",gap:7}}>
                 <div><label style={lbl}>Service</label><select value={draft.service} onChange={e=>setDraft(p=>({...p,service:Number(e.target.value)}))} style={inp}>{services.map(s=><option key={s.id} value={s.id}>{s.name} — RM{s.price}</option>)}</select></div>
                 <div><label style={lbl}>Staff</label><select value={draft.staff} onChange={e=>setDraft(p=>({...p,staff:Number(e.target.value)}))} style={inp}>{avail.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></div>
@@ -488,7 +489,7 @@ function DetailModal({booking,onClose,onAccept,onCancel,onSave,onReschedule,onQu
               onQty={(pid,qty)=>setDraft(prev=>({...prev,products:qty>0?(prev.products||[]).map(x=>x.productId===pid?{...x,qty}:x):(prev.products||[]).filter(x=>x.productId!==pid)}))}
             />
             <div style={{background:"var(--bg)",borderRadius:8,padding:"9px 11px"}}>
-              <div style={{fontSize:9,fontWeight:700,color:"#7e22ce",marginBottom:6}}>💳 Payment</div>
+              <div style={{fontSize:9,fontWeight:700,color:"#0f766e",marginBottom:6}}>💳 Payment</div>
               <div style={{display:"flex",gap:4,marginBottom:7}}>{["paid","unpaid","partial"].map(ps=>{const pc2=PC[ps];const sel=draft.payStatus===ps;return <button key={ps} onClick={()=>{const curProdTotal=(Array.isArray(draft.products)?draft.products:[]).reduce((s,p)=>s+p.unitPrice*p.qty,0);const full=dPrice+curProdTotal;setDraft(p=>({...p,payStatus:ps,amtPaid:ps==="paid"?full:ps==="unpaid"?0:p.amtPaid}));}} style={{flex:1,padding:"7px 2px",borderRadius:7,border:sel?`2px solid ${pc2.br}`:"1px solid var(--border)",background:sel?pc2.bg:"var(--surface)",color:sel?pc2.tx:"var(--text-muted)",fontWeight:sel?700:400,fontSize:10,cursor:"pointer"}}>{ps==="paid"?"✅ PAID":ps==="unpaid"?"❌ UNPAID":"⚠️ PARTIAL"}</button>;})}
               </div>
               {draft.payStatus==="partial"&&<div style={{padding:"6px 9px",background:"#fffbeb",borderRadius:6,border:"1px solid #fcd34d",fontSize:11,color:"#92400e",marginBottom:6}}>Outstanding: <strong>RM {dBal}</strong> — fill the amount received below</div>}
@@ -509,7 +510,7 @@ function DetailModal({booking,onClose,onAccept,onCancel,onSave,onReschedule,onQu
                 </div>
               </div>
               <div style={{display:"flex",justifyContent:"space-between",padding:"5px 8px",background:"var(--surface)",borderRadius:5,border:"1px solid var(--border)",fontSize:11,marginBottom:6}}>
-                <span>Total: <strong>RM {dGrandTotal}</strong>{Number(draft.tip)>0&&<span style={{color:"#7e22ce"}}> + RM{Number(draft.tip)} tip</span>}{dProdTotal>0&&dPrice>0&&<span style={{color:"var(--text-muted)",fontSize:10}}> (svc+prod)</span>}</span>
+                <span>Total: <strong>RM {dGrandTotal}</strong>{Number(draft.tip)>0&&<span style={{color:"#0f766e"}}> + RM{Number(draft.tip)} tip</span>}{dProdTotal>0&&dPrice>0&&<span style={{color:"var(--text-muted)",fontSize:10}}> (svc+prod)</span>}</span>
                 <span style={{color:dBal===0?"#15803d":"#991b1b",fontWeight:600}}>{dBal===0?"Fully paid":"Bal: RM "+dBal}</span>
               </div>
               <div><label style={lbl}>TXN No.</label><input value={draft.txnId} onChange={e=>setDraft(p=>({...p,txnId:e.target.value}))} placeholder="TXN..." style={inp}/></div>
@@ -517,8 +518,8 @@ function DetailModal({booking,onClose,onAccept,onCancel,onSave,onReschedule,onQu
             <div style={{display:"flex",gap:6}}><button onClick={saveEdit} style={pBtn({flex:1,padding:"9px 0",fontSize:11})}>Save Changes</button><button onClick={()=>setEdit(false)} style={gBtn({flex:1,padding:"9px 0",fontSize:11})}>Cancel</button></div>
           </div>}
 
-          {!edit&&b.history?.length>0&&<div style={{marginTop:12,paddingTop:10,borderTop:"1px solid #f0ebff"}}><div style={{fontSize:11,fontWeight:700,color:"#7e22ce",marginBottom:6}}>🕓 Change History</div>{b.history.map((h,i)=>{const isRs=h.field==="Rescheduled";return(<div key={i} style={{fontSize:11,color:"#64648a",padding:"4px 6px",borderBottom:"1px solid #f8f6ff",borderRadius:4,background:isRs?"#f3e8ff":"transparent"}}>
-            {isRs&&<span style={{fontSize:10,fontWeight:700,color:"#7e22ce",marginRight:5}}>📅 RESCHEDULED</span>}<strong>{h.field}</strong>: <span style={{color:"#ef4444"}}>{h.from}</span> → <span style={{color:"#16a34a"}}>{h.to}</span> <span style={{color:"#b0b0c8"}}>@ {h.at}</span>
+          {!edit&&b.history?.length>0&&<div style={{marginTop:12,paddingTop:10,borderTop:"1px solid #ebfffa"}}><div style={{fontSize:11,fontWeight:700,color:"#0f766e",marginBottom:6}}>🕓 Change History</div>{b.history.map((h,i)=>{const isRs=h.field==="Rescheduled";return(<div key={i} style={{fontSize:11,color:"#64648a",padding:"4px 6px",borderBottom:"1px solid #ebfffa",borderRadius:4,background:isRs?"#e8fff9":"transparent"}}>
+            {isRs&&<span style={{fontSize:10,fontWeight:700,color:"#0f766e",marginRight:5}}>📅 RESCHEDULED</span>}<strong>{h.field}</strong>: <span style={{color:"#ef4444"}}>{h.from}</span> → <span style={{color:"#16a34a"}}>{h.to}</span> <span style={{color:"#b0b0c8"}}>@ {h.at}</span>
           </div>);})}</div>}
         </div>
       </div>
@@ -547,17 +548,17 @@ function LeaveModal({staffMember,bookings,staffList,services,onClose,onConfirm})
         </div>
         <div style={{display:"flex",flexDirection:"column",gap:10}}>
           <div><label style={lbl}>Leave Type</label>
-            <div style={{display:"flex",gap:5}}>{Object.entries(ltLabels).map(([k,v])=><button key={k} onClick={()=>setLt(k)} style={{flex:1,padding:"7px 3px",borderRadius:7,border:lt===k?"2px solid #9333ea":"1px solid var(--border)",background:lt===k?"#f3e8ff":"#fff",color:lt===k?"#7e22ce":"#9090b0",fontWeight:lt===k?700:400,fontSize:9,cursor:"pointer"}}>{v}</button>)}</div>
+            <div style={{display:"flex",gap:5}}>{Object.entries(ltLabels).map(([k,v])=><button key={k} onClick={()=>setLt(k)} style={{flex:1,padding:"7px 3px",borderRadius:7,border:lt===k?"2px solid #0d9488":"1px solid var(--border)",background:lt===k?"#e8fff9":"#fff",color:lt===k?"#0f766e":"#9090b0",fontWeight:lt===k?700:400,fontSize:9,cursor:"pointer"}}>{v}</button>)}</div>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}>
             <div><label style={lbl}>From Date</label><input type="date" value={from} onChange={e=>{setFrom(e.target.value);if(e.target.value>to)setTo(e.target.value);}} style={inp}/></div>
             <div><label style={lbl}>To Date</label><input type="date" value={to} onChange={e=>setTo(e.target.value)} min={from} style={inp}/></div>
           </div>
-          {dates.length>1&&<div style={{padding:"5px 9px",background:"#f3e8ff",borderRadius:6,fontSize:10,color:"#7e22ce",fontWeight:500}}>{dates.length} days: {fmtD(from)} – {fmtD(to)}</div>}
+          {dates.length>1&&<div style={{padding:"5px 9px",background:"#e8fff9",borderRadius:6,fontSize:10,color:"#0f766e",fontWeight:500}}>{dates.length} days: {fmtD(from)} – {fmtD(to)}</div>}
           <div><label style={lbl}>Reason / Remark</label><input value={reason} onChange={e=>setReason(e.target.value)} placeholder="e.g. hospitalised, personal matter" style={inp}/></div>
           {affected.length>0?(
-            <div style={{background:"#fdf4ff",border:"1px solid #e9d5ff",borderRadius:9,padding:"10px 12px"}}>
-              <div style={{fontSize:10,fontWeight:700,color:"#7e22ce",marginBottom:7}}>⚠️ {affected.length} Affected Booking(s)</div>
+            <div style={{background:"#f4fffc",border:"1px solid #d5fff4",borderRadius:9,padding:"10px 12px"}}>
+              <div style={{fontSize:10,fontWeight:700,color:"#0f766e",marginBottom:7}}>⚠️ {affected.length} Affected Booking(s)</div>
               <div style={{maxHeight:110,overflowY:"auto",marginBottom:8}}>
                 {affected.map(b=>{const sv=services.find(s=>s.id===b.service);return<div key={b.id} style={{fontSize:9,color:"var(--text-muted)",padding:"2px 0",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between"}}><span>{fmtD(b.date)} {b.time} — {b.customer}</span><span style={{color:"var(--text-muted)"}}>{sv?.name}</span></div>;})}
               </div>
@@ -639,7 +640,7 @@ function CloseDayModal({show,onClose,initialDate,closedDates,closedWeekdays,open
         </div>
         <div style={{display:"flex",gap:2,background:"var(--bg)",borderRadius:9,padding:3,marginBottom:14}}>
           {[["date","🔒 Mark Closed"],["weekday","🔁 Recurring"],["open","✅ Open"]].map(([k,l])=>(
-            <button key={k} onClick={()=>setMode(k)} style={{flex:1,padding:"7px 6px",borderRadius:7,border:"none",cursor:"pointer",fontSize:11,fontWeight:700,background:mode===k?(k==="open"?"#15803d":"#6d28d9"):"transparent",color:mode===k?"#fff":k==="open"?"#15803d":"#7e22ce"}}>{l}</button>
+            <button key={k} onClick={()=>setMode(k)} style={{flex:1,padding:"7px 6px",borderRadius:7,border:"none",cursor:"pointer",fontSize:11,fontWeight:700,background:mode===k?(k==="open"?"#15803d":"#0f766e"):"transparent",color:mode===k?"#fff":k==="open"?"#15803d":"#0f766e"}}>{l}</button>
           ))}
         </div>
 
@@ -750,7 +751,7 @@ function ServiceModal({service,onClose,onSave}){
 
 // ─── ADD / EDIT STAFF MODAL ───────────────────────────────────────────────────
 function StaffModal({staffMember,onClose,onSave,isNew}){
-  const blank={id:Date.now(),name:"",avatar:"",color:"#a855f7",photo:null,phone:"",emergencyName:"",emergencyPhone:"",position:"Junior Beautician",skills:[],ic:""};
+  const blank={id:Date.now(),name:"",avatar:"",color:"#14b8a6",photo:null,phone:"",emergencyName:"",emergencyPhone:"",position:"Junior Beautician",skills:[],ic:""};
   const [form,setForm]=useState(staffMember||blank);
   const fileRef=useRef();
   const up=(k,v)=>setForm(p=>({...p,[k]:v}));
@@ -766,7 +767,7 @@ function StaffModal({staffMember,onClose,onSave,isNew}){
         <div style={{display:"flex",flexDirection:"column",gap:10}}>
           {/* Photo */}
           <div style={{display:"flex",alignItems:"center",gap:14}}>
-            <div onClick={()=>fileRef.current?.click()} style={{width:64,height:64,borderRadius:"50%",background:form.photo?"transparent":form.color||"#a855f7",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",overflow:"hidden",border:"2px dashed #d8b4fe",flexShrink:0}}>
+            <div onClick={()=>fileRef.current?.click()} style={{width:64,height:64,borderRadius:"50%",background:form.photo?"transparent":form.color||"#14b8a6",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",overflow:"hidden",border:"2px dashed #b4feea",flexShrink:0}}>
               {form.photo?<img src={form.photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<span style={{color:"#fff",fontWeight:700,fontSize:22}}>{form.name?form.name[0]:"+"}</span>}
             </div>
             <div>
@@ -788,14 +789,14 @@ function StaffModal({staffMember,onClose,onSave,isNew}){
             <div><label style={lbl}>Contact Number</label><input value={form.phone} onChange={e=>up("phone",e.target.value)} placeholder="012-3456789" style={inp}/></div>
             <div><label style={lbl}>Avatar Colour</label>
               <div style={{display:"flex",gap:5,paddingTop:4}}>
-                {["#a855f7","#ec4899","#06b6d4","#f59e0b","#10b981","#ef4444","#6366f1"].map(c=>(
+                {["#14b8a6","#ec4899","#06b6d4","#f59e0b","#10b981","#ef4444","#6366f1"].map(c=>(
                   <button key={c} onClick={()=>up("color",c)} style={{width:24,height:24,borderRadius:"50%",background:c,border:form.color===c?"3px solid #1a1a2e":"2px solid transparent",cursor:"pointer",flexShrink:0}}/>
                 ))}
               </div>
             </div>
           </div>
           <div style={{background:"var(--bg)",borderRadius:8,padding:"10px 12px"}}>
-            <div style={{fontSize:10,fontWeight:700,color:"#7e22ce",marginBottom:7}}>🚨 Emergency Contact</div>
+            <div style={{fontSize:10,fontWeight:700,color:"#0f766e",marginBottom:7}}>🚨 Emergency Contact</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}>
               <div><label style={lbl}>Name (Relationship)</label><input value={form.emergencyName} onChange={e=>up("emergencyName",e.target.value)} placeholder="e.g. Ahmad (Husband)" style={inp}/></div>
               <div><label style={lbl}>Phone</label><input value={form.emergencyPhone} onChange={e=>up("emergencyPhone",e.target.value)} placeholder="017-9988776" style={inp}/></div>
@@ -805,7 +806,7 @@ function StaffModal({staffMember,onClose,onSave,isNew}){
             <label style={lbl}>🎯 Skills / Services Available</label>
             <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
               {SKILL_OPTIONS.map(s=>{const sel=form.skills.includes(s);return(
-                <button key={s} onClick={()=>toggleSkill(s)} style={{padding:"4px 10px",borderRadius:20,border:sel?"2px solid #9333ea":"1px solid var(--border)",background:sel?"#f3e8ff":"#fff",color:sel?"#7e22ce":"#9090b0",fontSize:10,fontWeight:sel?600:400,cursor:"pointer"}}>{s}</button>
+                <button key={s} onClick={()=>toggleSkill(s)} style={{padding:"4px 10px",borderRadius:20,border:sel?"2px solid #0d9488":"1px solid var(--border)",background:sel?"#e8fff9":"#fff",color:sel?"#0f766e":"#9090b0",fontSize:10,fontWeight:sel?600:400,cursor:"pointer"}}>{s}</button>
               );})}
             </div>
           </div>
@@ -863,33 +864,33 @@ function NotifPanel({show,onClose,bookings,services,onSelectBooking,apptToasts,o
   const totalCount=all.length+(hasUpcoming?1:0);
   return(
     <div onClick={onClose} style={{position:"fixed",inset:0,zIndex:350}}>
-      <div onClick={e=>e.stopPropagation()} style={{position:"absolute",top:64,right:18,width:330,background:"var(--surface)",borderRadius:16,border:"1px solid var(--border)",boxShadow:"0 8px 32px rgba(124,58,237,0.15)",overflow:"hidden"}}>
-        <div style={{padding:"13px 16px",borderBottom:"1px solid #f0ebff",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+      <div onClick={e=>e.stopPropagation()} style={{position:"absolute",top:64,right:18,width:330,background:"var(--surface)",borderRadius:16,border:"1px solid var(--border)",boxShadow:"0 8px 32px rgba(13,148,136,0.15)",overflow:"hidden"}}>
+        <div style={{padding:"13px 16px",borderBottom:"1px solid #ebfffa",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{fontWeight:700,fontSize:14,color:"var(--text)",display:"flex",alignItems:"center",gap:7}}><Icon path={ICONS.bell} size={16}/>Notifications {totalCount>0&&<span style={{background:"#ef4444",color:"#fff",borderRadius:10,fontSize:10,fontWeight:700,padding:"1px 6px"}}>{totalCount}</span>}</div>
           <button onClick={onClose} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"var(--text-muted)"}}>×</button>
         </div>
         <div style={{maxHeight:400,overflowY:"auto"}}>
           {hasUpcoming&&(
-            <div onClick={()=>{onGoToBookings();onClose();}} style={{padding:"12px 16px",borderBottom:"1px solid #f0ebff",display:"flex",gap:11,alignItems:"flex-start",cursor:"pointer",background:"#faf5ff"}} onMouseEnter={e=>e.currentTarget.style.background="#f3e8ff"} onMouseLeave={e=>e.currentTarget.style.background="#faf5ff"}>
-              <div style={{width:34,height:34,borderRadius:"50%",background:"linear-gradient(135deg,#6d28d9,#9333ea)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:16,flexShrink:0}}>🔔</div>
+            <div onClick={()=>{onGoToBookings();onClose();}} style={{padding:"12px 16px",borderBottom:"1px solid #ebfffa",display:"flex",gap:11,alignItems:"flex-start",cursor:"pointer",background:"#f5fffc"}} onMouseEnter={e=>e.currentTarget.style.background="#e8fff9"} onMouseLeave={e=>e.currentTarget.style.background="#f5fffc"}>
+              <div style={{width:34,height:34,borderRadius:"50%",background:"linear-gradient(135deg,#0f766e,#0d9488)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:16,flexShrink:0}}>🔔</div>
               <div style={{flex:1}}>
-                <div style={{fontWeight:700,fontSize:13,color:"#6d28d9"}}>You have {apptToasts.length} upcoming appointment{apptToasts.length>1?"s":""}</div>
+                <div style={{fontWeight:700,fontSize:13,color:"#0f766e"}}>You have {apptToasts.length} upcoming appointment{apptToasts.length>1?"s":""}</div>
                 <div style={{fontSize:11,color:"var(--text-muted)",marginTop:2}}>{apptToasts.slice(0,2).map(({booking:b})=>`${b.customer} · ${b.time}`).join(" • ")}{apptToasts.length>2?` +${apptToasts.length-2} more`:""}</div>
-                <div style={{marginTop:4,fontSize:10,fontWeight:600,color:"#9333ea"}}>Tap to view in Bookings →</div>
+                <div style={{marginTop:4,fontSize:10,fontWeight:600,color:"#0d9488"}}>Tap to view in Bookings →</div>
               </div>
             </div>
           )}
           {all.length===0&&!hasUpcoming
             ?<div style={{padding:"24px 16px",textAlign:"center",color:"var(--text-muted)",fontSize:13}}>All caught up! No pending actions.</div>
             :all.map(b=>{const s=services.find(sv=>sv.id===b.service);return(
-              <div key={b.id} onClick={()=>{onSelectBooking(b);onClose();}} style={{padding:"12px 16px",borderBottom:"1px solid #f5f3ff",display:"flex",gap:11,alignItems:"flex-start",cursor:"pointer",transition:"background 0.1s"}} onMouseEnter={e=>e.currentTarget.style.background="var(--bg)"} onMouseLeave={e=>e.currentTarget.style.background=""}>
-                <div style={{width:34,height:34,borderRadius:"50%",background:b._type==="unassigned"?"linear-gradient(135deg,#7e22ce,#a855f7)":"linear-gradient(135deg,#d97706,#fbbf24)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",flexShrink:0}}><Icon path={b._type==="unassigned"?ICONS.alert:ICONS.clock} size={15}/></div>
+              <div key={b.id} onClick={()=>{onSelectBooking(b);onClose();}} style={{padding:"12px 16px",borderBottom:"1px solid #f3fffc",display:"flex",gap:11,alignItems:"flex-start",cursor:"pointer",transition:"background 0.1s"}} onMouseEnter={e=>e.currentTarget.style.background="var(--bg)"} onMouseLeave={e=>e.currentTarget.style.background=""}>
+                <div style={{width:34,height:34,borderRadius:"50%",background:b._type==="unassigned"?"linear-gradient(135deg,#0f766e,#14b8a6)":"linear-gradient(135deg,#d97706,#fbbf24)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",flexShrink:0}}><Icon path={b._type==="unassigned"?ICONS.alert:ICONS.clock} size={15}/></div>
                 <div style={{flex:1}}>
                   <div style={{fontWeight:700,fontSize:13,color:"var(--text)"}}>{b.customer}</div>
                   <div style={{fontSize:11,color:"var(--text-muted)"}}>{s?.name} · {fmtD(b.date)} {b.time}</div>
-                  <div style={{marginTop:3,padding:"2px 8px",borderRadius:20,display:"inline-block",fontSize:10,fontWeight:600,...(b._type==="unassigned"?{background:"#fdf4ff",color:"#7e22ce"}:{background:"#fffbeb",color:"#92400e"})}}>{b._type==="unassigned"?"Unassigned — needs staff":"Pending confirmation"}</div>
+                  <div style={{marginTop:3,padding:"2px 8px",borderRadius:20,display:"inline-block",fontSize:10,fontWeight:600,...(b._type==="unassigned"?{background:"#f4fffc",color:"#0f766e"}:{background:"#fffbeb",color:"#92400e"})}}>{b._type==="unassigned"?"Unassigned — needs staff":"Pending confirmation"}</div>
                 </div>
-                <Icon path={ICONS.chevRight} size={13} color="#c084fc"/>
+                <Icon path={ICONS.chevRight} size={13} color="#84fcdc"/>
               </div>
             );})}
         </div>
@@ -917,7 +918,7 @@ function ProductModal({product,onClose,onSave,categories}){
           {/* Image */}
           <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
             <div style={{width:90,height:90,borderRadius:10,border:"1px dashed var(--border-2)",overflow:"hidden",flexShrink:0,background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",position:"relative"}} onClick={()=>document.getElementById("prod-img-inp").click()}>
-              {f.image?<img src={f.image} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<Icon path={ICONS.image} size={28} color="#c084fc"/>}
+              {f.image?<img src={f.image} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<Icon path={ICONS.image} size={28} color="#84fcdc"/>}
               <input id="prod-img-inp" type="file" accept="image/*" style={{display:"none"}} onChange={handleImg}/>
             </div>
             <div style={{flex:1}}>
@@ -940,7 +941,7 @@ function ProductModal({product,onClose,onSave,categories}){
             <div><label style={lbl}>Discount (%)</label><input type="number" min={0} max={100} value={f.discount} onChange={e=>up("discount",e.target.value)} onWheel={e=>e.target.blur()} placeholder="optional" style={inp}/></div>
           </div>
           {(f.price||f.offerPrice)&&<div style={{padding:"8px 12px",background:"var(--bg)",borderRadius:8,fontSize:12,color:"var(--text-muted)"}}>
-            Sell price: <strong style={{color:"#7c3aed"}}>RM{f.offerPrice||f.price}</strong>
+            Sell price: <strong style={{color:"#0d9488"}}>RM{f.offerPrice||f.price}</strong>
             {f.offerPrice&&f.price&&Number(f.offerPrice)<Number(f.price)&&<span style={{color:"#991b1b",marginLeft:8}}>Save RM{Number(f.price)-Number(f.offerPrice)}</span>}
           </div>}
           <button onClick={()=>{if(!f.name||!f.price)return;onSave({...f,id:product?.id});}} style={pBtn({padding:"11px 0",fontSize:13,width:"100%",marginTop:4})}>{isNew?"Add Product":"Save Changes"}</button>
@@ -969,20 +970,25 @@ function LoginScreen({onSuccess}){
   };
 
   return(
-    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#f5f3ff 0%,#ede9fe 50%,#ddd6fe 100%)",display:"flex",alignItems:"center",justifyContent:"center",padding:16,fontFamily:"'Inter',system-ui,sans-serif"}}>
-      <div style={{background:"#fff",borderRadius:24,padding:36,width:400,maxWidth:"100%",boxShadow:"0 32px 80px rgba(109,40,217,0.18)",border:"1px solid #ede9fe"}}>
+    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#f3fffc 0%,#e9fef8 50%,#d6fef3 100%)",display:"flex",alignItems:"center",justifyContent:"center",padding:16,fontFamily:"'Inter',system-ui,sans-serif"}}>
+      <div style={{background:"#fff",borderRadius:24,padding:36,width:400,maxWidth:"100%",boxShadow:"0 32px 80px rgba(15,118,110,0.18)",border:"1px solid #e9fef8"}}>
         <div style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:28}}>
-          <div style={{width:62,height:62,borderRadius:18,background:"linear-gradient(135deg,#6d28d9,#9333ea)",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:14,boxShadow:"0 10px 28px rgba(109,40,217,0.40)"}}><span style={{color:"#fff",fontWeight:800,fontSize:28}}>B</span></div>
-          <div style={{fontWeight:800,fontSize:22,color:"#1e1b4b",letterSpacing:"-0.5px"}}>Beaubook</div>
-          <div style={{fontSize:13,color:"#8b7fb0",marginTop:3,fontWeight:500}}>Merchant Dashboard</div>
+          <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:18}}>
+            <BrandMark size={60} variant="mark"/>
+            <div style={{display:"flex",flexDirection:"column",gap:2}}>
+              <div style={{fontWeight:800,fontSize:22,color:"#1c2620",letterSpacing:"-0.5px",lineHeight:1.1}}><span>Beau</span><span style={{color:"#0d9488"}}>book</span></div>
+              <div style={{fontSize:"0.5rem",fontWeight:700,letterSpacing:"0.13em",textTransform:"uppercase",color:"#6e7a72"}}>Your Beauty · Your Time</div>
+            </div>
+          </div>
+          <div style={{fontSize:13,color:"#6e7a72",fontWeight:500}}>Merchant Dashboard</div>
         </div>
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
           <div>
-            <label style={{fontSize:11,fontWeight:700,color:"#7c3aed",display:"block",marginBottom:6,letterSpacing:"0.08em",textTransform:"uppercase"}}>Email</label>
+            <label style={{fontSize:11,fontWeight:700,color:"#0d9488",display:"block",marginBottom:6,letterSpacing:"0.08em",textTransform:"uppercase"}}>Email</label>
             <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()} placeholder="your@email.com" style={{...inp,padding:"12px 14px",fontSize:15}} autoFocus/>
           </div>
           <div>
-            <label style={{fontSize:11,fontWeight:700,color:"#7c3aed",display:"block",marginBottom:6,letterSpacing:"0.08em",textTransform:"uppercase"}}>Password</label>
+            <label style={{fontSize:11,fontWeight:700,color:"#0d9488",display:"block",marginBottom:6,letterSpacing:"0.08em",textTransform:"uppercase"}}>Password</label>
             <div style={{position:"relative"}}>
               <input type={showPw?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()} placeholder="Enter password" style={{...inp,padding:"12px 14px",paddingRight:46,fontSize:15}}/>
               <button onClick={()=>setShowPw(p=>!p)} tabIndex={-1} style={{position:"absolute",right:13,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"#9090b0",fontSize:19,lineHeight:1,padding:0}}>
@@ -991,7 +997,7 @@ function LoginScreen({onSuccess}){
             </div>
           </div>
           {error&&<div style={{fontSize:13,color:"#991b1b",background:"#fef2f2",padding:"10px 14px",borderRadius:10,border:"1px solid #fca5a5",fontWeight:500}}>{error}</div>}
-          <button onClick={submit} disabled={loading} style={pBtn({width:"100%",marginTop:4,padding:"14px 0",fontSize:15,fontWeight:700,background:"linear-gradient(135deg,#6d28d9,#9333ea)",boxShadow:"0 6px 18px rgba(109,40,217,0.35)",opacity:loading?0.7:1})}>{loading?"Logging in…":"Log In"}</button>
+          <button onClick={submit} disabled={loading} style={pBtn({width:"100%",marginTop:4,padding:"14px 0",fontSize:15,fontWeight:700,background:"linear-gradient(135deg,#0f766e,#0d9488)",boxShadow:"0 6px 18px rgba(15,118,110,0.35)",opacity:loading?0.7:1})}>{loading?"Logging in…":"Log In"}</button>
         </div>
       </div>
     </div>
@@ -1322,21 +1328,21 @@ export default function BeaubookDashboard(){
     const sc=BC[b.status]||BC.confirmed;const pc=PC[b.payStatus]||PC.unpaid;const s=svc(b.service);const st=stf(b.staff);
     const price=s?.price||0;const balance=Math.max(0,price-(b.amtPaid||0));
     return(
-      <div key={b.id} style={card({padding:"16px 18px",cursor:"pointer",display:"flex",alignItems:"center",gap:14,borderLeft:b.status==="pending"?"4px solid #f59e0b":b.status==="unassigned"?"4px solid #c084fc":"1px solid var(--border)"})}>
+      <div key={b.id} style={card({padding:"16px 18px",cursor:"pointer",display:"flex",alignItems:"center",gap:14,borderLeft:b.status==="pending"?"4px solid #f59e0b":b.status==="unassigned"?"4px solid #84fcdc":"1px solid var(--border)"})}>
         <div onClick={()=>setSelBooking(b)} style={{flex:1,display:"flex",alignItems:"center",gap:14}}>
           <div style={{textAlign:"center",minWidth:56,flexShrink:0}}>
             <div style={{fontSize:10,color:"var(--text-muted)",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.04em",marginBottom:2}}>{fmtD(b.date)}</div>
-            <div style={{fontSize:16,fontWeight:800,color:"#7c3aed",letterSpacing:"-0.5px"}}>{b.time}</div>
+            <div style={{fontSize:16,fontWeight:800,color:"#0d9488",letterSpacing:"-0.5px"}}>{b.time}</div>
           </div>
           <div style={{width:1,height:40,background:"var(--border)",flexShrink:0}}/>
           <div style={{flex:1,minWidth:0}}>
             <div style={{fontWeight:700,fontSize:15,color:"var(--text)",marginBottom:3}}>{b.customer}</div>
             <div style={{fontSize:12,color:"var(--text-muted)",display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
               {s?.name&&<span>{s.name}</span>}
-              {st&&<><span style={{color:"var(--border-2,#e5e1f8)"}}>·</span><span>{st.name}</span></>}
-              {b.seat&&<><span style={{color:"var(--border-2,#e5e1f8)"}}>·</span><span style={{background:"#f3e8ff",color:"#7c3aed",padding:"1px 7px",borderRadius:6,fontSize:11,fontWeight:600}}>{b.seat}</span></>}
+              {st&&<><span style={{color:"var(--border-2,#e1f8f2)"}}>·</span><span>{st.name}</span></>}
+              {b.seat&&<><span style={{color:"var(--border-2,#e1f8f2)"}}>·</span><span style={{background:"#e8fff9",color:"#0d9488",padding:"1px 7px",borderRadius:6,fontSize:11,fontWeight:600}}>{b.seat}</span></>}
             </div>
-            {b.remark&&<div style={{display:"inline-block",marginTop:5,padding:"3px 10px",borderRadius:20,background:"#f3e8ff",fontSize:11,color:"#7c3aed",fontWeight:500,border:"1px solid #e9d5ff"}}>&ldquo;{b.remark}&rdquo;</div>}
+            {b.remark&&<div style={{display:"inline-block",marginTop:5,padding:"3px 10px",borderRadius:20,background:"#e8fff9",fontSize:11,color:"#0d9488",fontWeight:500,border:"1px solid #d5fff4"}}>&ldquo;{b.remark}&rdquo;</div>}
           </div>
           <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:5,flexShrink:0}}>
             <span style={{padding:"3px 11px",borderRadius:99,fontSize:11,fontWeight:700,background:sc.bg,color:sc.tx,border:`1px solid ${sc.br}`,letterSpacing:"0.01em"}}>{b.status}</span>
@@ -1346,8 +1352,8 @@ export default function BeaubookDashboard(){
         </div>
         {/* Call / WA buttons */}
         <div style={{display:"flex",gap:6,flexShrink:0}}>
-          <a href={`tel:${b.phone}`} onClick={e=>e.stopPropagation()} style={{display:"flex",alignItems:"center",justifyContent:"center",width:36,height:36,borderRadius:10,background:"var(--bg)",border:"1px solid var(--border)",color:"#7c3aed",textDecoration:"none"}}><Icon path={ICONS.phone} size={15}/></a>
-          <a href={`https://wa.me/6${b.phone.replace(/-/g,"")}`} target="_blank" rel="noreferrer" onClick={e=>e.stopPropagation()} style={{display:"flex",alignItems:"center",justifyContent:"center",width:36,height:36,borderRadius:10,background:"var(--bg)",border:"1px solid var(--border)",color:"#7c3aed",textDecoration:"none"}}><Icon path={ICONS.message} size={15}/></a>
+          <a href={`tel:${b.phone}`} onClick={e=>e.stopPropagation()} style={{display:"flex",alignItems:"center",justifyContent:"center",width:36,height:36,borderRadius:10,background:"var(--bg)",border:"1px solid var(--border)",color:"#0d9488",textDecoration:"none"}}><Icon path={ICONS.phone} size={15}/></a>
+          <a href={`https://wa.me/6${b.phone.replace(/-/g,"")}`} target="_blank" rel="noreferrer" onClick={e=>e.stopPropagation()} style={{display:"flex",alignItems:"center",justifyContent:"center",width:36,height:36,borderRadius:10,background:"var(--bg)",border:"1px solid var(--border)",color:"#0d9488",textDecoration:"none"}}><Icon path={ICONS.message} size={15}/></a>
         </div>
         {b.status==="pending"&&<div style={{display:"flex",gap:6,flexShrink:0}}>
           <button onClick={e=>{e.stopPropagation();handleAccept(b.id);}} style={{background:"#16a34a",border:"none",color:"#fff",borderRadius:10,width:36,height:36,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><Icon path={ICONS.check} size={16}/></button>
@@ -1365,10 +1371,10 @@ export default function BeaubookDashboard(){
       {/* NAV */}
       <nav style={{background:"var(--surface)",borderBottom:"1px solid var(--border)",padding:"0 24px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:200,boxShadow:"var(--shadow-sm)"}}>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <button onClick={()=>setSidebarOpen(!sidebarOpen)} style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:10,padding:8,cursor:"pointer",color:"#7c3aed",display:"flex",alignItems:"center",justifyContent:"center"}}>
+          <button onClick={()=>setSidebarOpen(!sidebarOpen)} style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:10,padding:8,cursor:"pointer",color:"#0d9488",display:"flex",alignItems:"center",justifyContent:"center"}}>
             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
-          <div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#7c3aed,#9333ea)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:800,fontSize:13,flexShrink:0}}>{settings.companyName.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase()}</div>
+          <div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#0d9488,#0d9488)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:800,fontSize:13,flexShrink:0}}>{settings.companyName.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase()}</div>
           <div>
             <div style={{fontWeight:700,fontSize:15,color:"var(--text)",letterSpacing:"-0.3px",lineHeight:1.2}}>{settings.companyName}</div>
             <div style={{fontSize:11,color:"var(--text-muted)",fontWeight:500,marginTop:1}}>{settings.location}</div>
@@ -1376,18 +1382,21 @@ export default function BeaubookDashboard(){
         </div>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           {/* Live clock */}
-          <div style={{display:"flex",alignItems:"center",gap:7,fontSize:13,fontWeight:700,color:"#7c3aed",background:"var(--primary-bg,#f3e8ff)",padding:"7px 14px",borderRadius:10,border:"1px solid var(--border)",letterSpacing:"0.01em"}}>
+          <div style={{display:"flex",alignItems:"center",gap:7,fontSize:13,fontWeight:700,color:"#0d9488",background:"var(--primary-bg,#e8fff9)",padding:"7px 14px",borderRadius:10,border:"1px solid var(--border)",letterSpacing:"0.01em"}}>
             <span style={{width:7,height:7,borderRadius:"50%",background:"#10b981",display:"inline-block",flexShrink:0}}/>
             {nowTime.toLocaleTimeString("en-MY",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false})}
           </div>
           {/* Notification bell */}
           <button onClick={()=>setShowNotif(p=>!p)} style={{position:"relative",background:"var(--bg)",border:"1px solid var(--border)",borderRadius:10,width:40,height:40,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
-            <Icon path={ICONS.bell} size={18} color={notifCount>0?"#7c3aed":"var(--text-muted)"} strokeWidth={1.8}/>
+            <Icon path={ICONS.bell} size={18} color={notifCount>0?"#0d9488":"var(--text-muted)"} strokeWidth={1.8}/>
             {notifCount>0&&<span style={{position:"absolute",top:-5,right:-5,background:"#ef4444",color:"#fff",borderRadius:99,fontSize:10,fontWeight:700,minWidth:18,height:18,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 5px",border:"2px solid var(--surface)"}}>{notifCount}</span>}
           </button>
-          <div style={{display:"flex",alignItems:"center",gap:8,padding:"6px 12px",background:"var(--bg)",borderRadius:10,border:"1px solid var(--border)"}}>
-            <div style={{width:26,height:26,borderRadius:8,background:"linear-gradient(135deg,#6d28d9,#7c3aed)",display:"flex",alignItems:"center",justifyContent:"center"}}><span style={{color:"#fff",fontWeight:800,fontSize:11}}>B</span></div>
-            <span style={{fontSize:13,color:"var(--text)",fontWeight:600}}>Beaubook</span>
+          <div style={{display:"flex",alignItems:"center",gap:9,padding:"5px 12px",background:"var(--bg)",borderRadius:10,border:"1px solid var(--border)"}}>
+            <BrandMark size={34} variant="mark"/>
+            <div style={{display:"flex",flexDirection:"column",gap:1}}>
+              <span style={{fontSize:13,color:"var(--text)",fontWeight:800,lineHeight:1.1,letterSpacing:"-0.2px"}}><span>Beau</span><span style={{color:"#0d9488"}}>book</span></span>
+              <span style={{fontSize:"0.48rem",fontWeight:700,letterSpacing:"0.11em",textTransform:"uppercase",color:"var(--text-muted)"}}>Your Beauty · Your Time</span>
+            </div>
           </div>
         </div>
       </nav>
@@ -1397,8 +1406,8 @@ export default function BeaubookDashboard(){
         {sidebarOpen&&<aside style={{width:224,background:"var(--surface)",borderRight:"1px solid var(--border)",padding:"20px 14px",display:"flex",flexDirection:"column",gap:2,flexShrink:0}}>
           <div style={{...sectionLbl,padding:"0 10px",marginBottom:12}}>Menu</div>
           {[{id:"calendar",icon:ICONS.calendar,label:t("nav.calendar")},{id:"bookings",icon:ICONS.list,label:t("nav.bookings"),badge:pendingAll.length+unassignedAll.length},{id:"customers",icon:ICONS.user,label:t("nav.customers")},{id:"staff",icon:ICONS.users,label:t("nav.staff")},{id:"services",icon:ICONS.scissors,label:t("nav.services")},{id:"products",icon:ICONS.box,label:t("nav.products")},{id:"analytics",icon:ICONS.chart,label:t("nav.analytics")},{id:"settings",icon:ICONS.settings,label:t("nav.settings")}].map(item=>(
-            <button key={item.id} onClick={()=>setTab(item.id)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:10,border:"none",cursor:"pointer",textAlign:"left",width:"100%",background:tab===item.id?"var(--primary-bg,#f3e8ff)":"transparent",color:tab===item.id?"#7c3aed":"var(--text-muted)",fontWeight:tab===item.id?700:500,fontSize:13.5}}>
-              <Icon path={item.icon} size={17} color={tab===item.id?"#7c3aed":"var(--text-muted)"} strokeWidth={tab===item.id?2.2:1.8}/><span style={{flex:1}}>{item.label}</span>
+            <button key={item.id} onClick={()=>setTab(item.id)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:10,border:"none",cursor:"pointer",textAlign:"left",width:"100%",background:tab===item.id?"var(--primary-bg,#e8fff9)":"transparent",color:tab===item.id?"#0d9488":"var(--text-muted)",fontWeight:tab===item.id?700:500,fontSize:13.5}}>
+              <Icon path={item.icon} size={17} color={tab===item.id?"#0d9488":"var(--text-muted)"} strokeWidth={tab===item.id?2.2:1.8}/><span style={{flex:1}}>{item.label}</span>
               {item.badge>0&&<span style={{background:"#ef4444",color:"#fff",borderRadius:99,fontSize:10,fontWeight:700,padding:"2px 7px",lineHeight:1.5}}>{item.badge}</span>}
             </button>
           ))}
@@ -1411,7 +1420,7 @@ export default function BeaubookDashboard(){
           </div>}
           {/* Appointment reminder — single summary toast */}
           {apptToasts.length>0&&(
-            <div onClick={()=>{setTab("bookings");setApptToasts([]);}} style={{position:"fixed",bottom:20,right:16,zIndex:9998,padding:"14px 16px",borderRadius:14,background:"linear-gradient(135deg,#6d28d9,#9333ea)",color:"#fff",boxShadow:"0 8px 32px rgba(109,40,217,0.45)",display:"flex",alignItems:"center",gap:12,width:310,cursor:"pointer",animation:"slideIn 0.3s ease"}}>
+            <div onClick={()=>{setTab("bookings");setApptToasts([]);}} style={{position:"fixed",bottom:20,right:16,zIndex:9998,padding:"14px 16px",borderRadius:14,background:"linear-gradient(135deg,#0f766e,#0d9488)",color:"#fff",boxShadow:"0 8px 32px rgba(15,118,110,0.45)",display:"flex",alignItems:"center",gap:12,width:310,cursor:"pointer",animation:"slideIn 0.3s ease"}}>
               <div style={{fontSize:24,flexShrink:0}}>🔔</div>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{fontWeight:700,fontSize:13,marginBottom:3}}>You have {apptToasts.length} upcoming appointment{apptToasts.length>1?"s":""}</div>
@@ -1430,7 +1439,7 @@ export default function BeaubookDashboard(){
                 <h1 style={{margin:0,fontSize:18,fontWeight:800,color:"var(--text)",letterSpacing:"-0.3px"}}>{t("nav.calendar")}</h1>
                 <span style={{fontSize:12,color:"var(--text-muted)"}}>{new Date(selectedDate+"T00:00:00").toLocaleDateString("en-MY",{weekday:"short",day:"numeric",month:"short",year:"numeric"})}{selHoliday&&<span style={{color:"#dc2626",fontWeight:600}}> · {selHoliday}</span>}{selClosed&&<span style={{color:"#dc2626",fontWeight:600}}> · Closed</span>}{isOpenOverride(selectedDate)&&<span style={{color:"#15803d",fontWeight:600,background:"#dcfce7",padding:"1px 7px",borderRadius:4,marginLeft:4}}>✅ Open Override</span>}</span>
                 {/* Compact stat chips */}
-                {[{l:"Today",v:todayStats.total,c:"#7c3aed"},{l:"Confirmed",v:todayStats.confirmed,c:"#16a34a"},{l:"Pending",v:todayStats.pending,c:"#d97706"}].map(s=>(
+                {[{l:"Today",v:todayStats.total,c:"#0d9488"},{l:"Confirmed",v:todayStats.confirmed,c:"#16a34a"},{l:"Pending",v:todayStats.pending,c:"#d97706"}].map(s=>(
                   <div key={s.l} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 12px",background:"var(--surface)",border:"1px solid var(--border)",borderLeft:`3px solid ${s.c}`,borderRadius:8,boxShadow:"var(--shadow-sm)"}}>
                     <span style={{fontSize:10,fontWeight:700,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:"0.05em"}}>{s.l}</span>
                     <span style={{fontSize:18,fontWeight:800,color:s.c,letterSpacing:"-0.5px",lineHeight:1}}>{s.v}</span>
@@ -1443,24 +1452,24 @@ export default function BeaubookDashboard(){
                 <button onClick={()=>{setAddDate(selectedDate);setAddTime("09:00");setAddInitStaff(0);setShowAdd(true);}} style={pBtn({display:"flex",alignItems:"center",gap:5,padding:"7px 14px",fontSize:12})}><Icon path={ICONS.plus} size={14}/>Add booking</button>
               </div>
             </div>
-            {unassignedAll.length>0&&<div style={{background:"#fdf4ff",border:"1px solid #e9d5ff",borderRadius:12,padding:"10px 14px",marginBottom:12,display:"flex",alignItems:"center",gap:9}}>
-              <Icon path={ICONS.alert} size={16} color="#9333ea"/><div style={{flex:1,fontWeight:600,color:"#7e22ce",fontSize:13}}>{unassignedAll.length} unassigned — staff on leave</div>
+            {unassignedAll.length>0&&<div style={{background:"#f4fffc",border:"1px solid #d5fff4",borderRadius:12,padding:"10px 14px",marginBottom:12,display:"flex",alignItems:"center",gap:9}}>
+              <Icon path={ICONS.alert} size={16} color="#0d9488"/><div style={{flex:1,fontWeight:600,color:"#0f766e",fontSize:13}}>{unassignedAll.length} unassigned — staff on leave</div>
               <button onClick={()=>setTab("bookings")} style={gBtn({fontSize:11,padding:"5px 11px"})}>Assign</button>
             </div>}
 
             <div style={card({overflow:"hidden",display:"flex",flexDirection:"column",height:"calc(100vh - 150px)"})}>
               <div style={{display:"flex",alignItems:"center",padding:"8px 12px",borderBottom:"1px solid var(--border)",gap:8,flexWrap:"wrap",flexShrink:0}}>
-                <div style={{display:"flex",gap:2,background:"#f3e8ff",borderRadius:9,padding:3}}>
-                  {["week","month"].map(v=><button key={v} onClick={()=>setCalView(v)} style={{padding:"5px 13px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:calView===v?"#6d28d9":"transparent",color:calView===v?"#fff":"#7e22ce"}}>{v==="week"?"Week":"Month"}</button>)}
+                <div style={{display:"flex",gap:2,background:"#e8fff9",borderRadius:9,padding:3}}>
+                  {["week","month"].map(v=><button key={v} onClick={()=>setCalView(v)} style={{padding:"5px 13px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:calView===v?"#0f766e":"transparent",color:calView===v?"#fff":"#0f766e"}}>{v==="week"?"Week":"Month"}</button>)}
                 </div>
                 {calView==="week"&&<>
                   <button onClick={()=>{const d=new Date(weekBase);d.setDate(d.getDate()-7);setWeekBase(d.toISOString().split("T")[0]);}} style={gBtn({padding:"5px 10px",fontSize:12})}>←</button>
                   <div style={{display:"flex",flex:1,gap:3}}>
                     {wkDates.map((date,i)=>{const isSel=date===selectedDate;const cnt=bookings.filter(b=>b.date===date&&b.status!=="cancelled").length;return(
-                      <button key={date} onClick={()=>setSelectedDate(date)} style={{flex:1,padding:"5px 1px",borderRadius:8,border:isSel?"2px solid #9333ea":"1px solid var(--border)",background:isSel?"#f3e8ff":"#fff",cursor:"pointer"}}>
-                        <div style={{fontSize:10,color:isSel?"#7e22ce":"#9090b0",fontWeight:600}}>{DAY_NAMES[i]}</div>
-                        <div style={{fontSize:14,fontWeight:700,color:isSel?"#7e22ce":"#1a1a2e"}}>{parseInt(date.split("-")[2])}</div>
-                        {cnt>0&&<div style={{width:4,height:4,borderRadius:"50%",background:isSel?"#9333ea":"#c084fc",margin:"2px auto 0"}}/>}
+                      <button key={date} onClick={()=>setSelectedDate(date)} style={{flex:1,padding:"5px 1px",borderRadius:8,border:isSel?"2px solid #0d9488":"1px solid var(--border)",background:isSel?"#e8fff9":"#fff",cursor:"pointer"}}>
+                        <div style={{fontSize:10,color:isSel?"#0f766e":"#9090b0",fontWeight:600}}>{DAY_NAMES[i]}</div>
+                        <div style={{fontSize:14,fontWeight:700,color:isSel?"#0f766e":"#1a1a2e"}}>{parseInt(date.split("-")[2])}</div>
+                        {cnt>0&&<div style={{width:4,height:4,borderRadius:"50%",background:isSel?"#0d9488":"#84fcdc",margin:"2px auto 0"}}/>}
                       </button>
                     );})}
                   </div>
@@ -1477,7 +1486,7 @@ export default function BeaubookDashboard(){
                 <div style={{padding:"6px 12px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:6,flexWrap:"wrap",flexShrink:0}}>
                   <span style={{...sectionLbl,marginRight:2}}>Staff</span>
                   {[{id:0,name:"All"},...staffList].map(s=>(
-                    <button key={s.id} onClick={()=>setFilterStaff(s.id)} style={{padding:"4px 11px",borderRadius:20,border:filterStaff===s.id?"2px solid #9333ea":"1px solid var(--border)",background:filterStaff===s.id?"#f3e8ff":"#fff",cursor:"pointer",fontSize:12,fontWeight:filterStaff===s.id?700:500,color:filterStaff===s.id?"#7e22ce":"#64648a",display:"flex",alignItems:"center",gap:4}}>
+                    <button key={s.id} onClick={()=>setFilterStaff(s.id)} style={{padding:"4px 11px",borderRadius:20,border:filterStaff===s.id?"2px solid #0d9488":"1px solid var(--border)",background:filterStaff===s.id?"#e8fff9":"#fff",cursor:"pointer",fontSize:12,fontWeight:filterStaff===s.id?700:500,color:filterStaff===s.id?"#0f766e":"#64648a",display:"flex",alignItems:"center",gap:4}}>
                       {s.name}{s.id>0&&isOL(s.id,selectedDate)&&<span style={{fontSize:9,background:"#fef2f2",color:"#991b1b",padding:"0 4px",borderRadius:4}}>Off</span>}
                     </button>
                   ))}
@@ -1496,7 +1505,7 @@ export default function BeaubookDashboard(){
                     <div style={{flex:1,overflowY:"auto",minHeight:0}}>
                     {HOURS.map(hour=>(
                       <div key={hour} style={{display:"grid",gridTemplateColumns:`60px repeat(${filterStaff===0?staffList.length:1},1fr)`,borderBottom:`1px solid ${hour.endsWith(":00")?"var(--border)":"var(--bg)"}`,minHeight:28}}>
-                        <div style={{padding:"3px 8px",fontSize:11,color:hour.endsWith(":00")?"#7c3aed":"#d0c8f0",fontWeight:hour.endsWith(":00")?700:400,borderRight:"1px solid var(--border)",lineHeight:"22px"}}>{hour}</div>
+                        <div style={{padding:"3px 8px",fontSize:11,color:hour.endsWith(":00")?"#0d9488":"#c8f0e5",fontWeight:hour.endsWith(":00")?700:400,borderRight:"1px solid var(--border)",lineHeight:"22px"}}>{hour}</div>
                         {staffList.filter(s=>filterStaff===0||s.id===filterStaff).map(s=>{
                           const covering=getSlotBks(selectedDate,hour,s.id);
                           const onLeave=isOL(s.id,selectedDate);
@@ -1523,7 +1532,7 @@ export default function BeaubookDashboard(){
                                           <div style={{fontSize:13,fontWeight:700,color:sc.tx,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{b.customer}</div>
                                           <div style={{fontSize:11,color:sc.tx,opacity:.75,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{svc(b.service)?.name}</div>
                                           <div style={{display:"flex",gap:3,alignItems:"center",flexWrap:"wrap",marginTop:2}}>
-                                            {b.seat&&<span style={{fontSize:9,background:"#6d28d9",color:"#fff",padding:"1px 5px",borderRadius:4,flexShrink:0,fontWeight:700}}>{b.seat.replace("Seat ","").replace("Room ","R")}</span>}
+                                            {b.seat&&<span style={{fontSize:9,background:"#0f766e",color:"#fff",padding:"1px 5px",borderRadius:4,flexShrink:0,fontWeight:700}}>{b.seat.replace("Seat ","").replace("Room ","R")}</span>}
                                             <span style={{fontSize:9,padding:"1px 5px",borderRadius:4,background:pc2.tx,color:"#fff",fontWeight:700,flexShrink:0,textTransform:"uppercase"}}>{b.payStatus}</span>
                                           </div>
                                         </div>
@@ -1555,15 +1564,15 @@ export default function BeaubookDashboard(){
                     const holiday=getHoliday(date);const closed=getClosed(date);const openOvr=isOpenOverride(date);
                     const isToday=date===TODAY;const isSel=date===selectedDate;
                     return(
-                      <div key={date} onClick={()=>{setSelectedDate(date);setCalView("week");const d=new Date(date);const dy=d.getDay();const base=new Date(d);base.setDate(d.getDate()-dy);setWeekBase(base.toISOString().split("T")[0]);}} style={{borderRadius:8,border:openOvr?"2px solid #86efac":closed?"2px solid #fca5a5":isSel?"2px solid #9333ea":isToday?"2px solid #c084fc":"1px solid var(--border)",background:openOvr?"#f0fdf4":isSel?"#f3e8ff":isToday?"#fdf4ff":"var(--surface)",cursor:"pointer",padding:"5px 6px",overflow:"hidden"}}>
-                        <div style={{fontSize:13,fontWeight:isSel||isToday?700:500,color:isSel?"#7c3aed":isToday?"#9333ea":"var(--text)"}}>{parseInt(date.split("-")[2])}</div>
+                      <div key={date} onClick={()=>{setSelectedDate(date);setCalView("week");const d=new Date(date);const dy=d.getDay();const base=new Date(d);base.setDate(d.getDate()-dy);setWeekBase(base.toISOString().split("T")[0]);}} style={{borderRadius:8,border:openOvr?"2px solid #86efac":closed?"2px solid #fca5a5":isSel?"2px solid #0d9488":isToday?"2px solid #84fcdc":"1px solid var(--border)",background:openOvr?"#f0fdf4":isSel?"#e8fff9":isToday?"#f4fffc":"var(--surface)",cursor:"pointer",padding:"5px 6px",overflow:"hidden"}}>
+                        <div style={{fontSize:13,fontWeight:isSel||isToday?700:500,color:isSel?"#0d9488":isToday?"#0d9488":"var(--text)"}}>{parseInt(date.split("-")[2])}</div>
                         {holiday&&<div style={{fontSize:9,color:"#dc2626",fontWeight:600,marginTop:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{holiday}</div>}
                         {openOvr&&<div style={{marginTop:2,padding:"1px 5px",borderRadius:20,display:"inline-block",fontSize:9,fontWeight:700,background:"#16a34a",color:"#fff"}}>Open ✓</div>}
                         {!openOvr&&closed&&<div style={{marginTop:2,padding:"1px 5px",borderRadius:20,display:"inline-block",fontSize:9,fontWeight:700,background:"#ef4444",color:"#fff"}}>Closed</div>}
                         {cnt>0&&<div style={{marginTop:2}}>
-                          <div style={{fontSize:10,color:"#7c3aed",fontWeight:700}}>{cnt} appt{cnt>1?"s":""}</div>
+                          <div style={{fontSize:10,color:"#0d9488",fontWeight:700}}>{cnt} appt{cnt>1?"s":""}</div>
                           {pendCnt>0&&<div style={{fontSize:9,color:"#d97706",fontWeight:600}}>{pendCnt} pending</div>}
-                          {unaCnt>0&&<div style={{fontSize:9,color:"#9333ea",fontWeight:600}}>{unaCnt} unassigned</div>}
+                          {unaCnt>0&&<div style={{fontSize:9,color:"#0d9488",fontWeight:600}}>{unaCnt} unassigned</div>}
                         </div>}
                         {cnt===0&&!holiday&&!closed&&!openOvr&&<div style={{fontSize:9,color:"var(--text-light)",marginTop:2}}>Free</div>}
                       </div>
@@ -1571,7 +1580,7 @@ export default function BeaubookDashboard(){
                   })}
                 </div>
                 <div style={{display:"flex",gap:10,marginTop:6,justifyContent:"center",flexWrap:"wrap",flexShrink:0}}>
-                  {[["#86efac","Confirmed"],["#fbbf24","Pending"],["#a855f7","Unassigned"],["#fca5a5","Closed"],["#dc2626","Holiday"],["#16a34a","Open Override"]].map(([c,l])=>(
+                  {[["#86efac","Confirmed"],["#fbbf24","Pending"],["#14b8a6","Unassigned"],["#fca5a5","Closed"],["#dc2626","Holiday"],["#16a34a","Open Override"]].map(([c,l])=>(
                     <div key={l} style={{display:"flex",alignItems:"center",gap:4,fontSize:11,color:"var(--text-muted)"}}><span style={{width:6,height:6,borderRadius:"50%",background:c,display:"inline-block",flexShrink:0}}/>{l}</div>
                   ))}
                 </div>
@@ -1590,31 +1599,31 @@ export default function BeaubookDashboard(){
               <div style={{flex:1,fontWeight:600,color:"#92400e",fontSize:13}}>{pendingAll.length} booking{pendingAll.length>1?"s are":" is"} waiting for your confirmation.</div>
               <span onClick={()=>pendingSectionRef.current?.scrollIntoView({behavior:"smooth",block:"start"})} style={{fontSize:13,fontWeight:700,color:"#b45309",textDecoration:"underline",cursor:"pointer"}}>Review now</span>
             </div>}
-            {unassignedAll.length>0&&<div style={{background:"#fdf4ff",border:"1px solid #e9d5ff",borderRadius:12,padding:"11px 16px",marginBottom:10,display:"flex",gap:10,alignItems:"center"}}>
-              <Icon path={ICONS.alert} size={17} color="#9333ea"/><div style={{fontWeight:600,color:"#7e22ce",fontSize:13}}>{unassignedAll.length} unassigned — staff on leave</div>
+            {unassignedAll.length>0&&<div style={{background:"#f4fffc",border:"1px solid #d5fff4",borderRadius:12,padding:"11px 16px",marginBottom:10,display:"flex",gap:10,alignItems:"center"}}>
+              <Icon path={ICONS.alert} size={17} color="#0d9488"/><div style={{fontWeight:600,color:"#0f766e",fontSize:13}}>{unassignedAll.length} unassigned — staff on leave</div>
             </div>}
 
             {/* Month navigator */}
             <div style={card({padding:"14px 18px",marginBottom:16,display:"flex",alignItems:"center",gap:14,flexWrap:"wrap",position:"relative"})}>
-              <button onClick={()=>setBookingMonth(p=>{const m=p.m-1<0?11:p.m-1;return{y:p.m-1<0?p.y-1:p.y,m};})} style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:9,width:34,height:34,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#6d28d9"}}><Icon path={ICONS.chevLeft} size={16}/></button>
+              <button onClick={()=>setBookingMonth(p=>{const m=p.m-1<0?11:p.m-1;return{y:p.m-1<0?p.y-1:p.y,m};})} style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:9,width:34,height:34,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#0f766e"}}><Icon path={ICONS.chevLeft} size={16}/></button>
               <div onClick={()=>{setPickerYear(bookingMonth.y);setShowMonthPicker(p=>!p);}} style={{minWidth:150,textAlign:"center",cursor:"pointer",borderRadius:8,padding:"4px 10px"}}>
                 <div style={{fontSize:17,fontWeight:700,color:"var(--text)"}}>{MONTHS_EN[bookingMonth.m]} {bookingMonth.y}</div>
                 <div style={{fontSize:12,color:"var(--text-muted)",marginTop:1}}>{monthTotalCount} booking{monthTotalCount!==1?"s":""} this month</div>
               </div>
-              <button onClick={()=>setBookingMonth(p=>{const m=p.m+1>11?0:p.m+1;return{y:p.m+1>11?p.y+1:p.y,m};})} style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:9,width:34,height:34,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#6d28d9"}}><Icon path={ICONS.chevRight} size={16}/></button>
+              <button onClick={()=>setBookingMonth(p=>{const m=p.m+1>11?0:p.m+1;return{y:p.m+1>11?p.y+1:p.y,m};})} style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:9,width:34,height:34,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#0f766e"}}><Icon path={ICONS.chevRight} size={16}/></button>
               {!isCurrentBookingMonth&&<button onClick={()=>setBookingMonth({y:Number(TODAY.slice(0,4)),m:Number(TODAY.slice(5,7))-1})} style={gBtn({fontSize:12,padding:"6px 13px",marginLeft:"auto"})}>Back to current month</button>}
 
               {showMonthPicker&&<>
                 <div onClick={()=>setShowMonthPicker(false)} style={{position:"fixed",inset:0,zIndex:399}}/>
-                <div onClick={e=>e.stopPropagation()} style={{position:"absolute",top:"100%",left:0,marginTop:6,background:"var(--surface)",border:"1px solid var(--border)",borderRadius:14,boxShadow:"0 8px 32px rgba(124,58,237,0.15)",padding:14,width:260,zIndex:400}}>
+                <div onClick={e=>e.stopPropagation()} style={{position:"absolute",top:"100%",left:0,marginTop:6,background:"var(--surface)",border:"1px solid var(--border)",borderRadius:14,boxShadow:"0 8px 32px rgba(13,148,136,0.15)",padding:14,width:260,zIndex:400}}>
                   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
-                    <button onClick={()=>setPickerYear(y=>y-1)} style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:7,width:28,height:28,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#6d28d9"}}><Icon path={ICONS.chevLeft} size={14}/></button>
+                    <button onClick={()=>setPickerYear(y=>y-1)} style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:7,width:28,height:28,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#0f766e"}}><Icon path={ICONS.chevLeft} size={14}/></button>
                     <span style={{fontSize:14,fontWeight:700,color:"var(--text)"}}>{pickerYear}</span>
-                    <button onClick={()=>setPickerYear(y=>y+1)} style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:7,width:28,height:28,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#6d28d9"}}><Icon path={ICONS.chevRight} size={14}/></button>
+                    <button onClick={()=>setPickerYear(y=>y+1)} style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:7,width:28,height:28,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#0f766e"}}><Icon path={ICONS.chevRight} size={14}/></button>
                   </div>
                   <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6}}>
                     {MONTHS_EN.map((mn,mi)=>{const sel=bookingMonth.y===pickerYear&&bookingMonth.m===mi;return(
-                      <button key={mn} onClick={()=>{setBookingMonth({y:pickerYear,m:mi});setShowMonthPicker(false);}} style={{padding:"8px 4px",borderRadius:8,border:sel?"2px solid #9333ea":"1px solid var(--border)",background:sel?"#f3e8ff":"var(--bg)",color:sel?"#7e22ce":"var(--text)",fontWeight:sel?700:500,fontSize:12,cursor:"pointer"}}>{mn.slice(0,3)}</button>
+                      <button key={mn} onClick={()=>{setBookingMonth({y:pickerYear,m:mi});setShowMonthPicker(false);}} style={{padding:"8px 4px",borderRadius:8,border:sel?"2px solid #0d9488":"1px solid var(--border)",background:sel?"#e8fff9":"var(--bg)",color:sel?"#0f766e":"var(--text)",fontWeight:sel?700:500,fontSize:12,cursor:"pointer"}}>{mn.slice(0,3)}</button>
                     );})}
                   </div>
                 </div>
@@ -1629,7 +1638,7 @@ export default function BeaubookDashboard(){
               </div>
               <div style={{display:"flex",gap:2,background:"var(--bg)",borderRadius:9,padding:3}}>
                 {[["date","By Date"],["service","By Service"]].map(([k,l])=>(
-                  <button key={k} onClick={()=>setBookingGroupBy(k)} style={{padding:"7px 14px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:bookingGroupBy===k?"#6d28d9":"transparent",color:bookingGroupBy===k?"#fff":"#7e22ce"}}>{l}</button>
+                  <button key={k} onClick={()=>setBookingGroupBy(k)} style={{padding:"7px 14px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:bookingGroupBy===k?"#0f766e":"transparent",color:bookingGroupBy===k?"#fff":"#0f766e"}}>{l}</button>
                 ))}
               </div>
             </div>
@@ -1650,9 +1659,9 @@ export default function BeaubookDashboard(){
             {upcomingGroups.map(([groupName,list])=>(
               <div key={groupName} style={{marginBottom:20}}>
                 <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-                  <Icon path={bookingGroupBy==="service"?ICONS.scissors:ICONS.calendar} size={18} color="#7e22ce"/>
+                  <Icon path={bookingGroupBy==="service"?ICONS.scissors:ICONS.calendar} size={18} color="#0f766e"/>
                   <span style={{fontSize:18,fontWeight:700,color:"var(--text)"}}>{groupName}</span>
-                  <span style={{background:"#f3e8ff",color:"#7e22ce",borderRadius:20,fontSize:12,fontWeight:700,padding:"2px 10px"}}>{list.length}</span>
+                  <span style={{background:"#e8fff9",color:"#0f766e",borderRadius:20,fontSize:12,fontWeight:700,padding:"2px 10px"}}>{list.length}</span>
                 </div>
                 <div style={{display:"flex",flexDirection:"column",gap:8}}>
                   {list.map(b=>renderBookingCard(b))}
@@ -1672,14 +1681,14 @@ export default function BeaubookDashboard(){
                 </div>
                 <div style={card({padding:18,marginBottom:12})}>
                   <div style={{display:"flex",alignItems:"flex-start",gap:12,marginBottom:14}}>
-                    <div style={{width:50,height:50,borderRadius:"50%",background:"linear-gradient(135deg,#9333ea,#c084fc)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:20,flexShrink:0}}>{c.name[0]}</div>
+                    <div style={{width:50,height:50,borderRadius:"50%",background:"linear-gradient(135deg,#0d9488,#84fcdc)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:20,flexShrink:0}}>{c.name[0]}</div>
                     <div style={{flex:1}}>
                       <div style={{fontWeight:700,fontSize:18,color:"var(--text)",marginBottom:2}}>{c.name}</div>
                       <div style={{fontSize:12,color:"var(--text-muted)",marginBottom:7}}>{c.phone}</div>
                       <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
                         {c.isVip&&<span style={{padding:"2px 9px",borderRadius:20,fontSize:11,fontWeight:700,background:"#fef9c3",color:"#854d0e",border:"1px solid #fde68a"}}>⭐ VIP</span>}
                         {c.isNew&&<span style={{padding:"2px 9px",borderRadius:20,fontSize:11,fontWeight:700,background:"#f0fdf4",color:"#15803d",border:"1px solid #86efac"}}>New</span>}
-                        {!c.isNew&&!c.isVip&&<span style={{padding:"2px 9px",borderRadius:20,fontSize:11,fontWeight:700,background:"#f3e8ff",color:"#7e22ce",border:"1px solid #d8b4fe"}}>Regular</span>}
+                        {!c.isNew&&!c.isVip&&<span style={{padding:"2px 9px",borderRadius:20,fontSize:11,fontWeight:700,background:"#e8fff9",color:"#0f766e",border:"1px solid #b4feea"}}>Regular</span>}
                         {c.hasUnpaid&&<span style={{padding:"2px 9px",borderRadius:20,fontSize:11,fontWeight:700,background:"#fef2f2",color:"#991b1b",border:"1px solid #fca5a5"}}>Unpaid</span>}
                       </div>
                     </div>
@@ -1693,7 +1702,7 @@ export default function BeaubookDashboard(){
                   </div>
                   <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
                     {[{l:"Visits",v:c.count},{l:"Total",v:`RM${c.spend}`},{l:"Avg",v:`RM${c.avg}`},{l:"Fav",v:svc(c.favSvcId)?.name||"—",sm:true}].map(s=>(
-                      <div key={s.l} style={{background:"var(--bg)",borderRadius:10,padding:"9px 8px",textAlign:"center"}}><div style={{fontSize:s.sm?11:16,fontWeight:700,color:"#7e22ce",lineHeight:1.2}}>{s.v}</div><div style={{fontSize:10,color:"var(--text-muted)",marginTop:2}}>{s.l}</div></div>
+                      <div key={s.l} style={{background:"var(--bg)",borderRadius:10,padding:"9px 8px",textAlign:"center"}}><div style={{fontSize:s.sm?11:16,fontWeight:700,color:"#0f766e",lineHeight:1.2}}>{s.v}</div><div style={{fontSize:10,color:"var(--text-muted)",marginTop:2}}>{s.l}</div></div>
                     ))}
                   </div>
                 </div>
@@ -1705,14 +1714,14 @@ export default function BeaubookDashboard(){
                 <div style={card({padding:16})}>
                   <div style={{fontWeight:700,fontSize:13,color:"var(--text)",marginBottom:10}}>Visit History ({c.count})</div>
                   {c.sorted.map((v,i)=>{const sv2=svc(v.service);const st2=stf(v.staff);const pc2=PC[v.payStatus]||PC.unpaid;return(
-                    <div key={v.id} style={{display:"flex",gap:10,paddingBottom:10,marginBottom:10,borderBottom:i<c.sorted.length-1?"1px solid #f5f3ff":"none"}}>
-                      <div style={{display:"flex",flexDirection:"column",alignItems:"center"}}><div style={{width:8,height:8,borderRadius:"50%",background:"#a855f7",flexShrink:0,marginTop:4}}/>{i<c.sorted.length-1&&<div style={{width:1,flex:1,background:"var(--border)",minHeight:14}}/>}</div>
+                    <div key={v.id} style={{display:"flex",gap:10,paddingBottom:10,marginBottom:10,borderBottom:i<c.sorted.length-1?"1px solid #f3fffc":"none"}}>
+                      <div style={{display:"flex",flexDirection:"column",alignItems:"center"}}><div style={{width:8,height:8,borderRadius:"50%",background:"#14b8a6",flexShrink:0,marginTop:4}}/>{i<c.sorted.length-1&&<div style={{width:1,flex:1,background:"var(--border)",minHeight:14}}/>}</div>
                       <div style={{flex:1}}>
                         <div style={{display:"flex",justifyContent:"space-between",gap:8}}>
                           <div><div style={{fontWeight:600,fontSize:13,color:"var(--text)"}}>{sv2?.name}</div><div style={{fontSize:11,color:"var(--text-muted)"}}>{fmtD(v.date)}, {v.time}{st2?` · ${st2.name}`:""}{v.seat&&` · ${v.seat}`}</div>{v.txnId&&<div style={{fontSize:10,color:"#b0b0c8",fontFamily:"monospace"}}>#{v.txnId}</div>}</div>
-                          <div style={{textAlign:"right",flexShrink:0}}><div style={{fontWeight:700,fontSize:13,color:"#7e22ce"}}>RM{sv2?.price}</div><span style={{padding:"1px 7px",borderRadius:20,fontSize:10,fontWeight:600,background:pc2.bg,color:pc2.tx,border:`1px solid ${pc2.br}`}}>{v.payStatus}</span></div>
+                          <div style={{textAlign:"right",flexShrink:0}}><div style={{fontWeight:700,fontSize:13,color:"#0f766e"}}>RM{sv2?.price}</div><span style={{padding:"1px 7px",borderRadius:20,fontSize:10,fontWeight:600,background:pc2.bg,color:pc2.tx,border:`1px solid ${pc2.br}`}}>{v.payStatus}</span></div>
                         </div>
-                        {v.remark&&<div style={{marginTop:4,padding:"3px 8px",background:"#f3e8ff",borderRadius:6,fontSize:11,color:"#7e22ce",display:"inline-block"}}>&ldquo;{v.remark}&rdquo;</div>}
+                        {v.remark&&<div style={{marginTop:4,padding:"3px 8px",background:"#e8fff9",borderRadius:6,fontSize:11,color:"#0f766e",display:"inline-block"}}>&ldquo;{v.remark}&rdquo;</div>}
                       </div>
                     </div>
                   );})}
@@ -1722,7 +1731,7 @@ export default function BeaubookDashboard(){
             return<div>
               <h1 style={{margin:"0 0 16px",fontSize:26,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px"}}>{t("nav.customers")}</h1>
               <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:14}}>
-                {[{l:"Total",v:allCustomers.length,c:"#7c3aed"},{l:"Returning",v:allCustomers.filter(c=>c.count>1).length,c:"#0891b2"},{l:"New",v:allCustomers.filter(c=>c.isNew).length,c:"#16a34a"},{l:"Revenue",v:`RM${allCustomers.reduce((s,c)=>s+c.spend,0)}`,c:"#d97706"}].map(s=>(
+                {[{l:"Total",v:allCustomers.length,c:"#0d9488"},{l:"Returning",v:allCustomers.filter(c=>c.count>1).length,c:"#0891b2"},{l:"New",v:allCustomers.filter(c=>c.isNew).length,c:"#16a34a"},{l:"Revenue",v:`RM${allCustomers.reduce((s,c)=>s+c.spend,0)}`,c:"#d97706"}].map(s=>(
                   <div key={s.l} style={statCard(s.c)}><div style={{fontSize:11,fontWeight:600,color:"var(--text-muted)",marginBottom:8,textTransform:"uppercase",letterSpacing:"0.04em"}}>{s.l}</div><div style={{fontSize:26,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px"}}>{s.v}</div></div>
                 ))}
               </div>
@@ -1734,7 +1743,7 @@ export default function BeaubookDashboard(){
               <div style={{display:"flex",gap:5,marginBottom:12,flexWrap:"wrap",alignItems:"center"}}>
                 <div style={{display:"flex",gap:4}}>
                   {[["all","All"],["vip","VIP"],["new","New"],["unpaid","Unpaid"]].map(([k,l])=>(
-                    <button key={k} onClick={()=>setCustFilter(k)} style={{padding:"4px 11px",borderRadius:20,border:custFilter===k?"2px solid #9333ea":"1px solid var(--border)",background:custFilter===k?"#f3e8ff":"#fff",color:custFilter===k?"#7e22ce":"#9090b0",fontSize:12,fontWeight:custFilter===k?700:500,cursor:"pointer"}}>{l}</button>
+                    <button key={k} onClick={()=>setCustFilter(k)} style={{padding:"4px 11px",borderRadius:20,border:custFilter===k?"2px solid #0d9488":"1px solid var(--border)",background:custFilter===k?"#e8fff9":"#fff",color:custFilter===k?"#0f766e":"#9090b0",fontSize:12,fontWeight:custFilter===k?700:500,cursor:"pointer"}}>{l}</button>
                   ))}
                 </div>
                 <select value={custSort} onChange={e=>setCustSort(e.target.value)} style={{marginLeft:"auto",padding:"5px 9px",border:"1px solid var(--border)",borderRadius:8,fontSize:12,outline:"none",color:"var(--text-muted)"}}>
@@ -1744,7 +1753,7 @@ export default function BeaubookDashboard(){
               <div style={{display:"flex",flexDirection:"column",gap:8}}>
                 {filtered.map(c=>(
                   <div key={c.phone} onClick={()=>{setSelCustomer(c);setCustNoteEdit(custNotes[c.phone]||"");}} style={card({padding:"14px 18px",cursor:"pointer",display:"flex",alignItems:"center",gap:14})}>
-                    <div style={{width:44,height:44,borderRadius:13,background:`linear-gradient(135deg,${c.isVip?"#f59e0b,#fbbf24":"#7c3aed,#c084fc"})`,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:800,fontSize:17,flexShrink:0}}>{c.name[0]}</div>
+                    <div style={{width:44,height:44,borderRadius:13,background:`linear-gradient(135deg,${c.isVip?"#f59e0b,#fbbf24":"#0d9488,#84fcdc"})`,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:800,fontSize:17,flexShrink:0}}>{c.name[0]}</div>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}>
                         <span style={{fontWeight:700,fontSize:14,color:"var(--text)"}}>{c.name}</span>
@@ -1752,10 +1761,10 @@ export default function BeaubookDashboard(){
                         {c.isNew&&<span style={{padding:"2px 8px",borderRadius:99,fontSize:10,fontWeight:700,background:"#f0fdf4",color:"#15803d",border:"1px solid #86efac"}}>New</span>}
                         {c.hasUnpaid&&<span style={{padding:"2px 8px",borderRadius:99,fontSize:10,fontWeight:700,background:"#fef2f2",color:"#991b1b",border:"1px solid #fca5a5"}}>Unpaid</span>}
                       </div>
-                      <div style={{fontSize:12,color:"var(--text-muted)"}}>{c.phone} · Last: <span style={{color:"#7c3aed",fontWeight:600}}>{fmtD(c.lastVisit)}</span></div>
+                      <div style={{fontSize:12,color:"var(--text-muted)"}}>{c.phone} · Last: <span style={{color:"#0d9488",fontWeight:600}}>{fmtD(c.lastVisit)}</span></div>
                     </div>
                     <div style={{textAlign:"right",flexShrink:0}}>
-                      <div style={{fontWeight:700,fontSize:15,color:"#7c3aed"}}>RM {c.spend}</div>
+                      <div style={{fontWeight:700,fontSize:15,color:"#0d9488"}}>RM {c.spend}</div>
                       <div style={{fontSize:11,color:"var(--text-muted)",marginTop:2}}>{c.count} visits</div>
                     </div>
                     <Icon path={ICONS.chevRight} size={15} color="var(--text-muted)"/>
@@ -1779,7 +1788,7 @@ export default function BeaubookDashboard(){
               </div>
               <button onClick={()=>setAddStaff(true)} style={pBtn({display:"flex",alignItems:"center",gap:6})}><Icon path={ICONS.plus} size={16}/>Add staff</button>
             </div>
-            {unassignedAll.length>0&&<div style={{background:"#fdf4ff",border:"1px solid #e9d5ff",borderRadius:12,padding:"10px 14px",marginBottom:14,display:"flex",gap:9,alignItems:"center"}}><Icon path={ICONS.alert} size={16} color="#9333ea"/><div style={{fontWeight:600,color:"#7e22ce",fontSize:13,flex:1}}>{unassignedAll.length} unassigned</div><button onClick={()=>setTab("bookings")} style={gBtn({fontSize:11,padding:"5px 11px"})}>Assign</button></div>}
+            {unassignedAll.length>0&&<div style={{background:"#f4fffc",border:"1px solid #d5fff4",borderRadius:12,padding:"10px 14px",marginBottom:14,display:"flex",gap:9,alignItems:"center"}}><Icon path={ICONS.alert} size={16} color="#0d9488"/><div style={{fontWeight:600,color:"#0f766e",fontSize:13,flex:1}}>{unassignedAll.length} unassigned</div><button onClick={()=>setTab("bookings")} style={gBtn({fontSize:11,padding:"5px 11px"})}>Assign</button></div>}
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:14}}>
               {staffList.map(s=>{
                 const smStr=`${staffMonth.y}-${String(staffMonth.m+1).padStart(2,"0")}`;
@@ -1798,19 +1807,19 @@ export default function BeaubookDashboard(){
                         <div style={{fontSize:12,color:"var(--text-muted)"}}>{s.position}</div>
                         <div style={{fontSize:12,color:"var(--text-muted)"}}>{s.phone}</div>
                       </div>
-                      <button onClick={()=>setEditStaff(s)} style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:9,width:32,height:32,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#7c3aed",flexShrink:0}}><Icon path={ICONS.edit} size={14}/></button>
+                      <button onClick={()=>setEditStaff(s)} style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:9,width:32,height:32,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#0d9488",flexShrink:0}}><Icon path={ICONS.edit} size={14}/></button>
                     </div>
                     <span style={{padding:"4px 12px",borderRadius:99,fontSize:11,fontWeight:700,marginBottom:14,display:"inline-flex",alignItems:"center",gap:6,...(todayLeave?{background:"#fef2f2",color:"#991b1b",border:"1px solid #fca5a5"}:{background:"#f0fdf4",color:"#15803d",border:"1px solid #86efac"})}}><span style={{width:6,height:6,borderRadius:"50%",background:todayLeave?"#ef4444":"#22c55e",display:"inline-block"}}/>{todayLeave?"On Leave":"Active"}</span>
                     {/* Monthly stats */}
                     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:14,marginTop:4}}>
                       <div style={{background:"var(--bg)",borderRadius:10,padding:"11px 13px",border:"1px solid var(--border)"}}><div style={{fontSize:10,color:"var(--text-muted)",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.04em",marginBottom:4}}>Bookings</div><div style={{fontSize:20,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px"}}>{monthBks.length}</div></div>
-                      <div style={{background:"var(--bg)",borderRadius:10,padding:"11px 13px",border:"1px solid var(--border)"}}><div style={{fontSize:10,color:"var(--text-muted)",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.04em",marginBottom:4}}>Revenue</div><div style={{fontSize:20,fontWeight:800,color:"#7c3aed",letterSpacing:"-0.5px"}}>RM {monthRev}</div></div>
+                      <div style={{background:"var(--bg)",borderRadius:10,padding:"11px 13px",border:"1px solid var(--border)"}}><div style={{fontSize:10,color:"var(--text-muted)",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.04em",marginBottom:4}}>Revenue</div><div style={{fontSize:20,fontWeight:800,color:"#0d9488",letterSpacing:"-0.5px"}}>RM {monthRev}</div></div>
                     </div>
                     {/* Skills */}
                     {s.skills?.length>0&&<div style={{marginBottom:12}}>
                       <div style={{...sectionLbl,marginBottom:6}}>Skills</div>
                       <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
-                        {s.skills.map(sk=><span key={sk} style={{padding:"3px 10px",borderRadius:99,background:"var(--primary-bg,#f3e8ff)",color:"#7c3aed",fontSize:11,fontWeight:600}}>{sk}</span>)}
+                        {s.skills.map(sk=><span key={sk} style={{padding:"3px 10px",borderRadius:99,background:"var(--primary-bg,#e8fff9)",color:"#0d9488",fontSize:11,fontWeight:600}}>{sk}</span>)}
                       </div>
                     </div>}
                     {/* Emergency contact */}
@@ -1819,9 +1828,9 @@ export default function BeaubookDashboard(){
                       <div><div style={{fontSize:12,fontWeight:700,color:"#92400e"}}>Emergency contact</div><div style={{fontSize:12,color:"#92400e"}}>{s.emergencyName} · {s.emergencyPhone}</div></div>
                     </div>}
                     {/* Leave records */}
-                    {myLeaves.length>0&&<div style={{marginBottom:10,padding:"8px 11px",background:"#fdf4ff",borderRadius:10}}>
-                      <div style={{fontSize:11,fontWeight:700,color:"#7e22ce",marginBottom:3}}>Leave Records</div>
-                      {myLeaves.slice(-2).map((r,i)=><div key={i} style={{fontSize:11,color:"#7e22ce"}}>{r.dates.length===1?fmtD(r.dates[0]):`${fmtD(r.dates[0])}–${fmtD(r.dates[r.dates.length-1])}`} · {r.leaveType.toUpperCase()}{r.reason&&` · ${r.reason}`}</div>)}
+                    {myLeaves.length>0&&<div style={{marginBottom:10,padding:"8px 11px",background:"#f4fffc",borderRadius:10}}>
+                      <div style={{fontSize:11,fontWeight:700,color:"#0f766e",marginBottom:3}}>Leave Records</div>
+                      {myLeaves.slice(-2).map((r,i)=><div key={i} style={{fontSize:11,color:"#0f766e"}}>{r.dates.length===1?fmtD(r.dates[0]):`${fmtD(r.dates[0])}–${fmtD(r.dates[r.dates.length-1])}`} · {r.leaveType.toUpperCase()}{r.reason&&` · ${r.reason}`}</div>)}
                     </div>}
                     <div style={{display:"flex",gap:8}}>
                       <button onClick={()=>setLeaveStaff(s)} style={gBtn({flex:1,padding:"8px 0",fontSize:12,display:"flex",alignItems:"center",justifyContent:"center",gap:5})}><Icon path={ICONS.calendar} size={14}/>Mark leave</button>
@@ -1842,13 +1851,13 @@ export default function BeaubookDashboard(){
             <div style={{display:"flex",flexDirection:"column",gap:10}}>
               {services.map(s=>(
                 <div key={s.id} style={card({padding:"16px 20px",display:"flex",alignItems:"center",gap:14})}>
-                  <div style={{width:44,height:44,borderRadius:12,background:"var(--primary-bg,#f3e8ff)",display:"flex",alignItems:"center",justifyContent:"center",color:"#7c3aed",flexShrink:0}}><Icon path={ICONS.scissors} size={20}/></div>
+                  <div style={{width:44,height:44,borderRadius:12,background:"var(--primary-bg,#e8fff9)",display:"flex",alignItems:"center",justifyContent:"center",color:"#0d9488",flexShrink:0}}><Icon path={ICONS.scissors} size={20}/></div>
                   <div style={{flex:1}}>
                     <div style={{fontWeight:700,fontSize:15,color:"var(--text)",marginBottom:3}}>{s.name}</div>
                     <div style={{fontSize:12,color:"var(--text-muted)",display:"flex",alignItems:"center",gap:4}}><Icon path={ICONS.clock} size={12} color="var(--text-muted)"/>{s.duration} min</div>
                   </div>
                   <div style={{textAlign:"right",marginRight:8}}>
-                    <div style={{fontWeight:800,fontSize:18,color:"#7c3aed",letterSpacing:"-0.5px"}}>RM {s.price}</div>
+                    <div style={{fontWeight:800,fontSize:18,color:"#0d9488",letterSpacing:"-0.5px"}}>RM {s.price}</div>
                     <div style={{fontSize:11,color:"var(--text-muted)",marginTop:1}}>per session</div>
                   </div>
                   <button onClick={()=>setEditService(s)} style={gBtn({fontSize:12,padding:"7px 14px"})}>Edit</button>
@@ -1873,14 +1882,14 @@ export default function BeaubookDashboard(){
                   <div key={p.id} style={card({padding:0,overflow:"hidden"})}>
                     {p.image
                       ?<img src={p.image} alt={p.name} style={{width:"100%",height:140,objectFit:"cover",display:"block"}}/>
-                      :<div style={{width:"100%",height:140,background:"linear-gradient(135deg,#f3e8ff,#ede9fe)",display:"flex",alignItems:"center",justifyContent:"center"}}><Icon path={ICONS.box} size={40} color="#c084fc"/></div>
+                      :<div style={{width:"100%",height:140,background:"linear-gradient(135deg,#e8fff9,#e9fef8)",display:"flex",alignItems:"center",justifyContent:"center"}}><Icon path={ICONS.box} size={40} color="#84fcdc"/></div>
                     }
                     <div style={{padding:"12px 14px"}}>
-                      {p.category&&<div style={{fontSize:10,fontWeight:700,color:"#7c3aed",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:4}}>{p.category}</div>}
+                      {p.category&&<div style={{fontSize:10,fontWeight:700,color:"#0d9488",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:4}}>{p.category}</div>}
                       <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:3}}>{p.name}</div>
                       {p.description&&<div style={{fontSize:11,color:"var(--text-muted)",marginBottom:8,lineHeight:1.4,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{p.description}</div>}
                       <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
-                        <span style={{fontWeight:800,fontSize:16,color:"#7c3aed"}}>RM{sellPrice}</span>
+                        <span style={{fontWeight:800,fontSize:16,color:"#0d9488"}}>RM{sellPrice}</span>
                         {p.offerPrice&&<span style={{fontSize:11,color:"var(--text-muted)",textDecoration:"line-through"}}>RM{p.price}</span>}
                         {p.discount&&<span style={{fontSize:10,background:"#fef2f2",color:"#991b1b",padding:"1px 5px",borderRadius:4,fontWeight:700}}>{p.discount}% OFF</span>}
                       </div>
@@ -2012,7 +2021,7 @@ ${sorted.map(b=>{const bProds=(Array.isArray(b.products)?b.products:[]).map(p=>`
               {/* Date range filter */}
               <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:16,alignItems:"center"}}>
                 {[["today","Today"],["week","This Week"],["month","This Month"],["year","This Year"],["custom","Custom"]].map(([k,l])=>(
-                  <button key={k} onClick={()=>setAnalyticsRange(k)} style={{padding:"6px 14px",borderRadius:8,border:analyticsRange===k?"2px solid #7e22ce":"1px solid var(--border)",background:analyticsRange===k?"#f3e8ff":"var(--surface)",color:analyticsRange===k?"#7e22ce":"var(--text-muted)",fontWeight:analyticsRange===k?700:400,fontSize:12,cursor:"pointer"}}>{l}</button>
+                  <button key={k} onClick={()=>setAnalyticsRange(k)} style={{padding:"6px 14px",borderRadius:8,border:analyticsRange===k?"2px solid #0f766e":"1px solid var(--border)",background:analyticsRange===k?"#e8fff9":"var(--surface)",color:analyticsRange===k?"#0f766e":"var(--text-muted)",fontWeight:analyticsRange===k?700:400,fontSize:12,cursor:"pointer"}}>{l}</button>
                 ))}
                 {analyticsRange==="custom"&&<div style={{display:"flex",gap:6,alignItems:"center"}}>
                   <input type="date" value={analyticsFrom} onChange={e=>setAnalyticsFrom(e.target.value)} style={{...inp,width:"auto",fontSize:12,padding:"5px 9px"}}/>
@@ -2023,7 +2032,7 @@ ${sorted.map(b=>{const bProds=(Array.isArray(b.products)?b.products:[]).map(p=>`
               </div>
               {/* Stat cards */}
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:12,marginBottom:16}}>
-                {[{l:"Total Revenue",v:`RM ${totalRev}`,acc:"#7c3aed"},{l:"Amount Collected",v:`RM ${totalPaid}`,acc:"#16a34a"},{l:"Outstanding",v:`RM ${totalOutstanding}`,acc:"#dc2626"},{l:"Bookings",v:activeBk.length,acc:"#0891b2"},{l:"Product Revenue",v:`RM ${prodRevenue}`,acc:"#10b981"}].map(s=>(
+                {[{l:"Total Revenue",v:`RM ${totalRev}`,acc:"#0d9488"},{l:"Amount Collected",v:`RM ${totalPaid}`,acc:"#16a34a"},{l:"Outstanding",v:`RM ${totalOutstanding}`,acc:"#dc2626"},{l:"Bookings",v:activeBk.length,acc:"#0891b2"},{l:"Product Revenue",v:`RM ${prodRevenue}`,acc:"#10b981"}].map(s=>(
                   <div key={s.l} style={statCard(s.acc,{padding:"16px 18px"})}>
                     <div style={{fontSize:10,color:"var(--text-muted)",marginBottom:8,textTransform:"uppercase",letterSpacing:"0.05em",fontWeight:600}}>{s.l}</div>
                     <div style={{fontSize:22,fontWeight:800,color:"var(--text)",letterSpacing:"-0.5px",lineHeight:1}}>{s.v}</div>
@@ -2047,7 +2056,7 @@ ${sorted.map(b=>{const bProds=(Array.isArray(b.products)?b.products:[]).map(p=>`
               <div style={card({padding:18,marginBottom:14})}>
                 <div style={{fontWeight:700,fontSize:14,color:"var(--text)",marginBottom:12}}>Top Services</div>
                 {services.map(sv2=>{const cnt2=activeBk.filter(b=>b.service===sv2.id).length;const mx2=Math.max(...services.map(x=>activeBk.filter(b=>b.service===x.id).length),1);return(
-                  <div key={sv2.id} style={{marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"var(--text-muted)",marginBottom:4}}><span>{sv2.name}</span><span style={{fontWeight:600,color:"#7e22ce"}}>{cnt2} · RM{cnt2*sv2.price}</span></div><div style={{height:6,background:"#f3e8ff",borderRadius:3}}><div style={{height:"100%",width:`${(cnt2/mx2)*100}%`,background:"linear-gradient(90deg,#a855f7,#7e22ce)",borderRadius:3}}/></div></div>
+                  <div key={sv2.id} style={{marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"var(--text-muted)",marginBottom:4}}><span>{sv2.name}</span><span style={{fontWeight:600,color:"#0f766e"}}>{cnt2} · RM{cnt2*sv2.price}</span></div><div style={{height:6,background:"#e8fff9",borderRadius:3}}><div style={{height:"100%",width:`${(cnt2/mx2)*100}%`,background:"linear-gradient(90deg,#14b8a6,#0f766e)",borderRadius:3}}/></div></div>
                 );})}
                 {services.length===0&&<div style={{textAlign:"center",color:"var(--text-muted)",fontSize:12,padding:"8px 0"}}>No services.</div>}
               </div>
@@ -2062,11 +2071,11 @@ ${sorted.map(b=>{const bProds=(Array.isArray(b.products)?b.products:[]).map(p=>`
                 return(<div style={card({padding:18,marginBottom:14})}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
                     <div style={{fontWeight:700,fontSize:14,color:"var(--text)"}}>🛍️ Product Sales</div>
-                    <div style={{fontSize:13,fontWeight:800,color:"#7c3aed"}}>Total: RM{totalProdRev}</div>
+                    <div style={{fontSize:13,fontWeight:800,color:"#0d9488"}}>Total: RM{totalProdRev}</div>
                   </div>
                   {ps.map(p=>(<div key={p.name} style={{marginBottom:10}}>
-                    <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"var(--text-muted)",marginBottom:4}}><span>{p.name}</span><span style={{fontWeight:600,color:"#7e22ce"}}>{p.qty} sold · RM{p.revenue}</span></div>
-                    <div style={{height:6,background:"#f3e8ff",borderRadius:3}}><div style={{height:"100%",width:`${(p.revenue/maxRev)*100}%`,background:"linear-gradient(90deg,#10b981,#0d9488)",borderRadius:3}}/></div>
+                    <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"var(--text-muted)",marginBottom:4}}><span>{p.name}</span><span style={{fontWeight:600,color:"#0f766e"}}>{p.qty} sold · RM{p.revenue}</span></div>
+                    <div style={{height:6,background:"#e8fff9",borderRadius:3}}><div style={{height:"100%",width:`${(p.revenue/maxRev)*100}%`,background:"linear-gradient(90deg,#10b981,#0d9488)",borderRadius:3}}/></div>
                   </div>))}
                 </div>);
               })()}
@@ -2086,7 +2095,7 @@ ${sorted.map(b=>{const bProds=(Array.isArray(b.products)?b.products:[]).map(p=>`
                           <td style={{padding:"8px 8px",color:"var(--text)"}}>{b.date}</td>
                           <td style={{padding:"8px 8px",color:"var(--text)",fontWeight:500}}>{b.customer}</td>
                           <td style={{padding:"8px 8px",color:"var(--text-muted)"}}>{bProd.map(p=>`${p.name}×${p.qty}`).join(", ")}</td>
-                          <td style={{padding:"8px 8px",fontWeight:700,color:"#7c3aed"}}>RM{bTotal}</td>
+                          <td style={{padding:"8px 8px",fontWeight:700,color:"#0d9488"}}>RM{bTotal}</td>
                         </tr>);
                       })}
                     </tbody>
@@ -2115,7 +2124,7 @@ ${sorted.map(b=>{const bProds=(Array.isArray(b.products)?b.products:[]).map(p=>`
                   </div>
                   <div><label style={lbl}>{t("settings.address")}</label><input value={profileForm.address} onChange={e=>setProfileForm(p=>({...p,address:e.target.value}))} placeholder="Full business address" style={inp}/></div>
                   {/* Social media */}
-                  <div style={{marginTop:4}}><div style={{fontSize:11,fontWeight:700,color:"#7e22ce",marginBottom:8,letterSpacing:0.4,textTransform:"uppercase"}}>{t("settings.socialMedia")}</div>
+                  <div style={{marginTop:4}}><div style={{fontSize:11,fontWeight:700,color:"#0f766e",marginBottom:8,letterSpacing:0.4,textTransform:"uppercase"}}>{t("settings.socialMedia")}</div>
                     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
                       {[["facebook","📘 Facebook"],["instagram","📸 Instagram"],["tiktok","🎵 TikTok"],["xhs","🌸 XHS / 小红书"],["youtube","▶️ YouTube"],["twitter","🐦 Twitter / X"],["whatsapp","💬 WhatsApp Business"]].map(([k,pl])=>(
                         <div key={k} style={k==="whatsapp"?{gridColumn:"1/-1"}:{}}><label style={lbl}>{pl}</label><input value={profileForm[k]} onChange={e=>setProfileForm(p=>({...p,[k]:e.target.value}))} placeholder={`${pl} URL or handle`} style={inp}/></div>
@@ -2131,7 +2140,7 @@ ${sorted.map(b=>{const bProds=(Array.isArray(b.products)?b.products:[]).map(p=>`
                 <div style={{fontWeight:700,fontSize:15,color:"var(--text)",marginBottom:14,paddingBottom:12,borderBottom:"1px solid var(--border)"}}>{t("settings.appearance")}</div>
                 <div style={{display:"flex",gap:2,background:"var(--bg)",borderRadius:9,padding:3,width:"fit-content"}}>
                   {[["light",t("settings.light")],["dark",t("settings.dark")]].map(([k,l])=>(
-                    <button key={k} onClick={()=>setTheme(k)} style={{padding:"7px 16px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:theme===k?"#6d28d9":"transparent",color:theme===k?"#fff":"#7e22ce"}}>{l}</button>
+                    <button key={k} onClick={()=>setTheme(k)} style={{padding:"7px 16px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:theme===k?"#0f766e":"transparent",color:theme===k?"#fff":"#0f766e"}}>{l}</button>
                   ))}
                 </div>
               </div>
@@ -2141,7 +2150,7 @@ ${sorted.map(b=>{const bProds=(Array.isArray(b.products)?b.products:[]).map(p=>`
                 <div style={{fontWeight:700,fontSize:15,color:"var(--text)",marginBottom:14,paddingBottom:12,borderBottom:"1px solid var(--border)"}}>{t("settings.language")}</div>
                 <div style={{display:"flex",gap:2,background:"var(--bg)",borderRadius:9,padding:3,width:"fit-content"}}>
                   {[["en","English"],["zh","中文"],["ms","Bahasa Melayu"]].map(([k,l])=>(
-                    <button key={k} onClick={()=>setLanguage(k)} style={{padding:"7px 14px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:language===k?"#6d28d9":"transparent",color:language===k?"#fff":"#7e22ce"}}>{l}</button>
+                    <button key={k} onClick={()=>setLanguage(k)} style={{padding:"7px 14px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:language===k?"#0f766e":"transparent",color:language===k?"#fff":"#0f766e"}}>{l}</button>
                   ))}
                 </div>
               </div>
@@ -2156,7 +2165,7 @@ ${sorted.map(b=>{const bProds=(Array.isArray(b.products)?b.products:[]).map(p=>`
                 <div><label style={lbl}>{t("settings.notifyTiming")}</label>
                   <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                     {[[10,"10 min"],[30,"30 min"],[60,"1 hour"],[120,"2 hours"],[1440,"1 day"]].map(([v,l])=>(
-                      <button key={v} onClick={()=>handleSaveSettings({notifyBefore:v})} style={{padding:"6px 14px",borderRadius:8,border:settings.notifyBefore===v?"2px solid #7e22ce":"1px solid var(--border)",background:settings.notifyBefore===v?"#f3e8ff":"var(--surface)",color:settings.notifyBefore===v?"#7e22ce":"var(--text-muted)",fontWeight:settings.notifyBefore===v?700:400,fontSize:12,cursor:"pointer"}}>{l}</button>
+                      <button key={v} onClick={()=>handleSaveSettings({notifyBefore:v})} style={{padding:"6px 14px",borderRadius:8,border:settings.notifyBefore===v?"2px solid #0f766e":"1px solid var(--border)",background:settings.notifyBefore===v?"#e8fff9":"var(--surface)",color:settings.notifyBefore===v?"#0f766e":"var(--text-muted)",fontWeight:settings.notifyBefore===v?700:400,fontSize:12,cursor:"pointer"}}>{l}</button>
                     ))}
                   </div>
                 </div>
@@ -2171,7 +2180,7 @@ ${sorted.map(b=>{const bProds=(Array.isArray(b.products)?b.products:[]).map(p=>`
                       <span style={{fontSize:18}}>{settings.emailVerified?"✅":"⏳"}</span>
                       <div><div style={{fontWeight:600,fontSize:13,color:"var(--text)"}}>{settings.email}</div><div style={{fontSize:11,color:settings.emailVerified?"#15803d":"#92400e"}}>{settings.emailVerified?t("settings.verified"):t("settings.verifyPending")}</div></div>
                     </div>
-                    {!settings.emailVerified&&emailForm.verifyUrl&&<div style={{padding:"8px 12px",background:"#f3e8ff",borderRadius:8,fontSize:11,color:"#7e22ce"}}>Dev mode — <a href={emailForm.verifyUrl} target="_blank" rel="noreferrer" style={{color:"#7e22ce",fontWeight:700}}>click here to verify</a></div>}
+                    {!settings.emailVerified&&emailForm.verifyUrl&&<div style={{padding:"8px 12px",background:"#e8fff9",borderRadius:8,fontSize:11,color:"#0f766e"}}>Dev mode — <a href={emailForm.verifyUrl} target="_blank" rel="noreferrer" style={{color:"#0f766e",fontWeight:700}}>click here to verify</a></div>}
                     <button onClick={()=>setSettings(s=>({...s,email:null,emailVerified:false}))&&fetch("/api/settings/register-email",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:""})}).catch(()=>{})} style={gBtn({fontSize:12,padding:"7px 14px",alignSelf:"flex-start",color:"#991b1b",borderColor:"#fca5a5"})}>Change Email</button>
                   </div>
                 ):(
@@ -2189,7 +2198,7 @@ ${sorted.map(b=>{const bProds=(Array.isArray(b.products)?b.products:[]).map(p=>`
                           }
                         });
                     }} style={pBtn({padding:"9px 0",fontSize:13,alignSelf:"flex-start",paddingLeft:18,paddingRight:18})}>Register Email</button>
-                    {emailForm.sent&&emailForm.verifyUrl&&<div style={{padding:"8px 12px",background:"#f3e8ff",borderRadius:8,fontSize:11,color:"#7e22ce"}}>Dev mode — <a href={`http://localhost:4000${emailForm.verifyUrl}`} target="_blank" rel="noreferrer" style={{color:"#7e22ce",fontWeight:700}}>click here to verify your email</a></div>}
+                    {emailForm.sent&&emailForm.verifyUrl&&<div style={{padding:"8px 12px",background:"#e8fff9",borderRadius:8,fontSize:11,color:"#0f766e"}}>Dev mode — <a href={`http://localhost:4000${emailForm.verifyUrl}`} target="_blank" rel="noreferrer" style={{color:"#0f766e",fontWeight:700}}>click here to verify your email</a></div>}
                   </div>
                 )}
               </div>

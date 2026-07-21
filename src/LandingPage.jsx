@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import BrandMark from './BrandMark';
 import './LandingPage.css';
 
 export default function LandingPage(){
@@ -55,9 +56,12 @@ export default function LandingPage(){
         <div className="container header-inner">
           <a href="#home" className="logo">
             <span className="logo-mark" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/><path d="m9 15 2 2 4-4"/></svg>
+              <BrandMark size={52} variant="mark" />
             </span>
-            Beau<span>Book</span>
+            <span className="logo-text-block">
+              <span className="logo-text">Beau<span>book</span></span>
+              <span className="logo-tagline">Your Beauty · Your Time</span>
+            </span>
           </a>
 
           <nav className={`main-nav${navOpen ? ' open' : ''}`}>
@@ -88,7 +92,8 @@ export default function LandingPage(){
         <section className="hero" id="home">
           <div className="container hero-inner">
             <div className="hero-copy reveal">
-              <p className="eyebrow">Booking &amp; business management, simplified</p>
+              <div className="hero-mark" aria-hidden="true"><BrandMark size={46} variant="mark" /></div>
+              <p className="eyebrow">Your beauty. Your time.</p>
               <h1>Run your beauty business beautifully.</h1>
               <p className="hero-sub">
                 BeauBook brings appointments, staff schedules, inventory, and customers
@@ -398,9 +403,12 @@ export default function LandingPage(){
           <div className="footer-brand">
             <a href="#home" className="logo">
               <span className="logo-mark" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/><path d="m9 15 2 2 4-4"/></svg>
+                <BrandMark size={42} variant="mark" />
               </span>
-              Beau<span>Book</span>
+              <span className="logo-text-block">
+                <span className="logo-text">Beau<span>book</span></span>
+                <span className="logo-tagline">Your Beauty · Your Time</span>
+              </span>
             </a>
             <p>Booking &amp; business management for beauty &amp; wellness.</p>
           </div>
