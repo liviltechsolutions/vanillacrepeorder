@@ -233,14 +233,21 @@ function QuickSaleModal({show,onClose,onSave,products}){
 }
 
 // ─── ADD BOOKING MODAL ───────────────────────────────────────────────────────
-function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leaveRecords,staffList,services,products,seats}){
+function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leaveRecords,staffList,services,products,seats,customers}){
   const [f,setF]=useState({customer:"",phone:"",service:1,staff:initialStaff||1,date:initialDate||TODAY,time:initialTime||"09:00",remark:"",payStatus:"unpaid",payMethod:"",amtPaid:0,tip:0,txnId:"",seat:"",products:[]});
   const [staffWarning,setStaffWarning]=useState(null);
   const [submitting,setSubmitting]=useState(false);
   const [prodSearch,setProdSearch]=useState("");
+  const [custField,setCustField]=useState(null); // "customer" | "phone" | null — which field is driving the search dropdown
   useMemo(()=>{
-    if(show){setF({customer:"",phone:"",service:services[0]?.id||1,staff:initialStaff||(staffList[0]?.id)||1,date:initialDate||TODAY,time:initialTime||"09:00",remark:"",payStatus:"unpaid",payMethod:"",amtPaid:0,tip:0,txnId:"",seat:"",products:[]});setSubmitting(false);setProdSearch("");}
+    if(show){setF({customer:"",phone:"",service:services[0]?.id||1,staff:initialStaff||(staffList[0]?.id)||1,date:initialDate||TODAY,time:initialTime||"09:00",remark:"",payStatus:"unpaid",payMethod:"",amtPaid:0,tip:0,txnId:"",seat:"",products:[]});setSubmitting(false);setProdSearch("");setCustField(null);}
   },[show,initialDate,initialTime,initialStaff]);
+  const custQuery=(custField==="phone"?f.phone:f.customer).trim().toLowerCase();
+  const custMatches=useMemo(()=>{
+    if(!custField||!custQuery)return[];
+    return(customers||[]).filter(c=>c.name.toLowerCase().includes(custQuery)||c.phone.toLowerCase().includes(custQuery)).slice(0,6);
+  },[custField,custQuery,customers]);
+  const pickCustomer=c=>{setF(p=>({...p,customer:c.name,phone:c.phone}));setCustField(null);};
   useEffect(()=>{if(show)setStaffWarning(null);},[show]);
   const isOL=(sid)=>leaveRecords.some(r=>r.dates.includes(f.date)&&r.staffId===sid);
   const avail=staffList.filter(s=>!isOL(s.id));
@@ -263,9 +270,19 @@ function AddModal({show,onClose,onAdd,initialDate,initialTime,initialStaff,leave
           <button onClick={onClose} style={{background:"none",border:"none",fontSize:22,cursor:"pointer",color:"var(--text-muted)",padding:"0 4px"}}>×</button>
         </div>
         <div style={{display:"flex",flexDirection:"column",gap:10}}>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}>
-            <div><label style={lbl}>Customer Name</label><input value={f.customer} onChange={e=>up("customer",e.target.value)} placeholder="e.g. Sarah Lim" style={inp}/></div>
-            <div><label style={lbl}>Phone</label><input value={f.phone} onChange={e=>up("phone",e.target.value)} placeholder="012-3456789" style={inp}/></div>
+          <div style={{position:"relative",display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}>
+            <div><label style={lbl}>Customer Name</label><input value={f.customer} onChange={e=>up("customer",e.target.value)} onFocus={()=>setCustField("customer")} onBlur={()=>setTimeout(()=>setCustField(p=>p==="customer"?null:p),120)} placeholder="e.g. Sarah Lim" autoComplete="off" style={inp}/></div>
+            <div><label style={lbl}>Phone</label><input value={f.phone} onChange={e=>up("phone",e.target.value)} onFocus={()=>setCustField("phone")} onBlur={()=>setTimeout(()=>setCustField(p=>p==="phone"?null:p),120)} placeholder="012-3456789" autoComplete="off" style={inp}/></div>
+            {custField&&custMatches.length>0&&(
+              <div style={{position:"absolute",top:"100%",left:0,right:0,marginTop:4,background:"var(--surface)",border:"1px solid var(--border)",borderRadius:10,boxShadow:"0 8px 24px rgba(0,0,0,0.15)",zIndex:20,overflow:"hidden"}}>
+                {custMatches.map(c=>(
+                  <div key={c.phone} onMouseDown={e=>{e.preventDefault();pickCustomer(c);}} style={{padding:"9px 12px",cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:"1px solid var(--bg)"}}>
+                    <div><div style={{fontSize:13,fontWeight:600,color:"var(--text)"}}>{c.name}</div><div style={{fontSize:11,color:"var(--text-muted)"}}>{c.phone}</div></div>
+                    <div style={{fontSize:10,color:"#0d9488",fontWeight:600,whiteSpace:"nowrap"}}>{c.count} visit{c.count!==1?"s":""}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div><label style={lbl}>Service</label>
             <select value={f.service} onChange={e=>up("service",Number(e.target.value))} onWheel={e=>e.target.blur()} style={inp}>
@@ -2264,7 +2281,7 @@ ${sorted.map(b=>{const bProds=(Array.isArray(b.products)?b.products:[]).map(p=>`
       </div>
 
       {/* ─── MODALS ─── */}
-      <AddModal show={showAdd} onClose={()=>setShowAdd(false)} onAdd={handleAddBooking} initialDate={addDate} initialTime={addTime} initialStaff={addInitStaff} leaveRecords={leaveRecords} staffList={staffList} services={services} products={products} seats={seats}/>
+      <AddModal show={showAdd} onClose={()=>setShowAdd(false)} onAdd={handleAddBooking} initialDate={addDate} initialTime={addTime} initialStaff={addInitStaff} leaveRecords={leaveRecords} staffList={staffList} services={services} products={products} seats={seats} customers={allCustomers}/>
       <QuickSaleModal show={showQuickSale} onClose={()=>setShowQuickSale(false)} onSave={handleQuickSale} products={products}/>
       <DetailModal booking={selBooking} onClose={()=>{setSelBooking(null);setNotifTriggered(false);}} onAccept={handleAccept} onCancel={handleCancel} onSave={handleSaveEdit} onReschedule={handleReschedule} onQuickPay={(id,ps,amt,method)=>patchBooking(id,{payStatus:ps,amtPaid:amt,...(method?{payMethod:method}:{})}).then(updated=>{setBookings(p=>p.map(b=>b.id===id?updated:b));setSelBooking(updated);showToast("Payment updated!");})} leaveRecords={leaveRecords} staffList={staffList} services={services} autoEdit={notifTriggered} seats={seats} products={products}/>
       {(addService||editService)&&<ServiceModal service={editService} onClose={()=>{setAddService(false);setEditService(null);}} onSave={editService?handleEditServiceSave:handleAddService}/>}
