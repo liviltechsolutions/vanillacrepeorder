@@ -158,6 +158,8 @@ model Merchant {
   email            String  @unique
   emailVerified    Boolean @default(false)
   emailVerifyToken String?
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
   seats            Json    @default("[]")
   createdAt        DateTime @default(now())
 }

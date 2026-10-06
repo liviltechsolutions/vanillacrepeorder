@@ -984,7 +984,7 @@ function ProductModal({product,onClose,onSave,categories}){
 }
 
 // ─── LOGIN SCREEN ─────────────────────────────────────────────────────────────
-function LoginScreen({onSuccess,onSwitchToSignup}){
+function LoginScreen({onSuccess,onSwitchToSignup,onForgotPassword}){
   const [email,setEmail]=useState("");
   const [password,setPassword]=useState("");
   const [showPw,setShowPw]=useState(false);
@@ -1027,6 +1027,7 @@ function LoginScreen({onSuccess,onSwitchToSignup}){
                 {showPw?"🙈":"👁️"}
               </button>
             </div>
+            <div style={{textAlign:"right",marginTop:6}}><span onClick={onForgotPassword} style={{fontSize:12,color:"#0d9488",fontWeight:600,cursor:"pointer"}}>Forgot password?</span></div>
           </div>
           {error&&<div style={{fontSize:13,color:"#991b1b",background:"#fef2f2",padding:"10px 14px",borderRadius:10,border:"1px solid #fca5a5",fontWeight:500}}>{error}</div>}
           <button onClick={submit} disabled={loading} style={pBtn({width:"100%",marginTop:4,padding:"14px 0",fontSize:15,fontWeight:700,background:"linear-gradient(135deg,#0f766e,#0d9488)",boxShadow:"0 6px 18px rgba(15,118,110,0.35)",opacity:loading?0.7:1})}>{loading?"Logging in…":"Log In"}</button>
@@ -1108,12 +1109,111 @@ function SignupScreen({onSwitchToLogin}){
   );
 }
 
+// ─── FORGOT PASSWORD SCREEN ───────────────────────────────────────────────────
+function ForgotPasswordScreen({onSwitchToLogin}){
+  const [email,setEmail]=useState("");
+  const [error,setError]=useState("");
+  const [loading,setLoading]=useState(false);
+  const [sent,setSent]=useState(false);
+
+  const submit=()=>{
+    if(!email.trim()){setError("Please enter your email.");return;}
+    setLoading(true);setError("");
+    apiFetch("/api/auth/forgot-password",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})})
+      .then(r=>r.json())
+      .then(()=>setSent(true))
+      .catch(()=>setError("Something went wrong. Please try again."))
+      .finally(()=>setLoading(false));
+  };
+
+  return(
+    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#f3fffc 0%,#e9fef8 50%,#d6fef3 100%)",display:"flex",alignItems:"center",justifyContent:"center",padding:16,fontFamily:"'Inter',system-ui,sans-serif"}}>
+      <div style={{background:"#fff",borderRadius:24,padding:36,width:400,maxWidth:"100%",boxShadow:"0 32px 80px rgba(15,118,110,0.18)",border:"1px solid #e9fef8"}}>
+        {sent?(
+          <div style={{textAlign:"center"}}>
+            <div style={{fontSize:40,marginBottom:10}}>📬</div>
+            <div style={{fontWeight:800,fontSize:19,color:"#1c2620",marginBottom:8}}>Check your email</div>
+            <div style={{fontSize:13,color:"#6e7a72",marginBottom:18,lineHeight:1.5}}>If an account exists for <strong>{email}</strong>, we've sent a link to reset your password.</div>
+            <span onClick={onSwitchToLogin} style={{color:"#0d9488",fontWeight:700,cursor:"pointer",fontSize:13}}>Back to login</span>
+          </div>
+        ):(
+          <>
+            <div style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:24}}>
+              <BrandMark size={48} variant="mark"/>
+              <div style={{fontSize:13,color:"#6e7a72",fontWeight:500,marginTop:12}}>Reset your password</div>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:14}}>
+              <div>
+                <label style={{fontSize:11,fontWeight:700,color:"#0d9488",display:"block",marginBottom:6,letterSpacing:"0.08em",textTransform:"uppercase"}}>Email</label>
+                <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()} placeholder="your@email.com" style={{...inp,padding:"12px 14px",fontSize:15}} autoFocus/>
+              </div>
+              {error&&<div style={{fontSize:13,color:"#991b1b",background:"#fef2f2",padding:"10px 14px",borderRadius:10,border:"1px solid #fca5a5",fontWeight:500}}>{error}</div>}
+              <button onClick={submit} disabled={loading} style={pBtn({width:"100%",marginTop:4,padding:"14px 0",fontSize:15,fontWeight:700,background:"linear-gradient(135deg,#0f766e,#0d9488)",boxShadow:"0 6px 18px rgba(15,118,110,0.35)",opacity:loading?0.7:1})}>{loading?"Sending…":"Send Reset Link"}</button>
+              <div style={{textAlign:"center",fontSize:13,color:"#6e7a72"}}><span onClick={onSwitchToLogin} style={{color:"#0d9488",fontWeight:700,cursor:"pointer"}}>Back to login</span></div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── RESET PASSWORD SCREEN ────────────────────────────────────────────────────
+function ResetPasswordScreen({token,onDone}){
+  const [password,setPassword]=useState("");
+  const [confirm,setConfirm]=useState("");
+  const [error,setError]=useState("");
+  const [loading,setLoading]=useState(false);
+  const [done,setDone]=useState(false);
+
+  const submit=()=>{
+    if(password.length<8){setError("Password must be at least 8 characters.");return;}
+    if(password!==confirm){setError("Passwords do not match.");return;}
+    setLoading(true);setError("");
+    apiFetch("/api/auth/reset-password",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token,newPassword:password})})
+      .then(r=>r.json().then(d=>({ok:r.ok,...d})))
+      .then(d=>{if(!d.ok)throw new Error(d.error||"Reset failed.");setDone(true);})
+      .catch(e=>setError(e.message||"Reset failed."))
+      .finally(()=>setLoading(false));
+  };
+
+  return(
+    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#f3fffc 0%,#e9fef8 50%,#d6fef3 100%)",display:"flex",alignItems:"center",justifyContent:"center",padding:16,fontFamily:"'Inter',system-ui,sans-serif"}}>
+      <div style={{background:"#fff",borderRadius:24,padding:36,width:400,maxWidth:"100%",boxShadow:"0 32px 80px rgba(15,118,110,0.18)",border:"1px solid #e9fef8"}}>
+        {done?(
+          <div style={{textAlign:"center"}}>
+            <div style={{fontSize:40,marginBottom:10}}>✅</div>
+            <div style={{fontWeight:800,fontSize:19,color:"#1c2620",marginBottom:8}}>Password updated</div>
+            <div style={{fontSize:13,color:"#6e7a72",marginBottom:18,lineHeight:1.5}}>You can now log in with your new password.</div>
+            <button onClick={onDone} style={pBtn({width:"100%",padding:"12px 0",fontSize:14,fontWeight:700,background:"linear-gradient(135deg,#0f766e,#0d9488)"})}>Back to login</button>
+          </div>
+        ):(
+          <>
+            <div style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:24}}>
+              <BrandMark size={48} variant="mark"/>
+              <div style={{fontSize:13,color:"#6e7a72",fontWeight:500,marginTop:12}}>Set a new password</div>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:14}}>
+              <div><label style={lbl}>New Password</label><input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="At least 8 characters" style={inp}/></div>
+              <div><label style={lbl}>Confirm Password</label><input type="password" value={confirm} onChange={e=>setConfirm(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()} placeholder="Re-enter password" style={inp}/></div>
+              {error&&<div style={{fontSize:13,color:"#991b1b",background:"#fef2f2",padding:"10px 14px",borderRadius:10,border:"1px solid #fca5a5",fontWeight:500}}>{error}</div>}
+              <button onClick={submit} disabled={loading} style={pBtn({width:"100%",marginTop:4,padding:"14px 0",fontSize:15,fontWeight:700,background:"linear-gradient(135deg,#0f766e,#0d9488)",boxShadow:"0 6px 18px rgba(15,118,110,0.35)",opacity:loading?0.7:1})}>{loading?"Saving…":"Save New Password"}</button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── AUTH GATE ────────────────────────────────────────────────────────────────
 function AuthGate({onAuthed}){
-  const [view,setView]=useState("login"); // "login" | "signup"
-  return view==="login"
-    ? <LoginScreen onSuccess={onAuthed} onSwitchToSignup={()=>setView("signup")}/>
-    : <SignupScreen onSwitchToLogin={()=>setView("login")}/>;
+  const urlToken=new URLSearchParams(window.location.search).get("resetToken");
+  const [view,setView]=useState(urlToken?"reset":"login"); // "login" | "signup" | "forgot" | "reset"
+  if(view==="reset")return <ResetPasswordScreen token={urlToken} onDone={()=>{window.history.replaceState({},"","/merchantdash");setView("login");}}/>;
+  if(view==="signup")return <SignupScreen onSwitchToLogin={()=>setView("login")}/>;
+  if(view==="forgot")return <ForgotPasswordScreen onSwitchToLogin={()=>setView("login")}/>;
+  return <LoginScreen onSuccess={onAuthed} onSwitchToSignup={()=>setView("signup")} onForgotPassword={()=>setView("forgot")}/>;
 }
 
 // ─── MAIN ────────────────────────────────────────────────────────────────────

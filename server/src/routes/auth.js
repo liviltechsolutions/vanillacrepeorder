@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const crypto = require("crypto");
 const { hashPassword, verifyPassword, signMerchantToken, COOKIE_NAME, cookieOptions } = require("../auth");
-const { sendVerifyEmail, APP_ORIGIN } = require("../mailer");
+const { sendVerifyEmail, sendResetEmail, APP_ORIGIN } = require("../mailer");
 
 const PUBLIC_FIELDS = [
   "id", "companyName", "location", "businessType", "notifyOnPending", "notifyBefore",
@@ -69,6 +69,39 @@ module.exports = (prisma, requireAuth) => {
     const token = signMerchantToken(merchant.id);
     res.cookie(COOKIE_NAME, token, cookieOptions);
     res.json({ ok: true, merchant: pickPublic(merchant) });
+  });
+
+  router.post("/forgot-password", async (req, res) => {
+    const { email } = req.body;
+    if (email) {
+      const merchant = await prisma.merchant.findUnique({ where: { email: String(email).trim().toLowerCase() } });
+      if (merchant) {
+        const token = crypto.randomBytes(32).toString("hex");
+        await prisma.merchant.update({
+          where: { id: merchant.id },
+          data: { passwordResetToken: token, passwordResetExpires: new Date(Date.now() + 60 * 60 * 1000) },
+        });
+        sendResetEmail(merchant.email, token, merchant.companyName);
+      }
+    }
+    // Always respond ok — don't reveal whether an account exists for that email.
+    res.json({ ok: true });
+  });
+
+  router.post("/reset-password", async (req, res) => {
+    const { token, newPassword } = req.body;
+    if (!token) return res.status(400).json({ ok: false, error: "Missing token." });
+    if (!newPassword || newPassword.length < 8) return res.status(400).json({ ok: false, error: "Password must be at least 8 characters." });
+    const merchant = await prisma.merchant.findFirst({ where: { passwordResetToken: token } });
+    if (!merchant || !merchant.passwordResetExpires || merchant.passwordResetExpires < new Date()) {
+      return res.status(400).json({ ok: false, error: "This reset link is invalid or has expired." });
+    }
+    const { hash, salt } = hashPassword(newPassword);
+    await prisma.merchant.update({
+      where: { id: merchant.id },
+      data: { passwordHash: hash, passwordSalt: salt, passwordResetToken: null, passwordResetExpires: null },
+    });
+    res.json({ ok: true });
   });
 
   router.post("/logout", (req, res) => {
