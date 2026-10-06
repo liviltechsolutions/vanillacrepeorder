@@ -1,10 +1,9 @@
 import React from 'react';
 
-// Beaubook brand logo mark — cross with orange ring centre.
+// Beaubook brand logo mark — symmetric cross with orange ring centre.
 // Colours taken directly from the brand artwork:
-//   TEAL   bright teal-green for vertical arms + badge bg
+//   TEAL   bright teal-green for all four arms + badge bg
 //   ORANGE coral for the centre ring
-//   Horizontal arms = same teal at reduced opacity (lighter look)
 //
 // variant="badge"  teal rounded-square bg, white arms   nav / login / footer
 // variant="mark"   teal arms on transparent             hero / light surfaces
@@ -16,11 +15,12 @@ export const ORANGE = '#F47B38';
 // near  = gap from centre (so arms don't overlap the ring)
 // far   = tip distance from centre
 // width = stroke thickness (strokeLinecap="round" makes rounded pill ends)
+// All four arms share the same length/width/opacity — the mark is symmetric.
 const ARMS = [
-  { angle:   0, near: 16, far: 50, width: 20, opacity: 1    }, // top
-  { angle: 180, near: 16, far: 50, width: 20, opacity: 1    }, // bottom
-  { angle:  90, near: 16, far: 37, width: 14, opacity: 0.38 }, // right  (shorter + faded)
-  { angle: -90, near: 16, far: 37, width: 14, opacity: 0.38 }, // left
+  { angle:   0, near: 16, far: 50, width: 20, opacity: 1 }, // top
+  { angle: 180, near: 16, far: 50, width: 20, opacity: 1 }, // bottom
+  { angle:  90, near: 16, far: 50, width: 20, opacity: 1 }, // right
+  { angle: -90, near: 16, far: 50, width: 20, opacity: 1 }, // left
 ];
 
 export default function BrandMark({ size = 32, variant = 'mark' }) {
