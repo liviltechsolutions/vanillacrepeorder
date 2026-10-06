@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Heymagic KL</title>
+<meta name="description" content="Heymagic KL — Malaysia's first non-invasive eyebrow &amp; eyeliner wash. Red/blue/grey brow rescue, semi-permanent brow repair and lip blush colour in Kuchai Lama, Kuala Lumpur." />
+<meta property="og:title" content="Heymagic KL — Brow, Eyeliner &amp; Lip Specialists" />
+<meta property="og:description" content="Non-invasive brow &amp; eyeliner wash, colour correction, semi-permanent brow repair and lip blush. Kuchai Lama, Kuala Lumpur." />
+<meta property="og:image" content="logo.jpg" />
+<meta property="og:type" content="business.business" />
+<link rel="icon" type="image/jpeg" href="logo.jpg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Hanken+Grotesk:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink: #ffffff;
+    --ink-2: #fff7df;
+    --line: #ead68c;
+    --ivory: #241b10;
+    --sand: #6e5f46;
+    --sand-dim: #9c8d6e;
+    --bronze: #9c6a00;
+    --bronze-soft: #d9a52e;
+    --wine: #ffc72c;
+    --wine-light: #e8a800;
+    --wine-text: #241b10;
+    --maxw: 1120px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--ivory);
+    font-family:'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  img{max-width:100%;}
+  h1,h2,h3{
+    font-family:'Fraunces', Georgia, serif;
+    font-weight:500;
+    line-height:1.08;
+    text-wrap:balance;
+    margin:0;
+  }
+  p{margin:0;}
+  a{color:inherit;text-decoration:none;}
+  .cn{font-family:'Noto Sans SC','Hanken Grotesk',sans-serif;}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(1.25rem,4vw,2.5rem);}
+
+  a:focus-visible, button:focus-visible{
+    outline:2px solid var(--bronze);
+    outline-offset:3px;
+    border-radius:4px;
+  }
+
+  /* ---------- header ---------- */
+  .site-header{
+    position:sticky; top:0; z-index:50;
+    background:color-mix(in srgb, var(--ink) 88%, transparent);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid transparent;
+    transition:border-color .3s ease, background .3s ease;
+  }
+  .site-header.scrolled{
+    border-bottom-color:var(--line);
+    background:color-mix(in srgb, var(--ink) 97%, transparent);
+  }
+  .header-inner{
+    display:flex; align-items:center; justify-content:space-between;
+    height:76px;
+  }
+  .brand{display:flex;align-items:center;gap:.65rem;}
+  .brand-logo{width:38px; height:38px; border-radius:50%; flex-shrink:0; display:block;}
+  .brand-text{display:flex; flex-direction:column; justify-content:center;}
+  .brand-mark{font-family:'Fraunces',serif; font-weight:600; font-size:1.3rem; letter-spacing:.01em; line-height:1.1;}
+  .brand-mark em{color:var(--bronze); font-style:italic;}
+  .brand-sub{font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color:var(--sand); display:none;}
+  @media (min-width:640px){.brand-sub{display:inline;}}
+
+  nav.main-nav{display:none; gap:2.1rem; font-size:.92rem;}
+  nav.main-nav a{color:var(--sand); position:relative; padding:.3rem 0; transition:color .2s ease;}
+  nav.main-nav a:hover{color:var(--ivory);}
+  @media (min-width:860px){nav.main-nav{display:flex;}}
+
+  .header-cta{
+    display:inline-flex; align-items:center; gap:.5rem;
+    background:var(--wine); color:var(--wine-text);
+    padding:.62rem 1.15rem; border-radius:3px;
+    font-size:.86rem; font-weight:600; letter-spacing:.01em;
+    border:1px solid color-mix(in srgb, var(--wine) 60%, black 10%);
+    transition:background .2s ease, transform .2s ease;
+    white-space:nowrap;
+  }
+  .header-cta:hover{background:var(--wine-light); transform:translateY(-1px);}
+
+  .nav-toggle{display:none;}
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    padding:clamp(4rem,10vw,7.5rem) 0 clamp(3.5rem,8vw,6rem);
+    overflow:hidden;
+  }
+  .hero::before{
+    content:"";
+    position:absolute; inset:-20% -10% auto -10%;
+    height:120%;
+    background:
+      radial-gradient(ellipse 60% 45% at 78% 15%, color-mix(in srgb, var(--bronze) 20%, transparent), transparent 70%),
+      radial-gradient(ellipse 50% 40% at 10% 60%, color-mix(in srgb, var(--wine) 16%, transparent), transparent 70%);
+    pointer-events:none;
+  }
+  .hero-inner{position:relative; display:grid; gap:2.75rem; align-items:center;}
+  @media (min-width:980px){ .hero-inner{grid-template-columns:1.15fr .85fr;} }
+
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:.55rem;
+    font-size:.74rem; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--bronze); font-weight:600;
+  }
+  .eyebrow::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--bronze);}
+
+  .hero h1{
+    margin-top:1.1rem;
+    font-size:clamp(2.5rem, 5.4vw, 4.1rem);
+    max-width:16ch;
+  }
+  .hero h1 em{font-style:italic; color:var(--bronze);}
+
+  .hero-lede{
+    margin-top:1.4rem;
+    font-size:1.12rem; line-height:1.65;
+    color:var(--sand);
+    max-width:46ch;
+  }
+  .hero-cn{
+    margin-top:1rem;
+    font-size:.92rem; color:var(--sand-dim);
+    opacity:.85;
+  }
+
+  .hero-ctas{display:flex; flex-wrap:wrap; gap:.9rem; margin-top:2.1rem;}
+  .btn{
+    display:inline-flex; align-items:center; gap:.55rem;
+    padding:.85rem 1.5rem; border-radius:3px;
+    font-size:.95rem; font-weight:600;
+    transition:transform .2s ease, background .2s ease, border-color .2s ease;
+    border:1px solid transparent;
+  }
+  .btn-primary{background:var(--wine); color:var(--wine-text); border-color:color-mix(in srgb, var(--wine) 60%, black 10%);}
+  .btn-primary:hover{background:var(--wine-light); transform:translateY(-1px);}
+  .btn-ghost{border-color:var(--line); color:var(--ivory);}
+  .btn-ghost:hover{border-color:var(--bronze); color:var(--bronze);}
+
+  .stat-row{
+    display:flex; flex-wrap:wrap; gap:clamp(1.5rem,4vw,2.75rem);
+    margin-top:3rem; padding-top:2rem; border-top:1px solid var(--line);
+  }
+  .stat .num{font-family:'Fraunces',serif; font-size:1.9rem; color:var(--ivory);}
+  .stat .lbl{font-size:.74rem; letter-spacing:.1em; text-transform:uppercase; color:var(--sand); margin-top:.2rem;}
+
+  /* hero visual: pigment dial */
+  .hero-visual{display:flex; justify-content:center;}
+  .dial{
+    position:relative; width:min(320px,80vw); aspect-ratio:1;
+    border-radius:50%;
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    display:grid; place-items:center;
+  }
+  .dial::before{
+    content:"";
+    position:absolute; inset:14px; border-radius:50%;
+    background:conic-gradient(from 220deg,
+      #7f8a93 0deg, #5c6b86 70deg, #8c6a73 140deg,
+      #c9a06c 210deg, #d8b784 260deg, #c9a06c 310deg, #7f8a93 360deg);
+    opacity:.9;
+    -webkit-mask:radial-gradient(circle, transparent 58%, black 59%);
+            mask:radial-gradient(circle, transparent 58%, black 59%);
+  }
+  .dial-core{
+    position:relative; text-align:center; z-index:2;
+    background:var(--ink-2); width:62%; aspect-ratio:1; border-radius:50%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    border:1px solid var(--line);
+  }
+  .dial-core .n{font-family:'Fraunces',serif; font-size:1.7rem; color:var(--bronze);}
+  .dial-core .t{font-size:.66rem; letter-spacing:.1em; text-transform:uppercase; color:var(--sand); margin-top:.3rem; max-width:9ch;}
+
+  /* ---------- sections ---------- */
+  section{padding:clamp(4rem,9vw,6.5rem) 0;}
+  .section-head{max-width:640px; margin-bottom:clamp(2.25rem,5vw,3.25rem);}
+  .section-head h2{font-size:clamp(1.9rem,3.6vw,2.6rem); margin-top:.9rem;}
+  .section-head p{margin-top:1rem; color:var(--sand); font-size:1.05rem; line-height:1.6;}
+
+  .reveal{opacity:0; transform:translateY(16px); transition:opacity .7s ease, transform .7s ease;}
+  .reveal.is-visible{opacity:1; transform:none;}
+
+  /* services */
+  .services-grid{display:grid; gap:1.1rem; grid-template-columns:1fr;}
+  @media (min-width:700px){.services-grid{grid-template-columns:repeat(2,1fr);}}
+  .service-card{
+    background:var(--ink-2); border:1px solid var(--line); border-radius:4px;
+    padding:1.9rem; display:flex; flex-direction:column; gap:1rem;
+    transition:border-color .25s ease, transform .25s ease;
+  }
+  .service-card:hover{border-color:var(--bronze-soft); transform:translateY(-3px);}
+  .service-icon{
+    width:42px; height:42px; border-radius:50%;
+    display:grid; place-items:center;
+    background:color-mix(in srgb, var(--bronze) 14%, transparent);
+    color:var(--bronze);
+  }
+  .service-card h3{font-size:1.2rem; color:var(--ivory);}
+  .service-card .tag{font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--bronze); font-weight:600;}
+  .service-card p{color:var(--sand); font-size:.95rem; line-height:1.6;}
+
+  /* gallery / swatches */
+  .swatch-note{
+    display:flex; gap:.9rem; align-items:flex-start;
+    background:var(--ink-2); border:1px solid var(--line); border-radius:4px;
+    padding:1.1rem 1.3rem; margin-bottom:2.25rem; max-width:62ch;
+  }
+  .swatch-note svg{flex:none; margin-top:.15rem; color:var(--bronze);}
+  .swatch-note p{color:var(--sand); font-size:.92rem; line-height:1.55;}
+
+  .swatch-grid{display:grid; gap:1rem; grid-template-columns:repeat(2,1fr);}
+  @media (min-width:700px){.swatch-grid{grid-template-columns:repeat(4,1fr);}}
+  .swatch-card{
+    border:1px solid var(--line); border-radius:4px; overflow:hidden;
+    background:var(--ink-2);
+  }
+  .swatch-bar{height:92px; position:relative;}
+  .swatch-bar .from, .swatch-bar .to{position:absolute; inset:0 50% 0 0;}
+  .swatch-bar .to{inset:0 0 0 50%;}
+  .swatch-arrow{
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:24px; height:24px; border-radius:50%;
+    background:var(--ink); border:1px solid var(--line);
+    display:grid; place-items:center; color:var(--ivory); font-size:.7rem;
+  }
+  .swatch-body{padding:.95rem 1.05rem 1.15rem;}
+  .swatch-body .k{font-size:.62rem; letter-spacing:.09em; text-transform:uppercase; color:var(--bronze); font-weight:700;}
+  .swatch-body .v{margin-top:.35rem; font-size:.92rem; color:var(--ivory); line-height:1.4;}
+
+  /* location */
+  .location-grid{display:grid; gap:2.5rem; align-items:center;}
+  @media (min-width:900px){.location-grid{grid-template-columns:1fr 1fr;}}
+  .pin-card{
+    background:var(--ink-2); border:1px solid var(--line); border-radius:4px;
+    padding:2.5rem; text-align:center;
+  }
+  .pin-card svg{color:var(--bronze);}
+  .pin-card .area{font-family:'Fraunces',serif; font-size:1.4rem; margin-top:1rem;}
+  .pin-card .country{color:var(--sand); font-size:.9rem; margin-top:.3rem;}
+  .loc-list{display:flex; flex-direction:column; gap:1.5rem;}
+  .loc-item{display:flex; gap:1rem;}
+  .loc-item svg{flex:none; color:var(--bronze); margin-top:.2rem;}
+  .loc-item h3{font-size:1.02rem; color:var(--ivory); font-weight:600; font-family:'Hanken Grotesk',sans-serif;}
+  .loc-item p{color:var(--sand); font-size:.92rem; margin-top:.3rem; line-height:1.55;}
+
+  /* contact */
+  .contact{
+    background:var(--ink-2); border:1px solid var(--line); border-radius:6px;
+    padding:clamp(2.5rem,6vw,4rem); text-align:center;
+    position:relative; overflow:hidden;
+  }
+  .contact::before{
+    content:""; position:absolute; inset:0;
+    background:radial-gradient(ellipse 60% 70% at 50% 0%, color-mix(in srgb, var(--wine) 18%, transparent), transparent 70%);
+    pointer-events:none;
+  }
+  .contact-inner{position:relative;}
+  .contact h2{font-size:clamp(1.9rem,4vw,2.5rem); max-width:18ch; margin:0 auto;}
+  .contact p{color:var(--sand); margin-top:1rem; max-width:48ch; margin-inline:auto; font-size:1rem; line-height:1.6;}
+  .contact-ctas{display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; margin-top:2.1rem;}
+  .whatsapp-number{
+    margin-top:1.6rem; font-family:'Fraunces',serif; font-size:1.3rem; color:var(--bronze);
+    letter-spacing:.02em;
+  }
+
+  /* footer */
+  footer{border-top:1px solid var(--line); padding:2.5rem 0;}
+  .footer-inner{display:flex; flex-wrap:wrap; justify-content:space-between; gap:1.5rem; align-items:center;}
+  .footer-brand{display:flex; align-items:center; gap:.6rem; font-family:'Fraunces',serif; font-size:1.05rem;}
+  .footer-logo{width:30px; height:30px; border-radius:50%; display:block;}
+  .footer-links{display:flex; gap:1.5rem; font-size:.88rem; color:var(--sand);}
+  .footer-links a:hover{color:var(--bronze);}
+  .footer-copy{font-size:.8rem; color:var(--sand-dim); width:100%; margin-top:.5rem;}
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{transition-duration:.01ms !important; animation-duration:.01ms !important;}
+    .reveal{opacity:1; transform:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header" id="siteHeader">
+  <div class="wrap header-inner">
+    <a href="#top" class="brand">
+      <img src="logo.jpg" alt="Heymagic KL logo" class="brand-logo" />
+      <span class="brand-text">
+        <span class="brand-mark">hey<em>magic</em></span>
+        <span class="brand-sub">Brow · Eyes · Lips</span>
+      </span>
+    </a>
+    <nav class="main-nav">
+      <a href="#treatments">Treatments</a>
+      <a href="#results">Results</a>
+      <a href="#location">Location</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <a class="header-cta" href="https://wa.me/60139086567?text=Hi%20Heymagic%2C%20I%27d%20like%20to%20book%20an%20appointment" target="_blank" rel="noopener">
+      WhatsApp Us
+    </a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <div class="reveal is-visible">
+        <span class="eyebrow">Kuchai Lama · Kuala Lumpur</span>
+        <h1>Malaysia's first <em>non‑invasive</em> eyebrow &amp; eyeliner wash.</h1>
+        <p class="hero-lede">
+          We specialise in correcting red, blue and grey brow pigment, alongside
+          semi‑permanent brow repair and lip blush colour — no needles, no scarring.
+        </p>
+        <p class="hero-cn cn">全马首家无创洗眉洗眼线技术 · 红蓝灰眉救星</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="https://wa.me/60139086567?text=Hi%20Heymagic%2C%20I%27d%20like%20to%20book%20an%20appointment" target="_blank" rel="noopener">
+            Book on WhatsApp
+          </a>
+          <a class="btn btn-ghost" href="#treatments">See Treatments</a>
+        </div>
+        <div class="stat-row">
+          <div class="stat"><div class="num">10+</div><div class="lbl">Years Experience</div></div>
+          <div class="stat"><div class="num">2,000+</div><div class="lbl">Cases Treated</div></div>
+          <div class="stat"><div class="num">4.5k+</div><div class="lbl">Instagram Community</div></div>
+        </div>
+      </div>
+      <div class="hero-visual reveal is-visible">
+        <div class="dial" role="img" aria-label="Colour wheel representing pigment correction, from grey, blue and red tones to natural bronze">
+          <div class="dial-core">
+            <span class="n">01st</span>
+            <span class="t">in Malaysia</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="treatments">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Treatments</span>
+        <h2>Four ways we fix and finish brows, eyes &amp; lips</h2>
+        <p>Every booking starts with a consultation — we assess your existing pigment and skin before recommending a treatment path.</p>
+      </div>
+      <div class="services-grid">
+
+        <div class="service-card reveal">
+          <div class="service-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 15c3-6 7-9 10-9s6 2 8 5" stroke-linecap="round"/><circle cx="12" cy="17" r="1.3" fill="currentColor" stroke="none"/></svg>
+          </div>
+          <span class="tag">Signature</span>
+          <h3>Brow &amp; Eyeliner Wash</h3>
+          <p>Our non‑invasive removal technique lifts old, faded or botched pigment out of the skin — no needles, no scarring. The first of its kind in Malaysia.</p>
+        </div>
+
+        <div class="service-card reveal">
+          <div class="service-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="3.2"/><circle cx="16" cy="12" r="3.2"/><circle cx="10" cy="17" r="3.2"/></svg>
+          </div>
+          <span class="tag">Correction</span>
+          <h3>Red / Blue / Grey Rescue</h3>
+          <p>Outdated tattoo ink oxidises into tones nature never intended. We neutralise discoloured brows before any new pigment goes in.</p>
+        </div>
+
+        <div class="service-card reveal">
+          <div class="service-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 16c2-7 6-10 8-10s6 3 8 10" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16h16" stroke-linecap="round"/></svg>
+          </div>
+          <span class="tag">Repair</span>
+          <h3>Semi‑Permanent Brow Repair</h3>
+          <p>Uneven, over‑tattooed or asymmetric brows reshaped and refilled with soft, natural strokes suited to your face.</p>
+        </div>
+
+        <div class="service-card reveal">
+          <div class="service-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 11c2.5 2 5.5 2 8 0s5.5-2 8 0" stroke-linecap="round"/><path d="M4 14c2.5-2 5.5-2 8 0s5.5 2 8 0" stroke-linecap="round"/></svg>
+          </div>
+          <span class="tag">Colour</span>
+          <h3>Lip Blush Colour</h3>
+          <p>A semi‑permanent tint that restores natural rosiness and definition to the lip line.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section id="results">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Results, in Pigment</span>
+        <h2>Every correction starts as a colour problem</h2>
+      </div>
+      <div class="swatch-note reveal">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v5l3 2"/></svg>
+        <p>These swatches trace the colour‑correction categories we treat most — from oxidised old pigment to the soft, natural tone we bring it back to. Full case photos are shared during consultation.</p>
+      </div>
+      <div class="swatch-grid">
+
+        <div class="swatch-card reveal">
+          <div class="swatch-bar">
+            <div class="from" style="background:#5c6b86;"></div>
+            <div class="to" style="background:#8a7a68;"></div>
+            <div class="swatch-arrow">→</div>
+          </div>
+          <div class="swatch-body"><div class="k">Grey Brow Rescue</div><div class="v">Cool grey pigment → soft warm taupe</div></div>
+        </div>
+
+        <div class="swatch-card reveal">
+          <div class="swatch-bar">
+            <div class="from" style="background:#4a5a72;"></div>
+            <div class="to" style="background:#2a2420;"></div>
+            <div class="swatch-arrow">→</div>
+          </div>
+          <div class="swatch-body"><div class="k">Blue Eyeliner Wash</div><div class="v">Blue‑grey liner → neutral soft black</div></div>
+        </div>
+
+        <div class="swatch-card reveal">
+          <div class="swatch-bar">
+            <div class="from" style="background:#8c4a42;"></div>
+            <div class="to" style="background:#846b4d;"></div>
+            <div class="swatch-arrow">→</div>
+          </div>
+          <div class="swatch-body"><div class="k">Red Brow Correction</div><div class="v">Red‑toned brow → warm ash brown</div></div>
+        </div>
+
+        <div class="swatch-card reveal">
+          <div class="swatch-bar">
+            <div class="from" style="background:#a9887a;"></div>
+            <div class="to" style="background:#93303b;"></div>
+            <div class="swatch-arrow">→</div>
+          </div>
+          <div class="swatch-body"><div class="k">Lip Blush Refresh</div><div class="v">Faded lip liner → rosy natural tint</div></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section id="location">
+    <div class="wrap">
+      <div class="location-grid">
+        <div class="pin-card reveal">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s7-7.2 7-12a7 7 0 0 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/></svg>
+          <div class="area">Kuchai Lama</div>
+          <div class="country">Kuala Lumpur, Malaysia</div>
+        </div>
+        <div class="loc-list reveal">
+          <span class="eyebrow">Visit</span>
+          <div class="loc-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+            <div>
+              <h3>By appointment only</h3>
+              <p>Studio hours are arranged around bookings, including evenings and weekends.</p>
+            </div>
+          </div>
+          <div class="loc-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s7-7.2 7-12a7 7 0 0 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/></svg>
+            <div>
+              <h3>Exact address on booking</h3>
+              <p>We're tucked inside Kuchai Lama — message us on WhatsApp and we'll send the unit number and directions with your confirmed slot.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="wrap">
+      <div class="contact reveal">
+        <div class="contact-inner">
+          <span class="eyebrow">Book a Slot</span>
+          <h2>Message us, we'll take it from there</h2>
+          <p>Tell us what's bothering you about your current brows, liner or lips — we'll recommend the right treatment and confirm a time.</p>
+          <div class="contact-ctas">
+            <a class="btn btn-primary" href="https://wa.me/60139086567?text=Hi%20Heymagic%2C%20I%27d%20like%20to%20book%20an%20appointment" target="_blank" rel="noopener">
+              Chat on WhatsApp
+            </a>
+            <a class="btn btn-ghost" href="https://www.instagram.com/heymagic_brow_eyes_lips/" target="_blank" rel="noopener">
+              @heymagic_brow_eyes_lips
+            </a>
+          </div>
+          <div class="whatsapp-number">+60 13‑908 6567</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap footer-inner">
+    <span class="footer-brand">
+      <img src="logo.jpg" alt="Heymagic KL logo" class="footer-logo" />
+      hey<em style="color:var(--bronze);font-style:italic;">magic</em>
+    </span>
+    <div class="footer-links">
+      <a href="https://www.instagram.com/heymagic_brow_eyes_lips/" target="_blank" rel="noopener">Instagram</a>
+      <a href="https://wa.me/60139086567" target="_blank" rel="noopener">WhatsApp</a>
+      <a href="#top">Back to top</a>
+    </div>
+    <div class="footer-copy">© <span id="year"></span> Heymagic KL · Kuchai Lama, Kuala Lumpur</div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  const header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('scrolled', window.scrollY > 8);
+  }, { passive: true });
+
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!prefersReduced) {
+    const els = document.querySelectorAll('.reveal:not(.is-visible)');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    els.forEach(el => io.observe(el));
+  }
+</script>
+
+</body>
+</html>
