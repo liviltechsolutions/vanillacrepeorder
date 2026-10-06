@@ -12,15 +12,16 @@ export const TEAL   = '#0EC4A7';
 export const ORANGE = '#F47B38';
 
 // Each arm: angle rotates the coordinate system so we always draw "upward"
-// near  = gap from centre (so arms don't overlap the ring)
+// near  = gap from centre — kept clear of the ring's outer edge (~15.5) so
+//         the arms read as visibly separate from it, not touching/fused
 // far   = tip distance from centre
 // width = stroke thickness (strokeLinecap="round" makes rounded pill ends)
 // All four arms share the same length/width/opacity — the mark is symmetric.
 const ARMS = [
-  { angle:   0, near: 16, far: 50, width: 20, opacity: 1 }, // top
-  { angle: 180, near: 16, far: 50, width: 20, opacity: 1 }, // bottom
-  { angle:  90, near: 16, far: 50, width: 20, opacity: 1 }, // right
-  { angle: -90, near: 16, far: 50, width: 20, opacity: 1 }, // left
+  { angle:   0, near: 24, far: 50, width: 20, opacity: 1 }, // top
+  { angle: 180, near: 24, far: 50, width: 20, opacity: 1 }, // bottom
+  { angle:  90, near: 24, far: 50, width: 20, opacity: 1 }, // right
+  { angle: -90, near: 24, far: 50, width: 20, opacity: 1 }, // left
 ];
 
 export default function BrandMark({ size = 32, variant = 'mark' }) {
