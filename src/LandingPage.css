@@ -158,7 +158,7 @@ html { scroll-behavior: smooth; }
   color: var(--text);
   letter-spacing: -0.3px;
 }
-.landing .logo-text span { color: var(--primary-2); }
+.landing .logo-text span { color: #0EC4A7; } /* locked to BrandMark's TEAL, not the theme var */
 .landing .logo-tagline {
   font-size: 0.52rem;
   font-weight: 700;

@@ -9,8 +9,8 @@ import React from 'react';
 // variant="badge"  teal rounded-square bg, white arms   nav / login / footer
 // variant="mark"   teal arms on transparent             hero / light surfaces
 
-const TEAL   = '#0EC4A7';
-const ORANGE = '#F47B38';
+export const TEAL   = '#0EC4A7';
+export const ORANGE = '#F47B38';
 
 // Each arm: angle rotates the coordinate system so we always draw "upward"
 // near  = gap from centre (so arms don't overlap the ring)

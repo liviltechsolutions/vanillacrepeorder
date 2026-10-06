@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from "react";
-import BrandMark from "./BrandMark";
+import BrandMark, { TEAL as BRAND_TEAL } from "./BrandMark";
 
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 const HOURS=[];
@@ -993,7 +993,7 @@ function LoginScreen({onSuccess}){
           <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:18}}>
             <BrandMark size={60} variant="mark"/>
             <div style={{display:"flex",flexDirection:"column",gap:2}}>
-              <div style={{fontWeight:800,fontSize:22,color:"#1c2620",letterSpacing:"-0.5px",lineHeight:1.1}}><span>Beau</span><span style={{color:"#0d9488"}}>book</span></div>
+              <div style={{fontWeight:800,fontSize:22,color:"#1c2620",letterSpacing:"-0.5px",lineHeight:1.1}}><span>Beau</span><span style={{color:BRAND_TEAL}}>book</span></div>
               <div style={{fontSize:"0.5rem",fontWeight:700,letterSpacing:"0.13em",textTransform:"uppercase",color:"#6e7a72"}}>Your Beauty · Your Time</div>
             </div>
           </div>
@@ -1411,7 +1411,7 @@ export default function BeaubookDashboard(){
           <div style={{display:"flex",alignItems:"center",gap:9,padding:"5px 12px",background:"var(--bg)",borderRadius:10,border:"1px solid var(--border)"}}>
             <BrandMark size={34} variant="mark"/>
             <div style={{display:"flex",flexDirection:"column",gap:1}}>
-              <span style={{fontSize:13,color:"var(--text)",fontWeight:800,lineHeight:1.1,letterSpacing:"-0.2px"}}><span>Beau</span><span style={{color:"#0d9488"}}>book</span></span>
+              <span style={{fontSize:13,color:"var(--text)",fontWeight:800,lineHeight:1.1,letterSpacing:"-0.2px"}}><span>Beau</span><span style={{color:BRAND_TEAL}}>book</span></span>
               <span style={{fontSize:"0.48rem",fontWeight:700,letterSpacing:"0.11em",textTransform:"uppercase",color:"var(--text-muted)"}}>Your Beauty · Your Time</span>
             </div>
           </div>
