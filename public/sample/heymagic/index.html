@@ -98,6 +98,23 @@
   }
   .header-cta:hover{background:var(--wine-light); transform:translateY(-1px);}
 
+  .header-actions{display:flex; align-items:center; gap:.9rem;}
+
+  .lang-switch{
+    display:flex; align-items:center; gap:.15rem;
+    background:var(--ink-2); border:1px solid var(--line); border-radius:999px;
+    padding:.2rem;
+  }
+  .lang-btn{
+    appearance:none; border:none; background:transparent; cursor:pointer;
+    font-family:'Hanken Grotesk', sans-serif; font-size:.76rem; font-weight:700;
+    letter-spacing:.01em; color:var(--sand);
+    padding:.38rem .7rem; border-radius:999px;
+    transition:background .2s ease, color .2s ease;
+  }
+  .lang-btn:hover{color:var(--ivory);}
+  .lang-btn[aria-pressed="true"]{background:var(--wine); color:var(--wine-text);}
+
   .nav-toggle{display:none;}
 
   /* ---------- hero ---------- */
@@ -308,18 +325,26 @@
       <img src="logo.jpg" alt="Heymagic KL logo" class="brand-logo" />
       <span class="brand-text">
         <span class="brand-mark">hey<em>magic</em></span>
-        <span class="brand-sub">Brow · Eyes · Lips</span>
+        <span class="brand-sub">
+          <span data-lang="en">Brow · Eyes · Lips</span><span data-lang="zh" hidden class="cn">眉 · 眼 · 唇</span>
+        </span>
       </span>
     </a>
     <nav class="main-nav">
-      <a href="#treatments">Treatments</a>
-      <a href="#results">Results</a>
-      <a href="#location">Location</a>
-      <a href="#contact">Contact</a>
+      <a href="#treatments"><span data-lang="en">Treatments</span><span data-lang="zh" hidden class="cn">服务项目</span></a>
+      <a href="#results"><span data-lang="en">Results</span><span data-lang="zh" hidden class="cn">效果展示</span></a>
+      <a href="#location"><span data-lang="en">Location</span><span data-lang="zh" hidden class="cn">门店位置</span></a>
+      <a href="#contact"><span data-lang="en">Contact</span><span data-lang="zh" hidden class="cn">联系我们</span></a>
     </nav>
-    <a class="header-cta" href="https://wa.me/60139086567?text=Hi%20Heymagic%2C%20I%27d%20like%20to%20book%20an%20appointment" target="_blank" rel="noopener">
-      WhatsApp Us
-    </a>
+    <div class="header-actions">
+      <div class="lang-switch" role="group" aria-label="Language / 语言">
+        <button type="button" class="lang-btn" data-set-lang="en" aria-pressed="true">EN</button>
+        <button type="button" class="lang-btn" data-set-lang="zh" aria-pressed="false">中文</button>
+      </div>
+      <a class="header-cta" href="https://wa.me/60139086567?text=Hi%20Heymagic%2C%20I%27d%20like%20to%20book%20an%20appointment" target="_blank" rel="noopener">
+        <span data-lang="en">WhatsApp Us</span><span data-lang="zh" hidden class="cn">WhatsApp 预约</span>
+      </a>
+    </div>
   </div>
 </header>
 
@@ -327,30 +352,37 @@
   <section class="hero">
     <div class="wrap hero-inner">
       <div class="reveal is-visible">
-        <span class="eyebrow">Kuchai Lama · Kuala Lumpur</span>
-        <h1>Malaysia's first <em>non‑invasive</em> eyebrow &amp; eyeliner wash.</h1>
+        <span class="eyebrow">
+          <span data-lang="en">Kuchai Lama · Kuala Lumpur</span><span data-lang="zh" hidden class="cn">Kuchai Lama · 吉隆坡</span>
+        </span>
+        <h1>
+          <span data-lang="en">Malaysia's first <em>non‑invasive</em> eyebrow &amp; eyeliner wash.</span>
+          <span data-lang="zh" hidden class="cn">全马首家<em>无创</em>洗眉洗眼线技术。</span>
+        </h1>
         <p class="hero-lede">
-          We specialise in correcting red, blue and grey brow pigment, alongside
-          semi‑permanent brow repair and lip blush colour — no needles, no scarring.
+          <span data-lang="en">We specialise in correcting red, blue and grey brow pigment, alongside
+          semi‑permanent brow repair and lip blush colour — no needles, no scarring.</span>
+          <span data-lang="zh" hidden class="cn">专注红、蓝、灰色素眉的矫正,并提供半永久问题眉修复与纹唇气色服务——无需打针,不留疤痕。</span>
         </p>
-        <p class="hero-cn cn">全马首家无创洗眉洗眼线技术 · 红蓝灰眉救星</p>
         <div class="hero-ctas">
           <a class="btn btn-primary" href="https://wa.me/60139086567?text=Hi%20Heymagic%2C%20I%27d%20like%20to%20book%20an%20appointment" target="_blank" rel="noopener">
-            Book on WhatsApp
+            <span data-lang="en">Book on WhatsApp</span><span data-lang="zh" hidden class="cn">WhatsApp 预约</span>
           </a>
-          <a class="btn btn-ghost" href="#treatments">See Treatments</a>
+          <a class="btn btn-ghost" href="#treatments">
+            <span data-lang="en">See Treatments</span><span data-lang="zh" hidden class="cn">查看服务</span>
+          </a>
         </div>
         <div class="stat-row">
-          <div class="stat"><div class="num">10+</div><div class="lbl">Years Experience</div></div>
-          <div class="stat"><div class="num">2,000+</div><div class="lbl">Cases Treated</div></div>
-          <div class="stat"><div class="num">4.5k+</div><div class="lbl">Instagram Community</div></div>
+          <div class="stat"><div class="num">10+</div><div class="lbl"><span data-lang="en">Years Experience</span><span data-lang="zh" hidden class="cn">年经验</span></div></div>
+          <div class="stat"><div class="num">2,000+</div><div class="lbl"><span data-lang="en">Cases Treated</span><span data-lang="zh" hidden class="cn">服务案例</span></div></div>
+          <div class="stat"><div class="num">4.5k+</div><div class="lbl"><span data-lang="en">Instagram Community</span><span data-lang="zh" hidden class="cn">Instagram 粉丝</span></div></div>
         </div>
       </div>
       <div class="hero-visual reveal is-visible">
         <div class="dial" role="img" aria-label="Colour wheel representing pigment correction, from grey, blue and red tones to natural bronze">
           <div class="dial-core">
-            <span class="n">01st</span>
-            <span class="t">in Malaysia</span>
+            <span class="n"><span data-lang="en">01st</span><span data-lang="zh" hidden class="cn">全马</span></span>
+            <span class="t"><span data-lang="en">in Malaysia</span><span data-lang="zh" hidden class="cn">首家技术</span></span>
           </div>
         </div>
       </div>
@@ -360,9 +392,15 @@
   <section id="treatments">
     <div class="wrap">
       <div class="section-head reveal">
-        <span class="eyebrow">Treatments</span>
-        <h2>Four ways we fix and finish brows, eyes &amp; lips</h2>
-        <p>Every booking starts with a consultation — we assess your existing pigment and skin before recommending a treatment path.</p>
+        <span class="eyebrow"><span data-lang="en">Treatments</span><span data-lang="zh" hidden class="cn">服务项目</span></span>
+        <h2>
+          <span data-lang="en">Four ways we fix and finish brows, eyes &amp; lips</span>
+          <span data-lang="zh" hidden class="cn">四大项目,修复眉、眼、唇</span>
+        </h2>
+        <p>
+          <span data-lang="en">Every booking starts with a consultation — we assess your existing pigment and skin before recommending a treatment path.</span>
+          <span data-lang="zh" hidden class="cn">每次预约都从咨询开始——我们会先评估您的现有色素与肤质,再推荐合适的疗程。</span>
+        </p>
       </div>
       <div class="services-grid">
 
@@ -370,36 +408,48 @@
           <div class="service-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 15c3-6 7-9 10-9s6 2 8 5" stroke-linecap="round"/><circle cx="12" cy="17" r="1.3" fill="currentColor" stroke="none"/></svg>
           </div>
-          <span class="tag">Signature</span>
-          <h3>Brow &amp; Eyeliner Wash</h3>
-          <p>Our non‑invasive removal technique lifts old, faded or botched pigment out of the skin — no needles, no scarring. The first of its kind in Malaysia.</p>
+          <span class="tag"><span data-lang="en">Signature</span><span data-lang="zh" hidden class="cn">招牌技术</span></span>
+          <h3><span data-lang="en">Brow &amp; Eyeliner Wash</span><span data-lang="zh" hidden class="cn">洗眉洗眼线</span></h3>
+          <p>
+            <span data-lang="en">Our non‑invasive removal technique lifts old, faded or botched pigment out of the skin — no needles, no scarring. The first of its kind in Malaysia.</span>
+            <span data-lang="zh" hidden class="cn">采用无创技术将老旧、褪色或失败的色素从皮肤中洗出——无需打针,不留疤痕,全马首创。</span>
+          </p>
         </div>
 
         <div class="service-card reveal">
           <div class="service-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="3.2"/><circle cx="16" cy="12" r="3.2"/><circle cx="10" cy="17" r="3.2"/></svg>
           </div>
-          <span class="tag">Correction</span>
-          <h3>Red / Blue / Grey Rescue</h3>
-          <p>Outdated tattoo ink oxidises into tones nature never intended. We neutralise discoloured brows before any new pigment goes in.</p>
+          <span class="tag"><span data-lang="en">Correction</span><span data-lang="zh" hidden class="cn">色素矫正</span></span>
+          <h3><span data-lang="en">Red / Blue / Grey Rescue</span><span data-lang="zh" hidden class="cn">红蓝灰眉救星</span></h3>
+          <p>
+            <span data-lang="en">Outdated tattoo ink oxidises into tones nature never intended. We neutralise discoloured brows before any new pigment goes in.</span>
+            <span data-lang="zh" hidden class="cn">老旧纹眉色料氧化后会变成不自然的色调,我们会先中和变色眉毛,再进行后续疗程。</span>
+          </p>
         </div>
 
         <div class="service-card reveal">
           <div class="service-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 16c2-7 6-10 8-10s6 3 8 10" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16h16" stroke-linecap="round"/></svg>
           </div>
-          <span class="tag">Repair</span>
-          <h3>Semi‑Permanent Brow Repair</h3>
-          <p>Uneven, over‑tattooed or asymmetric brows reshaped and refilled with soft, natural strokes suited to your face.</p>
+          <span class="tag"><span data-lang="en">Repair</span><span data-lang="zh" hidden class="cn">眉型修复</span></span>
+          <h3><span data-lang="en">Semi‑Permanent Brow Repair</span><span data-lang="zh" hidden class="cn">半永久问题眉修复</span></h3>
+          <p>
+            <span data-lang="en">Uneven, over‑tattooed or asymmetric brows reshaped and refilled with soft, natural strokes suited to your face.</span>
+            <span data-lang="zh" hidden class="cn">针对不对称、过度纹绣的问题眉,以柔和自然的手法重新塑形补色,贴合脸型。</span>
+          </p>
         </div>
 
         <div class="service-card reveal">
           <div class="service-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 11c2.5 2 5.5 2 8 0s5.5-2 8 0" stroke-linecap="round"/><path d="M4 14c2.5-2 5.5-2 8 0s5.5 2 8 0" stroke-linecap="round"/></svg>
           </div>
-          <span class="tag">Colour</span>
-          <h3>Lip Blush Colour</h3>
-          <p>A semi‑permanent tint that restores natural rosiness and definition to the lip line.</p>
+          <span class="tag"><span data-lang="en">Colour</span><span data-lang="zh" hidden class="cn">气色调理</span></span>
+          <h3><span data-lang="en">Lip Blush Colour</span><span data-lang="zh" hidden class="cn">纹唇气色</span></h3>
+          <p>
+            <span data-lang="en">A semi‑permanent tint that restores natural rosiness and definition to the lip line.</span>
+            <span data-lang="zh" hidden class="cn">半永久唇色,恢复双唇自然红润与立体唇线。</span>
+          </p>
         </div>
 
       </div>
@@ -409,12 +459,18 @@
   <section id="results">
     <div class="wrap">
       <div class="section-head reveal">
-        <span class="eyebrow">Results, in Pigment</span>
-        <h2>Every correction starts as a colour problem</h2>
+        <span class="eyebrow"><span data-lang="en">Results, in Pigment</span><span data-lang="zh" hidden class="cn">色彩,见证改变</span></span>
+        <h2>
+          <span data-lang="en">Every correction starts as a colour problem</span>
+          <span data-lang="zh" hidden class="cn">每一次矫正,都从色彩问题开始</span>
+        </h2>
       </div>
       <div class="swatch-note reveal">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v5l3 2"/></svg>
-        <p>These swatches trace the colour‑correction categories we treat most — from oxidised old pigment to the soft, natural tone we bring it back to. Full case photos are shared during consultation.</p>
+        <p>
+          <span data-lang="en">These swatches trace the colour‑correction categories we treat most — from oxidised old pigment to the soft, natural tone we bring it back to. Full case photos are shared during consultation.</span>
+          <span data-lang="zh" hidden class="cn">以下色卡展示我们最常处理的矫正类型——从氧化变色的旧色素,到修复后柔和自然的色调。完整案例照片将在咨询时提供。</span>
+        </p>
       </div>
       <div class="swatch-grid">
 
@@ -424,7 +480,10 @@
             <div class="to" style="background:#8a7a68;"></div>
             <div class="swatch-arrow">→</div>
           </div>
-          <div class="swatch-body"><div class="k">Grey Brow Rescue</div><div class="v">Cool grey pigment → soft warm taupe</div></div>
+          <div class="swatch-body">
+            <div class="k"><span data-lang="en">Grey Brow Rescue</span><span data-lang="zh" hidden class="cn">灰眉救援</span></div>
+            <div class="v"><span data-lang="en">Cool grey pigment → soft warm taupe</span><span data-lang="zh" hidden class="cn">冷灰色素 → 柔和暖棕</span></div>
+          </div>
         </div>
 
         <div class="swatch-card reveal">
@@ -433,7 +492,10 @@
             <div class="to" style="background:#2a2420;"></div>
             <div class="swatch-arrow">→</div>
           </div>
-          <div class="swatch-body"><div class="k">Blue Eyeliner Wash</div><div class="v">Blue‑grey liner → neutral soft black</div></div>
+          <div class="swatch-body">
+            <div class="k"><span data-lang="en">Blue Eyeliner Wash</span><span data-lang="zh" hidden class="cn">蓝色眼线洗除</span></div>
+            <div class="v"><span data-lang="en">Blue‑grey liner → neutral soft black</span><span data-lang="zh" hidden class="cn">蓝灰眼线 → 自然柔黑</span></div>
+          </div>
         </div>
 
         <div class="swatch-card reveal">
@@ -442,7 +504,10 @@
             <div class="to" style="background:#846b4d;"></div>
             <div class="swatch-arrow">→</div>
           </div>
-          <div class="swatch-body"><div class="k">Red Brow Correction</div><div class="v">Red‑toned brow → warm ash brown</div></div>
+          <div class="swatch-body">
+            <div class="k"><span data-lang="en">Red Brow Correction</span><span data-lang="zh" hidden class="cn">红眉矫正</span></div>
+            <div class="v"><span data-lang="en">Red‑toned brow → warm ash brown</span><span data-lang="zh" hidden class="cn">偏红眉色 → 暖灰棕色</span></div>
+          </div>
         </div>
 
         <div class="swatch-card reveal">
@@ -451,7 +516,10 @@
             <div class="to" style="background:#93303b;"></div>
             <div class="swatch-arrow">→</div>
           </div>
-          <div class="swatch-body"><div class="k">Lip Blush Refresh</div><div class="v">Faded lip liner → rosy natural tint</div></div>
+          <div class="swatch-body">
+            <div class="k"><span data-lang="en">Lip Blush Refresh</span><span data-lang="zh" hidden class="cn">唇色焕新</span></div>
+            <div class="v"><span data-lang="en">Faded lip liner → rosy natural tint</span><span data-lang="zh" hidden class="cn">褪色唇线 → 自然红润唇色</span></div>
+          </div>
         </div>
 
       </div>
@@ -464,22 +532,30 @@
         <div class="pin-card reveal">
           <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s7-7.2 7-12a7 7 0 0 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/></svg>
           <div class="area">Kuchai Lama</div>
-          <div class="country">Kuala Lumpur, Malaysia</div>
+          <div class="country">
+            <span data-lang="en">Kuala Lumpur, Malaysia</span><span data-lang="zh" hidden class="cn">马来西亚吉隆坡</span>
+          </div>
         </div>
         <div class="loc-list reveal">
-          <span class="eyebrow">Visit</span>
+          <span class="eyebrow"><span data-lang="en">Visit</span><span data-lang="zh" hidden class="cn">门店信息</span></span>
           <div class="loc-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
             <div>
-              <h3>By appointment only</h3>
-              <p>Studio hours are arranged around bookings, including evenings and weekends.</p>
+              <h3><span data-lang="en">By appointment only</span><span data-lang="zh" hidden class="cn">采用预约制</span></h3>
+              <p>
+                <span data-lang="en">Studio hours are arranged around bookings, including evenings and weekends.</span>
+                <span data-lang="zh" hidden class="cn">营业时间根据预约安排,包括晚上与周末。</span>
+              </p>
             </div>
           </div>
           <div class="loc-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s7-7.2 7-12a7 7 0 0 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/></svg>
             <div>
-              <h3>Exact address on booking</h3>
-              <p>We're tucked inside Kuchai Lama — message us on WhatsApp and we'll send the unit number and directions with your confirmed slot.</p>
+              <h3><span data-lang="en">Exact address on booking</span><span data-lang="zh" hidden class="cn">预约后提供详细地址</span></h3>
+              <p>
+                <span data-lang="en">We're tucked inside Kuchai Lama — message us on WhatsApp and we'll send the unit number and directions with your confirmed slot.</span>
+                <span data-lang="zh" hidden class="cn">工作室位于 Kuchai Lama——通过 WhatsApp 联系我们,确认预约后将发送门牌号与路线。</span>
+              </p>
             </div>
           </div>
         </div>
@@ -491,12 +567,18 @@
     <div class="wrap">
       <div class="contact reveal">
         <div class="contact-inner">
-          <span class="eyebrow">Book a Slot</span>
-          <h2>Message us, we'll take it from there</h2>
-          <p>Tell us what's bothering you about your current brows, liner or lips — we'll recommend the right treatment and confirm a time.</p>
+          <span class="eyebrow"><span data-lang="en">Book a Slot</span><span data-lang="zh" hidden class="cn">立即预约</span></span>
+          <h2>
+            <span data-lang="en">Message us, we'll take it from there</span>
+            <span data-lang="zh" hidden class="cn">留言给我们,接下来交给我们</span>
+          </h2>
+          <p>
+            <span data-lang="en">Tell us what's bothering you about your current brows, liner or lips — we'll recommend the right treatment and confirm a time.</span>
+            <span data-lang="zh" hidden class="cn">告诉我们您目前眉毛、眼线或嘴唇的困扰——我们会推荐合适疗程并确认时间。</span>
+          </p>
           <div class="contact-ctas">
             <a class="btn btn-primary" href="https://wa.me/60139086567?text=Hi%20Heymagic%2C%20I%27d%20like%20to%20book%20an%20appointment" target="_blank" rel="noopener">
-              Chat on WhatsApp
+              <span data-lang="en">Chat on WhatsApp</span><span data-lang="zh" hidden class="cn">WhatsApp 联系我们</span>
             </a>
             <a class="btn btn-ghost" href="https://www.instagram.com/heymagic_brow_eyes_lips/" target="_blank" rel="noopener">
               @heymagic_brow_eyes_lips
@@ -518,14 +600,31 @@
     <div class="footer-links">
       <a href="https://www.instagram.com/heymagic_brow_eyes_lips/" target="_blank" rel="noopener">Instagram</a>
       <a href="https://wa.me/60139086567" target="_blank" rel="noopener">WhatsApp</a>
-      <a href="#top">Back to top</a>
+      <a href="#top"><span data-lang="en">Back to top</span><span data-lang="zh" hidden class="cn">返回顶部</span></a>
     </div>
-    <div class="footer-copy">© <span id="year"></span> Heymagic KL · Kuchai Lama, Kuala Lumpur</div>
+    <div class="footer-copy">
+      © <span id="year"></span> Heymagic KL · <span data-lang="en">Kuchai Lama, Kuala Lumpur</span><span data-lang="zh" hidden class="cn">Kuchai Lama, 吉隆坡</span>
+    </div>
   </div>
 </footer>
 
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
+
+  const langEls = document.querySelectorAll('[data-lang]');
+  const langBtns = document.querySelectorAll('.lang-btn');
+  function setLang(lang){
+    langEls.forEach(el => { el.hidden = el.dataset.lang !== lang; });
+    langBtns.forEach(btn => btn.setAttribute('aria-pressed', String(btn.dataset.setLang === lang)));
+    document.documentElement.lang = lang === 'zh' ? 'zh-Hans' : 'en';
+    try { localStorage.setItem('heymagic-lang', lang); } catch (e) {}
+  }
+  let initialLang = 'en';
+  try {
+    initialLang = localStorage.getItem('heymagic-lang') || (navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en');
+  } catch (e) {}
+  setLang(initialLang);
+  langBtns.forEach(btn => btn.addEventListener('click', () => setLang(btn.dataset.setLang)));
 
   const header = document.getElementById('siteHeader');
   window.addEventListener('scroll', () => {
