@@ -1,9 +1,11 @@
 const express = require("express");
 const router = express.Router();
 
-module.exports = (prisma) => {
+module.exports = (prisma, requireAuth) => {
+  router.use(requireAuth);
+
   router.get("/", async (req, res) => {
-    const products = await prisma.product.findMany({ orderBy: { id: "asc" } });
+    const products = await prisma.product.findMany({ where: { merchantId: req.merchantId }, orderBy: { id: "asc" } });
     res.json(products);
   });
 
@@ -11,6 +13,7 @@ module.exports = (prisma) => {
     const { name, description, price, offerPrice, discount, inventory, category, image } = req.body;
     const product = await prisma.product.create({
       data: {
+        merchantId: req.merchantId,
         name, description: description || null,
         price: Number(price) || 0,
         offerPrice: offerPrice != null && offerPrice !== "" ? Number(offerPrice) : null,
@@ -25,6 +28,8 @@ module.exports = (prisma) => {
 
   router.put("/:id", async (req, res) => {
     const id = Number(req.params.id);
+    const existing = await prisma.product.findFirst({ where: { id, merchantId: req.merchantId } });
+    if (!existing) return res.status(404).json({ error: "not found" });
     const { name, description, price, offerPrice, discount, inventory, category, image } = req.body;
     const product = await prisma.product.update({
       where: { id },
@@ -43,6 +48,8 @@ module.exports = (prisma) => {
 
   router.delete("/:id", async (req, res) => {
     const id = Number(req.params.id);
+    const existing = await prisma.product.findFirst({ where: { id, merchantId: req.merchantId } });
+    if (!existing) return res.status(404).json({ error: "not found" });
     await prisma.product.delete({ where: { id } });
     res.json({ ok: true });
   });

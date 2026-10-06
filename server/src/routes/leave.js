@@ -1,9 +1,11 @@
 const express = require("express");
 const router = express.Router();
 
-module.exports = (prisma) => {
+module.exports = (prisma, requireAuth) => {
+  router.use(requireAuth);
+
   router.get("/", async (req, res) => {
-    const leave = await prisma.leaveRecord.findMany({ orderBy: { id: "asc" } });
+    const leave = await prisma.leaveRecord.findMany({ where: { merchantId: req.merchantId }, orderBy: { id: "asc" } });
     res.json(leave);
   });
 
@@ -11,18 +13,19 @@ module.exports = (prisma) => {
   router.post("/", async (req, res) => {
     const { staffId, dates, leaveType, reason, affected, reassign } = req.body;
     const now = req.body.now || new Date().toISOString();
+    const merchantId = req.merchantId;
 
-    const staffList = await prisma.staff.findMany();
+    const staffList = await prisma.staff.findMany({ where: { merchantId } });
     const stf = (id) => staffList.find((s) => s.id === id);
 
     const [leaveRecord, updatedBookings] = await prisma.$transaction(async (tx) => {
       const record = await tx.leaveRecord.create({
-        data: { staffId, dates, leaveType, reason },
+        data: { merchantId, staffId, dates, leaveType, reason },
       });
 
       const updated = [];
       for (const a of affected) {
-        const booking = await tx.booking.findUnique({ where: { id: a.id } });
+        const booking = await tx.booking.findFirst({ where: { id: a.id, merchantId } });
         if (!booking) continue;
         const history = booking.history || [];
         if (reassign > 0) {

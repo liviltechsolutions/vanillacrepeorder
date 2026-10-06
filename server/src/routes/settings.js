@@ -2,118 +2,64 @@ const express = require("express");
 const router = express.Router();
 const crypto = require("crypto");
 const { hashPassword, verifyPassword } = require("../auth");
+const { sendVerifyEmail } = require("../mailer");
 
-let nodemailer;
-try { nodemailer = require("nodemailer"); } catch (_) {}
-
-function sendVerifyEmail(toEmail, token, companyName) {
-  if (!nodemailer) return;
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM } = process.env;
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) return;
-  const transporter = nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: Number(SMTP_PORT) || 587,
-    secure: false,
-    auth: { user: SMTP_USER, pass: SMTP_PASS },
-  });
-  const link = `http://localhost:4000/api/settings/verify-email?token=${token}`;
-  transporter.sendMail({
-    from: SMTP_FROM || SMTP_USER,
-    to: toEmail,
-    subject: `${companyName} — Verify your email`,
-    html: `<p>Click to verify your Beaubook account email:</p><p><a href="${link}">${link}</a></p>`,
-  }).catch(err => console.error("Email send failed:", err.message));
-}
-
-const SETTING_FIELDS = [
-  "companyName", "location", "notifyOnPending", "notifyBefore",
+const PUBLIC_FIELDS = [
+  "id", "companyName", "location", "businessType", "notifyOnPending", "notifyBefore",
   "contactPhone", "address", "personInCharge",
   "facebook", "instagram", "tiktok", "xhs", "youtube", "twitter", "whatsapp",
   "email", "emailVerified", "seats",
 ];
-
-function pickPublic(s) {
+function pickPublic(m) {
   const out = {};
-  SETTING_FIELDS.forEach(f => { if (s[f] !== undefined) out[f] = s[f]; });
+  PUBLIC_FIELDS.forEach(f => { if (m[f] !== undefined) out[f] = m[f]; });
   return out;
 }
 
-module.exports = (prisma) => {
-  router.get("/", async (req, res) => {
-    const s = await prisma.settings.findUnique({ where: { id: 1 } });
-    res.json(pickPublic(s));
+module.exports = (prisma, requireAuth) => {
+  router.get("/", requireAuth, async (req, res) => {
+    const m = await prisma.merchant.findUnique({ where: { id: req.merchantId } });
+    res.json(pickPublic(m));
   });
 
-  // Returns whether the account has a verified email (used by LoginScreen)
-  router.get("/login-mode", async (req, res) => {
-    const s = await prisma.settings.findUnique({ where: { id: 1 } });
-    res.json({ hasEmail: !!(s.email && s.emailVerified) });
-  });
-
-  router.put("/", async (req, res) => {
+  router.put("/", requireAuth, async (req, res) => {
     const allowed = [
-      "companyName", "location", "notifyOnPending", "notifyBefore",
+      "companyName", "location", "businessType", "notifyOnPending", "notifyBefore",
       "contactPhone", "address", "personInCharge",
       "facebook", "instagram", "tiktok", "xhs", "youtube", "twitter", "whatsapp",
       "seats",
     ];
     const data = {};
     allowed.forEach(f => { if (req.body[f] !== undefined) data[f] = req.body[f]; });
-    const s = await prisma.settings.update({ where: { id: 1 }, data });
-    res.json(pickPublic(s));
+    const m = await prisma.merchant.update({ where: { id: req.merchantId }, data });
+    res.json(pickPublic(m));
   });
 
-  // Register/update account email — generates a verification token
-  router.post("/register-email", async (req, res) => {
+  // Change the account email for the logged-in merchant — generates a verification
+  // token and reuses the same /api/auth/verify-email endpoint signup uses.
+  router.post("/register-email", requireAuth, async (req, res) => {
     const { email } = req.body;
     if (!email || !email.includes("@")) return res.status(400).json({ ok: false, error: "Invalid email" });
+    const normEmail = email.trim().toLowerCase();
+    const inUse = await prisma.merchant.findUnique({ where: { email: normEmail } });
+    if (inUse && inUse.id !== req.merchantId) return res.status(409).json({ ok: false, error: "That email is already in use." });
     const token = crypto.randomBytes(32).toString("hex");
-    const s = await prisma.settings.update({
-      where: { id: 1 },
-      data: { email, emailVerified: false, emailVerifyToken: token },
+    const m = await prisma.merchant.update({
+      where: { id: req.merchantId },
+      data: { email: normEmail, emailVerified: false, emailVerifyToken: token },
     });
-    sendVerifyEmail(email, token, s.companyName);
-    // Return token so the UI can show a clickable link in dev mode (no SMTP needed)
-    res.json({ ok: true, token, verifyUrl: `/api/settings/verify-email?token=${token}` });
+    sendVerifyEmail(m.email, token, m.companyName);
+    res.json({ ok: true, verifyUrl: `/api/auth/verify-email?token=${token}` });
   });
 
-  // Verify email via token (browser-navigable link)
-  router.get("/verify-email", async (req, res) => {
-    const { token } = req.query;
-    if (!token) return res.status(400).send("Missing token");
-    const s = await prisma.settings.findUnique({ where: { id: 1 } });
-    if (!s.emailVerifyToken || s.emailVerifyToken !== token) {
-      return res.status(400).send("Invalid or expired verification link.");
-    }
-    await prisma.settings.update({
-      where: { id: 1 },
-      data: { emailVerified: true, emailVerifyToken: null },
-    });
-    res.send(`<html><body style="font-family:sans-serif;text-align:center;padding:60px"><h2>✅ Email Verified!</h2><p>Your email <strong>${s.email}</strong> has been verified.</p><p><a href="http://localhost:3000">Return to Beaubook</a></p></body></html>`);
-  });
-
-  router.post("/login", async (req, res) => {
-    const { password, email } = req.body;
-    const s = await prisma.settings.findUnique({ where: { id: 1 } });
-    // If a verified email is registered, the submitted email must match
-    if (s.email && s.emailVerified && email) {
-      if (email.toLowerCase() !== s.email.toLowerCase()) {
-        return res.status(401).json({ ok: false, error: "fail" });
-      }
-    }
-    const ok = verifyPassword(password || "", s.passwordHash, s.passwordSalt);
-    if (!ok) return res.status(401).json({ ok: false, error: "fail" });
-    res.json({ ok: true });
-  });
-
-  router.post("/password", async (req, res) => {
+  router.post("/password", requireAuth, async (req, res) => {
     const { currentPassword, newPassword } = req.body;
-    const s = await prisma.settings.findUnique({ where: { id: 1 } });
-    if (!verifyPassword(currentPassword || "", s.passwordHash, s.passwordSalt)) {
+    const m = await prisma.merchant.findUnique({ where: { id: req.merchantId } });
+    if (!verifyPassword(currentPassword || "", m.passwordHash, m.passwordSalt)) {
       return res.status(401).json({ ok: false, error: "Current password is incorrect" });
     }
     const { hash, salt } = hashPassword(newPassword);
-    await prisma.settings.update({ where: { id: 1 }, data: { passwordHash: hash, passwordSalt: salt } });
+    await prisma.merchant.update({ where: { id: req.merchantId }, data: { passwordHash: hash, passwordSalt: salt } });
     res.json({ ok: true });
   });
 

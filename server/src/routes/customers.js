@@ -1,11 +1,14 @@
 const express = require("express");
 const router = express.Router();
 
-module.exports = (prisma) => {
+module.exports = (prisma, requireAuth) => {
+  router.use(requireAuth);
+
   router.get("/", async (req, res) => {
+    const merchantId = req.merchantId;
     const [extraRows, noteRows] = await Promise.all([
-      prisma.customerExtra.findMany(),
-      prisma.customerNote.findMany(),
+      prisma.customerExtra.findMany({ where: { merchantId } }),
+      prisma.customerNote.findMany({ where: { merchantId } }),
     ]);
     const extra = {};
     extraRows.forEach((r) => {
@@ -22,18 +25,19 @@ module.exports = (prisma) => {
   router.put("/:oldPhone", async (req, res) => {
     const { oldPhone } = req.params;
     const { name, phone, ic, email, gender, birthday } = req.body;
+    const merchantId = req.merchantId;
 
     const [extra, updatedBookings] = await prisma.$transaction(async (tx) => {
       const extra = await tx.customerExtra.upsert({
-        where: { phone },
+        where: { merchantId_phone: { merchantId, phone } },
         update: { ic, email, gender, birthday },
-        create: { phone, ic, email, gender, birthday },
+        create: { merchantId, phone, ic, email, gender, birthday },
       });
       await tx.booking.updateMany({
-        where: { phone: oldPhone },
+        where: { phone: oldPhone, merchantId },
         data: { customer: name },
       });
-      const updatedBookings = await tx.booking.findMany({ where: { phone: oldPhone } });
+      const updatedBookings = await tx.booking.findMany({ where: { phone: oldPhone, merchantId } });
       return [extra, updatedBookings];
     });
 
@@ -44,10 +48,11 @@ module.exports = (prisma) => {
   router.put("/:phone/note", async (req, res) => {
     const { phone } = req.params;
     const { note } = req.body;
+    const merchantId = req.merchantId;
     const saved = await prisma.customerNote.upsert({
-      where: { phone },
+      where: { merchantId_phone: { merchantId, phone } },
       update: { note },
-      create: { phone, note },
+      create: { merchantId, phone, note },
     });
     res.json(saved);
   });

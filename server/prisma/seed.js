@@ -2,6 +2,8 @@ const { PrismaClient } = require("@prisma/client");
 const { hashPassword } = require("../src/auth");
 const prisma = new PrismaClient();
 
+const SEED_EMAIL = "seed@beaubook.test";
+
 const INIT_STAFF = [
   { id: 1, name: "Amirah", avatar: "A", color: "#a855f7", photo: null, phone: "012-9988776", emergencyName: "Fatimah (Mother)", emergencyPhone: "017-1122334", position: "Senior Beautician", skills: ["Haircut", "Colouring", "Treatment"], ic: "900101-14-1234" },
   { id: 2, name: "Siti", avatar: "S", color: "#ec4899", photo: null, phone: "013-7765432", emergencyName: "Ahmad (Husband)", emergencyPhone: "011-3344556", position: "Nail Technician", skills: ["Manicure", "Pedicure", "Facial"], ic: "930615-10-5678" },
@@ -39,25 +41,38 @@ const INIT_BK = [
 ];
 
 async function main() {
-  await prisma.booking.deleteMany();
-  await prisma.staff.deleteMany();
-  await prisma.customerExtra.deleteMany();
-  await prisma.customerNote.deleteMany();
-  await prisma.leaveRecord.deleteMany();
-  await prisma.schedule.deleteMany();
-  await prisma.service.deleteMany();
+  // Seed merchant is a stable fixture keyed by email — only create on first run,
+  // never overwrite an existing password on reseed.
+  const { hash, salt } = hashPassword("beaubook123");
+  const merchant = await prisma.merchant.upsert({
+    where: { email: SEED_EMAIL },
+    update: {},
+    create: {
+      companyName: "Glam Lab", location: "Kuala Lumpur", email: SEED_EMAIL,
+      passwordHash: hash, passwordSalt: salt, notifyOnPending: true, emailVerified: true,
+    },
+  });
+  const merchantId = merchant.id;
+
+  await prisma.booking.deleteMany({ where: { merchantId } });
+  await prisma.staff.deleteMany({ where: { merchantId } });
+  await prisma.customerExtra.deleteMany({ where: { merchantId } });
+  await prisma.customerNote.deleteMany({ where: { merchantId } });
+  await prisma.leaveRecord.deleteMany({ where: { merchantId } });
+  await prisma.schedule.deleteMany({ where: { merchantId } });
+  await prisma.service.deleteMany({ where: { merchantId } });
 
   for (const s of INIT_STAFF) {
-    await prisma.staff.create({ data: s });
+    await prisma.staff.create({ data: { ...s, merchantId } });
   }
   for (const sv of INIT_SERVICES) {
-    await prisma.service.create({ data: sv });
+    await prisma.service.create({ data: { ...sv, merchantId } });
   }
   for (const b of INIT_BK) {
-    await prisma.booking.create({ data: b });
+    await prisma.booking.create({ data: { ...b, merchantId } });
   }
   for (const [phone, extra] of Object.entries(INIT_CUSTOMERS_DATA)) {
-    await prisma.customerExtra.create({ data: { phone, ...extra } });
+    await prisma.customerExtra.create({ data: { merchantId, phone, ...extra } });
   }
 
   // explicit ids above don't advance the autoincrement sequences — fix that up
@@ -71,15 +86,7 @@ async function main() {
     `SELECT setval(pg_get_serial_sequence('"Service"', 'id'), (SELECT MAX(id) FROM "Service"))`
   );
 
-  // Settings is a singleton — only create on first run, never overwrite an existing password on reseed
-  const { hash, salt } = hashPassword("beaubook123");
-  await prisma.settings.upsert({
-    where: { id: 1 },
-    update: {},
-    create: { id: 1, companyName: "Glam Lab", location: "Kuala Lumpur", passwordHash: hash, passwordSalt: salt, notifyOnPending: true },
-  });
-
-  console.log("Seed complete.");
+  console.log(`Seed complete. Merchant: ${SEED_EMAIL} / beaubook123 (id ${merchantId})`);
 }
 
 main()

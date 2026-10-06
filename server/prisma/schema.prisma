@@ -9,6 +9,7 @@ datasource db {
 
 model Staff {
   id              Int      @id @default(autoincrement())
+  merchantId      Int
   name            String
   avatar          String
   color           String
@@ -19,10 +20,13 @@ model Staff {
   position        String
   skills          String[]
   ic              String?
+
+  @@index([merchantId])
 }
 
 model Booking {
   id         Int      @id @default(autoincrement())
+  merchantId Int
   customer   String
   phone      String
   service    Int
@@ -40,10 +44,13 @@ model Booking {
   seat       String?
   history    Json     @default("[]")
   products   Json     @default("[]")
+
+  @@index([merchantId])
 }
 
 model Product {
   id          Int      @id @default(autoincrement())
+  merchantId  Int
   name        String
   description String?
   price       Int
@@ -53,60 +60,87 @@ model Product {
   category    String?
   image       String?
   createdAt   DateTime @default(now())
+
+  @@index([merchantId])
 }
 
 model LeaveRecord {
-  id        Int      @id @default(autoincrement())
-  staffId   Int
-  dates     String[]
-  leaveType String
-  reason    String?
+  id         Int      @id @default(autoincrement())
+  merchantId Int
+  staffId    Int
+  dates      String[]
+  leaveType  String
+  reason     String?
+
+  @@index([merchantId])
 }
 
 model Schedule {
-  staffId Int  @id
-  data    Json
+  merchantId Int
+  staffId    Int
+  data       Json
+
+  @@id([merchantId, staffId])
 }
 
 model CustomerExtra {
-  phone    String  @id
-  ic       String?
-  email    String?
-  gender   String?
-  birthday String?
+  merchantId Int
+  phone      String
+  ic         String?
+  email      String?
+  gender     String?
+  birthday   String?
+
+  @@id([merchantId, phone])
 }
 
 model CustomerNote {
-  phone String @id
-  note  String
+  merchantId Int
+  phone      String
+  note       String
+
+  @@id([merchantId, phone])
 }
 
 model ClosedDate {
-  date   String  @id
-  reason String?
+  merchantId Int
+  date       String
+  reason     String?
+
+  @@id([merchantId, date])
 }
 
 model OpenOverride {
-  date   String  @id
-  reason String?
+  merchantId Int
+  date       String
+  reason     String?
+
+  @@id([merchantId, date])
 }
 
 model ClosedWeekday {
-  weekday Int     @id
-  reason  String?
+  merchantId Int
+  weekday    Int
+  reason     String?
+
+  @@id([merchantId, weekday])
 }
 
 model Service {
-  id       Int    @id @default(autoincrement())
-  name     String
-  duration Int
-  price    Int
+  id         Int    @id @default(autoincrement())
+  merchantId Int
+  name       String
+  duration   Int
+  price      Int
+
+  @@index([merchantId])
 }
 
-model Settings {
-  id               Int     @id @default(1)
+model Merchant {
+  id               Int     @id @default(autoincrement())
   companyName      String
-  location         String
+  location         String?
+  businessType     String?
   passwordHash     String
   passwordSalt     String
   notifyOnPending  Boolean @default(true)
@@ -121,8 +155,9 @@ model Settings {
   youtube          String?
   twitter          String?
   whatsapp         String?
-  email            String?
+  email            String  @unique
   emailVerified    Boolean @default(false)
   emailVerifyToken String?
   seats            Json    @default("[]")
+  createdAt        DateTime @default(now())
 }

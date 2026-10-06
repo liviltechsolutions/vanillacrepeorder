@@ -1,6 +1,20 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import BrandMark, { TEAL as BRAND_TEAL } from "./BrandMark";
 
+// Thin wrapper around apiFetch() that always sends the httpOnly auth cookie and
+// JSON headers, and signals a 401 (expired/missing session) to the caller via
+// a dedicated event so the app can drop back to the login screen in one place.
+function apiFetch(url, opts = {}) {
+  return window.fetch(url, {
+    ...opts,
+    credentials: "include",
+    headers: { "Content-Type": "application/json", ...(opts.headers || {}) },
+  }).then(r => {
+    if (r.status === 401) window.dispatchEvent(new Event("beaubook:unauthorized"));
+    return r;
+  });
+}
+
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 const HOURS=[];
 for(let h=9;h<=19;h++){HOURS.push(`${String(h).padStart(2,"0")}:00`);if(h<19)HOURS.push(`${String(h).padStart(2,"0")}:30`);}
@@ -13,6 +27,7 @@ const BC={confirmed:{bg:"#f0fdf4",br:"#86efac",tx:"#15803d"},pending:{bg:"#fffbe
 const POSITIONS=["Junior Beautician","Senior Beautician","Lead Stylist","Nail Technician","Therapist","Manager","Freelancer"];
 const SKILL_OPTIONS=["Haircut","Colouring","Treatment","Manicure","Pedicure","Facial","Threading","Massage","Makeup","Lash Extension"];
 const DEFAULT_SEATS=["Seat A1","Seat A2","Seat B1","Seat B2","Room 1","Room 2","Room 3","VIP Room"];
+const BUSINESS_TYPES=["Hair Salon","Nail Studio","Spa & Massage","Barbershop","Lash & Brow Studio","Skincare / Facial","Makeup Studio","Other"];
 // Malaysia national public holidays — gazetted federal holidays
 const MY_HOLIDAYS_2026={
   "2026-01-01":"New Year's Day",
@@ -969,7 +984,7 @@ function ProductModal({product,onClose,onSave,categories}){
 }
 
 // ─── LOGIN SCREEN ─────────────────────────────────────────────────────────────
-function LoginScreen({onSuccess}){
+function LoginScreen({onSuccess,onSwitchToSignup}){
   const [email,setEmail]=useState("");
   const [password,setPassword]=useState("");
   const [showPw,setShowPw]=useState(false);
@@ -979,10 +994,10 @@ function LoginScreen({onSuccess}){
   const submit=()=>{
     if(!email.trim()){setError("Please enter your email.");return;}
     setLoading(true);setError("");
-    fetch("/api/settings/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password})})
+    apiFetch("/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password})})
       .then(r=>{if(!r.ok)return r.json().then(d=>{throw new Error(d.error||"fail");});return r.json();})
-      .then(()=>{sessionStorage.setItem("beaubook_authed","1");onSuccess();})
-      .catch(e=>setError(e.message==="fail"?"Incorrect email or password.":e.message||"Login failed."))
+      .then(()=>onSuccess())
+      .catch(e=>setError(e.message==="unverified"?"Please verify your email before logging in — check your inbox for the link.":e.message==="fail"?"Incorrect email or password.":e.message||"Login failed."))
       .finally(()=>setLoading(false));
   };
 
@@ -1015,10 +1030,90 @@ function LoginScreen({onSuccess}){
           </div>
           {error&&<div style={{fontSize:13,color:"#991b1b",background:"#fef2f2",padding:"10px 14px",borderRadius:10,border:"1px solid #fca5a5",fontWeight:500}}>{error}</div>}
           <button onClick={submit} disabled={loading} style={pBtn({width:"100%",marginTop:4,padding:"14px 0",fontSize:15,fontWeight:700,background:"linear-gradient(135deg,#0f766e,#0d9488)",boxShadow:"0 6px 18px rgba(15,118,110,0.35)",opacity:loading?0.7:1})}>{loading?"Logging in…":"Log In"}</button>
+          <div style={{textAlign:"center",fontSize:13,color:"#6e7a72"}}>Don't have an account? <span onClick={onSwitchToSignup} style={{color:"#0d9488",fontWeight:700,cursor:"pointer"}}>Sign up</span></div>
         </div>
       </div>
     </div>
   );
+}
+
+// ─── SIGNUP SCREEN ────────────────────────────────────────────────────────────
+function SignupScreen({onSwitchToLogin}){
+  const [f,setF]=useState({personInCharge:"",companyName:"",address:"",contactPhone:"",email:"",password:"",businessType:BUSINESS_TYPES[0],businessTypeOther:""});
+  const up=(k,v)=>setF(p=>({...p,[k]:v}));
+  const [error,setError]=useState("");
+  const [loading,setLoading]=useState(false);
+  const [done,setDone]=useState(null); // {verifyUrl} once registered
+
+  const submit=()=>{
+    if(!f.companyName.trim()){setError("Company name is required.");return;}
+    if(!f.email.trim()){setError("Email is required.");return;}
+    if(f.password.length<8){setError("Password must be at least 8 characters.");return;}
+    setLoading(true);setError("");
+    const businessType=f.businessType==="Other"?(f.businessTypeOther.trim()||"Other"):f.businessType;
+    apiFetch("/api/auth/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...f,businessType})})
+      .then(r=>r.json().then(d=>({ok:r.ok,...d})))
+      .then(d=>{if(!d.ok)throw new Error(d.error||"Signup failed.");setDone(d);})
+      .catch(e=>setError(e.message||"Signup failed."))
+      .finally(()=>setLoading(false));
+  };
+
+  const shell=children=>(
+    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#f3fffc 0%,#e9fef8 50%,#d6fef3 100%)",display:"flex",alignItems:"center",justifyContent:"center",padding:16,fontFamily:"'Inter',system-ui,sans-serif"}}>
+      <div style={{background:"#fff",borderRadius:24,padding:36,width:440,maxWidth:"100%",boxShadow:"0 32px 80px rgba(15,118,110,0.18)",border:"1px solid #e9fef8"}}>
+        {children}
+      </div>
+    </div>
+  );
+
+  if(done){
+    return shell(
+      <div style={{textAlign:"center"}}>
+        <div style={{fontSize:40,marginBottom:10}}>📬</div>
+        <div style={{fontWeight:800,fontSize:19,color:"#1c2620",marginBottom:8}}>Check your email</div>
+        <div style={{fontSize:13,color:"#6e7a72",marginBottom:18,lineHeight:1.5}}>We've sent a verification link to <strong>{f.email}</strong>. Click it to activate your account, then log in.</div>
+        {done.verifyUrl&&<a href={done.verifyUrl} style={{display:"block",fontSize:12,color:"#0d9488",wordBreak:"break-all",marginBottom:18,background:"#f0fdfa",padding:"10px 12px",borderRadius:9}}>Dev mode — email not configured, click here to verify: {done.verifyUrl}</a>}
+        <span onClick={onSwitchToLogin} style={{color:"#0d9488",fontWeight:700,cursor:"pointer",fontSize:13}}>Back to login</span>
+      </div>
+    );
+  }
+
+  return shell(
+    <>
+      <div style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:24}}>
+        <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:10}}>
+          <BrandMark size={48} variant="mark"/>
+          <div style={{fontWeight:800,fontSize:20,color:"#1c2620",letterSpacing:"-0.5px"}}><span>Beau</span><span style={{color:BRAND_TEAL}}>book</span></div>
+        </div>
+        <div style={{fontSize:13,color:"#6e7a72",fontWeight:500}}>Create your merchant account</div>
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:12}}>
+        <div><label style={lbl}>Your Name</label><input value={f.personInCharge} onChange={e=>up("personInCharge",e.target.value)} placeholder="e.g. Sarah Lim" style={inp}/></div>
+        <div><label style={lbl}>Company Name</label><input value={f.companyName} onChange={e=>up("companyName",e.target.value)} placeholder="e.g. Glam Lab Studio" style={inp}/></div>
+        <div><label style={lbl}>Address</label><input value={f.address} onChange={e=>up("address",e.target.value)} placeholder="Business address" style={inp}/></div>
+        <div><label style={lbl}>Contact Number</label><input value={f.contactPhone} onChange={e=>up("contactPhone",e.target.value)} placeholder="012-3456789" style={inp}/></div>
+        <div><label style={lbl}>Type of Business</label>
+          <select value={f.businessType} onChange={e=>up("businessType",e.target.value)} onWheel={e=>e.target.blur()} style={inp}>
+            {BUSINESS_TYPES.map(b=><option key={b} value={b}>{b}</option>)}
+          </select>
+        </div>
+        {f.businessType==="Other"&&<div><input value={f.businessTypeOther} onChange={e=>up("businessTypeOther",e.target.value)} placeholder="Tell us what kind of business" style={inp}/></div>}
+        <div><label style={lbl}>Email</label><input type="email" value={f.email} onChange={e=>up("email",e.target.value)} placeholder="you@email.com" style={inp}/></div>
+        <div><label style={lbl}>Password</label><input type="password" value={f.password} onChange={e=>up("password",e.target.value)} placeholder="At least 8 characters" style={inp}/></div>
+        {error&&<div style={{fontSize:13,color:"#991b1b",background:"#fef2f2",padding:"10px 14px",borderRadius:10,border:"1px solid #fca5a5",fontWeight:500}}>{error}</div>}
+        <button onClick={submit} disabled={loading} style={pBtn({width:"100%",marginTop:4,padding:"14px 0",fontSize:15,fontWeight:700,background:"linear-gradient(135deg,#0f766e,#0d9488)",boxShadow:"0 6px 18px rgba(15,118,110,0.35)",opacity:loading?0.7:1})}>{loading?"Creating account…":"Create Account"}</button>
+        <div style={{textAlign:"center",fontSize:13,color:"#6e7a72"}}>Already have an account? <span onClick={onSwitchToLogin} style={{color:"#0d9488",fontWeight:700,cursor:"pointer"}}>Log in</span></div>
+      </div>
+    </>
+  );
+}
+
+// ─── AUTH GATE ────────────────────────────────────────────────────────────────
+function AuthGate({onAuthed}){
+  const [view,setView]=useState("login"); // "login" | "signup"
+  return view==="login"
+    ? <LoginScreen onSuccess={onAuthed} onSwitchToSignup={()=>setView("signup")}/>
+    : <SignupScreen onSwitchToLogin={()=>setView("login")}/>;
 }
 
 // ─── MAIN ────────────────────────────────────────────────────────────────────
@@ -1072,7 +1167,7 @@ export default function BeaubookDashboard(){
   const [editProduct,setEditProduct]=useState(null);
   const [addProduct,setAddProduct]=useState(false);
   const [productSearch,setProductSearch]=useState("");
-  const [authed,setAuthed]=useState(()=>sessionStorage.getItem("beaubook_authed")==="1");
+  const [authStatus,setAuthStatus]=useState("checking"); // "checking" | "authed" | "anon"
   const [theme,setTheme]=useState(()=>localStorage.getItem("beaubook_theme")||"light");
   const [language,setLanguage]=useState(()=>localStorage.getItem("beaubook_language")||"en");
   const [settings,setSettings]=useState({companyName:"Glam Lab",location:"Kuala Lumpur",notifyOnPending:true,notifyBefore:30,email:null,emailVerified:false});
@@ -1099,23 +1194,35 @@ export default function BeaubookDashboard(){
   useEffect(()=>{document.documentElement.dataset.theme=theme;localStorage.setItem("beaubook_theme",theme);},[theme]);
   useEffect(()=>{localStorage.setItem("beaubook_language",language);},[language]);
 
+  // Verify the session cookie with the server on mount — replaces the old
+  // client-trusted sessionStorage flag with a real check.
   useEffect(()=>{
-    fetch("/api/bookings").then(r=>r.json()).then(setBookings);
-    fetch("/api/staff").then(r=>r.json()).then(setStaffList);
-    fetch("/api/leave").then(r=>r.json()).then(setLeaveRecords);
-    fetch("/api/schedules").then(r=>r.json()).then(setSchedules);
-    fetch("/api/customers").then(r=>r.json()).then(({extra,notes})=>{setCustomerExtra(extra);setCustNotes(notes);});
-    fetch("/api/closed-dates").then(r=>r.json()).then(setClosedDates);
-    fetch("/api/closed-weekdays").then(r=>r.json()).then(setClosedWeekdays);
-    fetch("/api/open-overrides").then(r=>r.json()).then(setOpenOverrides);
-    fetch("/api/services").then(r=>r.json()).then(setServices);
-    fetch("/api/products").then(r=>r.json()).then(setProducts);
-    fetch("/api/settings").then(r=>r.json()).then(s=>{
+    apiFetch("/api/auth/me").then(r=>setAuthStatus(r.ok?"authed":"anon")).catch(()=>setAuthStatus("anon"));
+  },[]);
+  useEffect(()=>{
+    const onUnauthorized=()=>setAuthStatus("anon");
+    window.addEventListener("beaubook:unauthorized",onUnauthorized);
+    return()=>window.removeEventListener("beaubook:unauthorized",onUnauthorized);
+  },[]);
+
+  useEffect(()=>{
+    if(authStatus!=="authed")return;
+    apiFetch("/api/bookings").then(r=>r.json()).then(setBookings);
+    apiFetch("/api/staff").then(r=>r.json()).then(setStaffList);
+    apiFetch("/api/leave").then(r=>r.json()).then(setLeaveRecords);
+    apiFetch("/api/schedules").then(r=>r.json()).then(setSchedules);
+    apiFetch("/api/customers").then(r=>r.json()).then(({extra,notes})=>{setCustomerExtra(extra);setCustNotes(notes);});
+    apiFetch("/api/closed-dates").then(r=>r.json()).then(setClosedDates);
+    apiFetch("/api/closed-weekdays").then(r=>r.json()).then(setClosedWeekdays);
+    apiFetch("/api/open-overrides").then(r=>r.json()).then(setOpenOverrides);
+    apiFetch("/api/services").then(r=>r.json()).then(setServices);
+    apiFetch("/api/products").then(r=>r.json()).then(setProducts);
+    apiFetch("/api/settings").then(r=>r.json()).then(s=>{
       setSettings(s);
       setProfileForm({companyName:s.companyName||"",location:s.location||"",contactPhone:s.contactPhone||"",address:s.address||"",personInCharge:s.personInCharge||"",facebook:s.facebook||"",instagram:s.instagram||"",tiktok:s.tiktok||"",xhs:s.xhs||"",youtube:s.youtube||"",twitter:s.twitter||"",whatsapp:s.whatsapp||""});
       if(Array.isArray(s.seats)&&s.seats.length>0)setSeats(s.seats);
     });
-  },[]);
+  },[authStatus]);
 
   // Live clock — ticks every second
   useEffect(()=>{const t=setInterval(()=>setNowTime(new Date()),1000);return()=>clearInterval(t);},[]);
@@ -1146,7 +1253,7 @@ export default function BeaubookDashboard(){
 
   function handleSaveSettings(updates){
     const payload={companyName:profileForm.companyName,location:profileForm.location,contactPhone:profileForm.contactPhone,address:profileForm.address,personInCharge:profileForm.personInCharge,facebook:profileForm.facebook,instagram:profileForm.instagram,tiktok:profileForm.tiktok,xhs:profileForm.xhs,youtube:profileForm.youtube,twitter:profileForm.twitter,whatsapp:profileForm.whatsapp,notifyOnPending:settings.notifyOnPending,notifyBefore:settings.notifyBefore,...updates};
-    fetch("/api/settings",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r=>r.json()).then(saved=>{setSettings(s=>({...s,...saved}));showToast("Settings saved!");});
+    apiFetch("/api/settings",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r=>r.json()).then(saved=>{setSettings(s=>({...s,...saved}));showToast("Settings saved!");});
   }
   function handleReschedule(b,{date,time}){
     const now=nowStr();
@@ -1154,7 +1261,7 @@ export default function BeaubookDashboard(){
     patchBooking(b.id,{date,time,history}).then(updated=>{setBookings(p=>p.map(bk=>bk.id===b.id?updated:bk));setSelBooking(updated);showToast("Appointment rescheduled!");});
   }
   function handleChangePassword(currentPassword,newPassword){
-    return fetch("/api/settings/password",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({currentPassword,newPassword})}).then(r=>r.json().then(data=>({ok:r.ok,...data})));
+    return apiFetch("/api/settings/password",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({currentPassword,newPassword})}).then(r=>r.json().then(data=>({ok:r.ok,...data})));
   }
 
   function exportReport(period){
@@ -1181,7 +1288,7 @@ export default function BeaubookDashboard(){
     showToast(`${period[0].toUpperCase()}${period.slice(1)} report exported!`);
   }
 
-  function patchBooking(id,data){return fetch(`/api/bookings/${id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)}).then(r=>r.json());}
+  function patchBooking(id,data){return apiFetch(`/api/bookings/${id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)}).then(r=>r.json());}
   const getClosed=date=>{
     // Open override takes highest priority — this date is forced open
     if(openOverrides.find(o=>o.date===date))return null;
@@ -1193,43 +1300,43 @@ export default function BeaubookDashboard(){
   };
   const isOpenOverride=date=>!!openOverrides.find(o=>o.date===date);
   function handleMarkOpenOverride(date,reason){
-    fetch("/api/open-overrides",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({date,reason})}).then(r=>r.json()).then(saved=>{
+    apiFetch("/api/open-overrides",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({date,reason})}).then(r=>r.json()).then(saved=>{
       setOpenOverrides(p=>[...p.filter(o=>o.date!==date),saved].sort((a,b)=>a.date.localeCompare(b.date)));
       showToast("Marked as open override!");
     });
   }
   function handleUnmarkOpenOverride(date){
-    fetch(`/api/open-overrides/${date}`,{method:"DELETE"}).then(()=>{setOpenOverrides(p=>p.filter(o=>o.date!==date));showToast("Open override removed.");});
+    apiFetch(`/api/open-overrides/${date}`,{method:"DELETE"}).then(()=>{setOpenOverrides(p=>p.filter(o=>o.date!==date));showToast("Open override removed.");});
   }
   function handleMarkClosed(date,reason){
-    fetch("/api/closed-dates",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({date,reason})}).then(r=>r.json()).then(saved=>{
+    apiFetch("/api/closed-dates",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({date,reason})}).then(r=>r.json()).then(saved=>{
       setClosedDates(p=>[...p.filter(c=>c.date!==date),saved].sort((a,b2)=>a.date.localeCompare(b2.date)));
       showToast("Marked as closed!");
     });
   }
   function handleUnmarkClosed(date){
-    fetch(`/api/closed-dates/${date}`,{method:"DELETE"}).then(()=>{setClosedDates(p=>p.filter(c=>c.date!==date));showToast("Closed date removed.");});
+    apiFetch(`/api/closed-dates/${date}`,{method:"DELETE"}).then(()=>{setClosedDates(p=>p.filter(c=>c.date!==date));showToast("Closed date removed.");});
   }
   function handleMarkClosedWeekday(weekday,reason){
-    fetch("/api/closed-weekdays",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({weekday,reason})}).then(r=>r.json()).then(saved=>{
+    apiFetch("/api/closed-weekdays",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({weekday,reason})}).then(r=>r.json()).then(saved=>{
       setClosedWeekdays(p=>[...p.filter(c=>c.weekday!==weekday),saved].sort((a,b2)=>a.weekday-b2.weekday));
     });
   }
   function handleUnmarkClosedWeekday(weekday){
-    fetch(`/api/closed-weekdays/${weekday}`,{method:"DELETE"}).then(()=>{setClosedWeekdays(p=>p.filter(c=>c.weekday!==weekday));});
+    apiFetch(`/api/closed-weekdays/${weekday}`,{method:"DELETE"}).then(()=>{setClosedWeekdays(p=>p.filter(c=>c.weekday!==weekday));});
   }
   function handleAddService(form){
-    fetch("/api/services",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)}).then(r=>r.json()).then(created=>{setServices(p=>[...p,created]);setAddService(false);showToast("Service added!");});
+    apiFetch("/api/services",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)}).then(r=>r.json()).then(created=>{setServices(p=>[...p,created]);setAddService(false);showToast("Service added!");});
   }
   function handleEditServiceSave(form){
-    fetch(`/api/services/${form.id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)}).then(r=>r.json()).then(updated=>{setServices(p=>p.map(s=>s.id===updated.id?updated:s));setEditService(null);showToast("Service updated!");});
+    apiFetch(`/api/services/${form.id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)}).then(r=>r.json()).then(updated=>{setServices(p=>p.map(s=>s.id===updated.id?updated:s));setEditService(null);showToast("Service updated!");});
   }
   function handleDeleteService(id){
-    fetch(`/api/services/${id}`,{method:"DELETE"}).then(()=>{setServices(p=>p.filter(s=>s.id!==id));showToast("Service deleted.","error");});
+    apiFetch(`/api/services/${id}`,{method:"DELETE"}).then(()=>{setServices(p=>p.filter(s=>s.id!==id));showToast("Service deleted.","error");});
   }
   function handleSaveSeats(newSeats){
     setSeats(newSeats);
-    fetch("/api/settings",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({seats:newSeats})}).catch(()=>{});
+    apiFetch("/api/settings",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({seats:newSeats})}).catch(()=>{});
   }
 
   function handleAccept(id){patchBooking(id,{status:"confirmed"}).then(updated=>{setBookings(p=>p.map(b=>b.id===id?updated:b));setSelBooking(p=>p?.id===id?updated:p);showToast("Booking confirmed!");});}
@@ -1244,41 +1351,41 @@ export default function BeaubookDashboard(){
   function handleAddBooking(form){
     const dup=bookings.find(b=>b.status!=="cancelled"&&b.staff===Number(form.staff)&&b.date===form.date&&b.time===form.time);
     if(dup){showToast(`⚠️ ${dup.customer} already booked at ${form.time} with the same staff`);return;}
-    fetch("/api/bookings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)}).then(r=>r.json()).then(created=>{setBookings(p=>[...p,created]);setShowAdd(false);showToast("Booking added!");});
+    apiFetch("/api/bookings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)}).then(r=>r.json()).then(created=>{setBookings(p=>[...p,created]);setShowAdd(false);showToast("Booking added!");});
   }
   function handleQuickSale(form){
     const today=new Date().toISOString().split("T")[0];
     const now=new Date().toTimeString().slice(0,5);
     const payload={customer:form.customer,phone:form.phone,service:0,staff:0,date:today,time:now,status:"sale",note:"Walk-in sale",remark:"",payStatus:form.payStatus,payMethod:form.payMethod,amtPaid:form.amtPaid,tip:0,txnId:form.txnId||"",seat:"",products:form.products};
-    fetch("/api/bookings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r=>r.json()).then(created=>{setBookings(p=>[...p,created]);setShowQuickSale(false);showToast("Sale recorded!");});
+    apiFetch("/api/bookings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r=>r.json()).then(created=>{setBookings(p=>[...p,created]);setShowQuickSale(false);showToast("Sale recorded!");});
   }
   function handleSaveProduct(form,isNew){
     const url=isNew?"/api/products":`/api/products/${form.id}`;
     const method=isNew?"POST":"PUT";
-    fetch(url,{method,headers:{"Content-Type":"application/json"},body:JSON.stringify(form)}).then(r=>r.json()).then(saved=>{
+    apiFetch(url,{method,headers:{"Content-Type":"application/json"},body:JSON.stringify(form)}).then(r=>r.json()).then(saved=>{
       if(isNew)setProducts(p=>[...p,saved]);
       else setProducts(p=>p.map(x=>x.id===saved.id?saved:x));
       setEditProduct(null);setAddProduct(false);showToast(isNew?"Product added!":"Product updated!");
     });
   }
   function handleDeleteProduct(id){
-    fetch(`/api/products/${id}`,{method:"DELETE"}).then(()=>{setProducts(p=>p.filter(x=>x.id!==id));showToast("Product deleted.","error");});
+    apiFetch(`/api/products/${id}`,{method:"DELETE"}).then(()=>{setProducts(p=>p.filter(x=>x.id!==id));showToast("Product deleted.","error");});
   }
   function handleLeave(staffId,dates,lt,reason,affected,reassign){
     const now=nowStr();
-    fetch("/api/leave",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({staffId,dates,leaveType:lt,reason,affected,reassign,now})}).then(r=>r.json()).then(({leaveRecord,updatedBookings})=>{
+    apiFetch("/api/leave",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({staffId,dates,leaveType:lt,reason,affected,reassign,now})}).then(r=>r.json()).then(({leaveRecord,updatedBookings})=>{
       setLeaveRecords(p=>[...p,leaveRecord]);
       setBookings(prev=>prev.map(b=>updatedBookings.find(u=>u.id===b.id)||b));
       setLeaveStaff(null);showToast("Leave recorded!");
     });
   }
   function handleSaveSched(staffId,sc){
-    fetch(`/api/schedules/${staffId}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(sc)}).then(r=>r.json()).then(()=>{setSchedules(p=>({...p,[staffId]:sc}));setSchedStaff(null);showToast("Schedule saved!");});
+    apiFetch(`/api/schedules/${staffId}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(sc)}).then(r=>r.json()).then(()=>{setSchedules(p=>({...p,[staffId]:sc}));setSchedStaff(null);showToast("Schedule saved!");});
   }
   function handleSaveStaff(form,isNew){
     const req=isNew
-      ?fetch("/api/staff",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)})
-      :fetch(`/api/staff/${form.id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)});
+      ?apiFetch("/api/staff",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)})
+      :apiFetch(`/api/staff/${form.id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)});
     req.then(r=>r.json()).then(saved=>{
       if(isNew){setStaffList(p=>[...p,saved]);}
       else{setStaffList(p=>p.map(s=>s.id===saved.id?saved:s));}
@@ -1286,7 +1393,7 @@ export default function BeaubookDashboard(){
     });
   }
   function handleSaveCustomer(form){
-    fetch(`/api/customers/${editCustomer.phone}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)}).then(r=>r.json()).then(({extra,updatedBookings})=>{
+    apiFetch(`/api/customers/${editCustomer.phone}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)}).then(r=>r.json()).then(({extra,updatedBookings})=>{
       setCustomerExtra(p=>({...p,[form.phone]:{ic:extra.ic,email:extra.email,gender:extra.gender,birthday:extra.birthday}}));
       setBookings(p=>p.map(b=>updatedBookings.find(u=>u.id===b.id)||b));
       setEditCustomer(null);showToast("Customer info saved!");
@@ -1380,7 +1487,8 @@ export default function BeaubookDashboard(){
     );
   }
 
-  if(!authed) return <LoginScreen onSuccess={()=>setAuthed(true)}/>;
+  if(authStatus==="checking") return <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"linear-gradient(160deg,#f3fffc 0%,#e9fef8 50%,#d6fef3 100%)"}}><BrandMark size={48} variant="mark"/></div>;
+  if(authStatus!=="authed") return <AuthGate onAuthed={()=>setAuthStatus("authed")}/>;
 
   return(
     <div style={{fontFamily:"'Inter',system-ui,sans-serif",minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column"}}>
@@ -1726,7 +1834,7 @@ export default function BeaubookDashboard(){
                 <div style={card({padding:16,marginBottom:12})}>
                   <div style={{fontWeight:700,fontSize:13,color:"var(--text)",marginBottom:8}}>Merchant Note</div>
                   <textarea value={custNoteEdit} onChange={e=>setCustNoteEdit(e.target.value)} onFocus={()=>setCustNoteEdit(custNotes[c.phone]||"")} placeholder="e.g. Allergic to ammonia..." style={{...inp,height:58,resize:"vertical",lineHeight:1.5}}/>
-                  <button onClick={()=>{fetch(`/api/customers/${c.phone}/note`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({note:custNoteEdit})}).then(()=>{setCustNotes(p=>({...p,[c.phone]:custNoteEdit}));showToast("Note saved!");});}} style={pBtn({marginTop:8,padding:"7px 14px",fontSize:12})}>Save Note</button>
+                  <button onClick={()=>{apiFetch(`/api/customers/${c.phone}/note`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({note:custNoteEdit})}).then(()=>{setCustNotes(p=>({...p,[c.phone]:custNoteEdit}));showToast("Note saved!");});}} style={pBtn({marginTop:8,padding:"7px 14px",fontSize:12})}>Save Note</button>
                 </div>
                 <div style={card({padding:16})}>
                   <div style={{fontWeight:700,fontSize:13,color:"var(--text)",marginBottom:10}}>Visit History ({c.count})</div>
@@ -2198,7 +2306,7 @@ ${sorted.map(b=>{const bProds=(Array.isArray(b.products)?b.products:[]).map(p=>`
                       <div><div style={{fontWeight:600,fontSize:13,color:"var(--text)"}}>{settings.email}</div><div style={{fontSize:11,color:settings.emailVerified?"#15803d":"#92400e"}}>{settings.emailVerified?t("settings.verified"):t("settings.verifyPending")}</div></div>
                     </div>
                     {!settings.emailVerified&&emailForm.verifyUrl&&<div style={{padding:"8px 12px",background:"#e8fff9",borderRadius:8,fontSize:11,color:"#0f766e"}}>Dev mode — <a href={emailForm.verifyUrl} target="_blank" rel="noreferrer" style={{color:"#0f766e",fontWeight:700}}>click here to verify</a></div>}
-                    <button onClick={()=>setSettings(s=>({...s,email:null,emailVerified:false}))&&fetch("/api/settings/register-email",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:""})}).catch(()=>{})} style={gBtn({fontSize:12,padding:"7px 14px",alignSelf:"flex-start",color:"#991b1b",borderColor:"#fca5a5"})}>Change Email</button>
+                    <button onClick={()=>setSettings(s=>({...s,email:null,emailVerified:false}))&&apiFetch("/api/settings/register-email",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:""})}).catch(()=>{})} style={gBtn({fontSize:12,padding:"7px 14px",alignSelf:"flex-start",color:"#991b1b",borderColor:"#fca5a5"})}>Change Email</button>
                   </div>
                 ):(
                   <div style={{display:"flex",flexDirection:"column",gap:8}}>
@@ -2206,7 +2314,7 @@ ${sorted.map(b=>{const bProds=(Array.isArray(b.products)?b.products:[]).map(p=>`
                     <div><label style={lbl}>{t("settings.registerEmail")}</label><input type="email" value={emailForm.email} onChange={e=>setEmailForm(p=>({...p,email:e.target.value}))} placeholder={t("settings.emailPlaceholder")} style={inp}/></div>
                     <button onClick={()=>{
                       if(!emailForm.email||!emailForm.email.includes("@")){return;}
-                      fetch("/api/settings/register-email",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:emailForm.email})})
+                      apiFetch("/api/settings/register-email",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:emailForm.email})})
                         .then(r=>r.json()).then(d=>{
                           if(d.ok){
                             setSettings(s=>({...s,email:emailForm.email,emailVerified:false}));
@@ -2269,7 +2377,7 @@ ${sorted.map(b=>{const bProds=(Array.isArray(b.products)?b.products:[]).map(p=>`
               <div style={card({padding:22})}>
                 <div style={{fontWeight:700,fontSize:15,color:"var(--text)",marginBottom:4,paddingBottom:12,borderBottom:"1px solid var(--border)"}}>Sign Out</div>
                 <div style={{fontSize:12,color:"var(--text-muted)",marginBottom:12}}>You will be returned to the login screen.</div>
-                <button onClick={()=>{sessionStorage.removeItem("beaubook_authed");setAuthed(false);}} style={{display:"flex",alignItems:"center",gap:8,padding:"10px 18px",borderRadius:10,border:"1px solid #fca5a5",background:"#fef2f2",color:"#991b1b",fontWeight:700,fontSize:13,cursor:"pointer"}}>
+                <button onClick={()=>{apiFetch("/api/auth/logout",{method:"POST"}).finally(()=>setAuthStatus("anon"));}} style={{display:"flex",alignItems:"center",gap:8,padding:"10px 18px",borderRadius:10,border:"1px solid #fca5a5",background:"#fef2f2",color:"#991b1b",fontWeight:700,fontSize:13,cursor:"pointer"}}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                   Sign Out
                 </button>
