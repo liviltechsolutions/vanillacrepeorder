@@ -12,3 +12,7 @@ An isolated, responsive ordering portal prototype. Open `index.html` in a browse
 ## Production integration still needed
 
 This standalone prototype does not yet connect to the BeauBook PostgreSQL database or provide server-side authentication. Local storage is per browser and is not shared with the central kitchen or other devices. Before operational use, wire customer authentication and records to the existing Express/Prisma API, and confirm the menu, customer-specific pricing, delivery schedule rules, and access roles.
+
+## Online preview
+
+GitHub Pages publishes this folder from the `main` branch. Once the Pages workflow completes, the portal is available at <https://liviltechsolutions.github.io/vanillacrepeorder/>.
